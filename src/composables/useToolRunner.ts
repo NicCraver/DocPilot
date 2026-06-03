@@ -37,6 +37,11 @@ export async function pickFiles(filters?: { name: string; extensions: string[] }
   return Array.isArray(selected) ? selected : selected ? [selected] : [];
 }
 
+export async function pickDirectory(): Promise<string | null> {
+  const selected = await open({ directory: true, multiple: false });
+  return typeof selected === "string" ? selected : null;
+}
+
 export async function pickSave(
   defaultPath: string,
   filters?: { name: string; extensions: string[] }[],

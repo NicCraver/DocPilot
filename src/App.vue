@@ -162,7 +162,7 @@ const tabMeta = computed(() => {
             <div
               :key="tab"
               class="h-full"
-              :class="tab === 'agent' ? 'max-w-4xl mx-auto w-full' : 'max-w-6xl mx-auto w-full'"
+              :class="tab === 'agent' ? 'w-full max-w-none' : 'max-w-6xl mx-auto w-full'"
             >
               <ToolsHome v-if="tab === 'tools'" />
               <AgentChat v-else-if="tab === 'agent'" />

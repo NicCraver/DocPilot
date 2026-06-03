@@ -11,6 +11,9 @@ importers:
       '@ai-sdk/openai':
         specifier: ^3.0.67
         version: 3.0.67(zod@4.4.3)
+      '@docpilot/shared-types':
+        specifier: workspace:*
+        version: link:packages/shared-types
       '@tauri-apps/api':
         specifier: ^2.11.0
         version: 2.11.0
@@ -57,6 +60,8 @@ importers:
       vue-tsc:
         specifier: ^2.1.0
         version: 2.2.12(typescript@5.9.3)
+
+  packages/shared-types: {}
 
 packages:
 

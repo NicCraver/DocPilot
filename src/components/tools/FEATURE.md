@@ -2,7 +2,7 @@
 
 ## 现状 (Status)
 
-工具中心 `ToolsHome` 展示 **23** 个工具，左侧按 PDF / 图片 / 文件 / 文本 四分类可滚动列表，顶部支持**搜索过滤**；右侧动态加载对应 Vue 组件（`toolViews.ts`）。每工具独立目录含页面 + FEATURE.md；共享 `ToolPanel.vue`（基于 `AppCard`）与 `useToolRunner.ts`。
+工具中心 `ToolsHome` 展示 **23** 个工具，左侧按 PDF / 图片 / 文件 / 文本 四分类可滚动列表，顶部支持**搜索过滤**；右侧动态加载对应 Vue 组件（`toolViews.ts`）。每工具独立目录含页面 + FEATURE.md；共享 `ToolPanel.vue`（基于 `AppCard`）与 `useToolRunner.ts`。工具 `id` 与 IPC 信封类型来自 `@docpilot/shared-types`（Rust ts-rs 生成 + `tool-ids.json`）。
 
 ## 设计意图 (Intent)
 
@@ -16,6 +16,7 @@
 
 ## 变更日志 (Changelog)
 
+- 2026-06-04: 接入 `@docpilot/shared-types`；`toolCatalog`/`toolViews` id 类型收紧为 `ToolId`，契约测试防漂移。
 - 2026-06-04: UI 重构——工具搜索、分类标签、设计令牌与 `ToolPanel` 上传区可访问性改进。
 - 2026-06-03: 新增 20 工具页与分类侧栏；原有 compress/merge/split 保留。
 - 2026-06-03: 阶段三 merge/split 三工具 segmented 导航（已被分类侧栏取代）。

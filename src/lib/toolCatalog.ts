@@ -1,7 +1,9 @@
+import type { ToolId } from "@docpilot/shared-types";
+
 export type ToolCategory = "pdf" | "image" | "file" | "text";
 
 export interface ToolMeta {
-  id: string;
+  id: ToolId;
   label: string;
   desc: string;
   category: ToolCategory;

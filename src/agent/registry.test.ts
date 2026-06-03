@@ -5,9 +5,19 @@ const { listToolsMock, runToolMock } = vi.hoisted(() => ({
   runToolMock: vi.fn(),
 }));
 
-vi.mock("../lib/tools", () => ({
-  listTools: listToolsMock,
-  runTool: runToolMock,
+vi.mock("../lib/tools", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../lib/tools")>();
+  return {
+    ...actual,
+    listTools: listToolsMock,
+    runTool: runToolMock,
+    pathExists: vi.fn().mockResolvedValue(true),
+  };
+});
+
+vi.mock("./filePicker", () => ({
+  pickAgentFile: vi.fn(),
+  pickAgentFiles: vi.fn(),
 }));
 
 import { buildAgentTools } from "./registry";

@@ -10,21 +10,27 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ts_rs::TS)]
+#[ts(export, export_to = "../../packages/shared-types/src/generated/")]
 pub struct ToolSchema {
     pub id: String,
     pub description: String,
+    #[ts(type = "Record<string, unknown>")]
     pub parameters: serde_json::Value,
     pub requires_confirmation: bool,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ts_rs::TS)]
+#[ts(export, export_to = "../../packages/shared-types/src/generated/")]
 pub struct ToolInput {
+    #[ts(type = "Record<string, unknown>")]
     pub args: serde_json::Value,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ts_rs::TS)]
+#[ts(export, export_to = "../../packages/shared-types/src/generated/")]
 pub struct ToolOutput {
+    #[ts(type = "Record<string, unknown>")]
     pub data: serde_json::Value,
     pub message: String,
 }
@@ -78,6 +84,7 @@ impl ToolRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ts_rs::TS;
 
     struct EchoTool;
 
@@ -130,5 +137,13 @@ mod tests {
         let schemas = reg.list();
         assert_eq!(schemas.len(), 1);
         assert_eq!(schemas[0].id, "echo");
+    }
+
+    #[test]
+    fn export_shared_types_bindings() {
+        let cfg = ts_rs::Config::default();
+        ToolSchema::export(&cfg).unwrap();
+        ToolInput::export(&cfg).unwrap();
+        ToolOutput::export(&cfg).unwrap();
     }
 }

@@ -12,7 +12,12 @@ pub fn run() {
         .manage(AppState {
             registry: build_registry(),
         })
-        .invoke_handler(tauri::generate_handler![commands::list_tools, commands::run_tool])
+        .invoke_handler(tauri::generate_handler![
+            commands::list_tools,
+            commands::run_tool,
+            commands::list_files_in_dir,
+            commands::path_exists,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

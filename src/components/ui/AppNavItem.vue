@@ -18,7 +18,11 @@ defineProps<{
   >
     <span
       class="shrink-0 transition-colors duration-[var(--dp-dur-fast)]"
-      :class="active ? 'text-[var(--dp-primary)]' : 'text-[var(--dp-text-muted)] group-hover:text-[var(--dp-text-secondary)]'"
+      :class="
+        active
+          ? 'text-[var(--dp-primary)]'
+          : 'text-[var(--dp-text-muted)] group-hover:text-[var(--dp-text-secondary)]'
+      "
     >
       <slot name="icon" />
     </span>

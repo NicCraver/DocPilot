@@ -1,6 +1,7 @@
 import { defineAsyncComponent, type Component } from "vue";
+import type { ToolId } from "@docpilot/shared-types";
 
-export const toolViews: Record<string, Component> = {
+export const toolViews = {
   compress_pdf: defineAsyncComponent(() => import("./compress-pdf/CompressPdf.vue")),
   merge_pdf: defineAsyncComponent(() => import("./merge-pdf/MergePdf.vue")),
   split_pdf: defineAsyncComponent(() => import("./split-pdf/SplitPdf.vue")),
@@ -24,4 +25,4 @@ export const toolViews: Record<string, Component> = {
   copy_file: defineAsyncComponent(() => import("./copy-file/CopyFile.vue")),
   move_file: defineAsyncComponent(() => import("./move-file/MoveFile.vue")),
   text_to_pdf: defineAsyncComponent(() => import("./text-to-pdf/TextToPdf.vue")),
-};
+} satisfies Record<ToolId, Component>;

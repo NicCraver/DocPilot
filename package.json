@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.67",
+    "@docpilot/shared-types": "workspace:*",
     "@tauri-apps/api": "^2.11.0",
     "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-store": "^2.4.3",

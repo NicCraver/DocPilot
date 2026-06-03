@@ -1,0 +1,29 @@
+import toolIdsJson from "../tool-ids.json";
+
+export const TOOL_IDS = toolIdsJson as readonly [
+  "compress_pdf",
+  "merge_pdf",
+  "split_pdf",
+  "get_pdf_info",
+  "rotate_pdf",
+  "extract_pages",
+  "delete_pages",
+  "reorder_pages",
+  "add_blank_pages",
+  "duplicate_page",
+  "get_image_info",
+  "compress_image",
+  "resize_image",
+  "convert_image",
+  "crop_image",
+  "rotate_image",
+  "merge_images",
+  "images_to_pdf",
+  "get_file_info",
+  "compute_hash",
+  "copy_file",
+  "move_file",
+  "text_to_pdf",
+];
+
+export type ToolId = (typeof TOOL_IDS)[number];
