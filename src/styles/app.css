@@ -1,0 +1,208 @@
+/* ============================================================================
+ * DocPilot 设计令牌系统 (Design Tokens)
+ * 风格：Flat Design · Inter · 蓝主色 (#2563EB) · 浅灰文档背景 (#F8FAFC)
+ * 对齐 ui-ux-pro-max：WCAG AA 对比度、可见焦点环、prefers-reduced-motion 降级
+ * ==========================================================================*/
+
+:root {
+  /* ---- 中性面板与背景 ---- */
+  --dp-bg: #f1f5f9; /* 应用最外层底色（slate-100，比 surface 略深以衬托卡片） */
+  --dp-surface: #ffffff; /* 卡片 / 侧栏 / 主面板 */
+  --dp-surface-muted: #f8fafc; /* 次级容器底（slate-50） */
+
+  /* ---- 边框 ---- */
+  --dp-border: #e2e8f0; /* 默认描边（slate-200） */
+  --dp-border-strong: #cbd5e1; /* 强调描边 / 虚线拖拽框（slate-300） */
+
+  /* ---- 主色（scan blue） ---- */
+  --dp-primary: #2563eb; /* blue-600，对白底文字对比 > 4.5:1 */
+  --dp-primary-hover: #1d4ed8; /* blue-700 */
+  --dp-primary-soft: #eff6ff; /* blue-50，软背景 */
+
+  /* ---- 强调色（CTA orange，谨慎使用） ---- */
+  --dp-accent: #f97316; /* orange-500 */
+  --dp-accent-soft: #fff7ed; /* orange-50 */
+
+  /* ---- 语义状态色 ---- */
+  --dp-success: #059669; /* emerald-600 */
+  --dp-success-soft: #ecfdf5; /* emerald-50 */
+  --dp-danger: #dc2626; /* red-600 */
+  --dp-danger-soft: #fef2f2; /* red-50 */
+
+  /* ---- 文字层级（均满足 AA 对比度） ---- */
+  --dp-text: #0f172a; /* slate-900 主文字 */
+  --dp-text-secondary: #475569; /* slate-600 次要文字 */
+  --dp-text-muted: #64748b; /* slate-500 辅助/占位文字 */
+
+  /* ---- 圆角 ---- */
+  --dp-radius-sm: 0.5rem; /* 8px */
+  --dp-radius-md: 0.625rem; /* 10px */
+  --dp-radius-lg: 0.75rem; /* 12px */
+  --dp-radius-xl: 1rem; /* 16px */
+
+  /* ---- 阴影（Flat 风格：克制、单层、低扩散） ---- */
+  --dp-shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
+  --dp-shadow: 0 4px 12px -2px rgb(15 23 42 / 0.08), 0 2px 6px -2px rgb(15 23 42 / 0.05);
+  --dp-shadow-lg: 0 12px 32px -8px rgb(15 23 42 / 0.14);
+
+  /* ---- 焦点环 ---- */
+  --dp-ring: 0 0 0 3px rgb(37 99 235 / 0.35);
+
+  /* ---- 动效时长（micro-interaction 150-200ms） ---- */
+  --dp-dur-fast: 150ms;
+  --dp-dur: 200ms;
+}
+
+/* ----------------------------------------------------------------------------
+ * 全局基础样式
+ * --------------------------------------------------------------------------*/
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ---- 元素归零（presetUno 不含 preflight，需手动 reset） ---- */
+html,
+body,
+div,
+section,
+article,
+aside,
+header,
+footer,
+nav,
+main,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+ol,
+li,
+figure,
+form,
+fieldset,
+pre,
+code {
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  cursor: pointer;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+code,
+pre {
+  font-family:
+    "SF Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--dp-text);
+  background: var(--dp-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv11", "ss01";
+  text-rendering: optimizeLegibility;
+}
+
+/* 数据列/价格使用等宽数字，避免跳动 */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------------------------
+ * 可访问性：统一可见焦点环（键盘导航）
+ * --------------------------------------------------------------------------*/
+:focus-visible {
+  outline: none;
+  box-shadow: var(--dp-ring);
+  border-radius: var(--dp-radius-sm);
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ----------------------------------------------------------------------------
+ * 精致滚动条（细、低调，hover 加深）
+ * --------------------------------------------------------------------------*/
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--dp-border-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--dp-border-strong);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--dp-text-muted);
+  background-clip: padding-box;
+}
+
+/* ----------------------------------------------------------------------------
+ * 减弱动效（尊重系统偏好）
+ * --------------------------------------------------------------------------*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

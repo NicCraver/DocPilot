@@ -1,4 +1,7 @@
 pub mod compress_pdf;
+pub mod extra;
+pub mod file_util;
+pub mod image_util;
 pub mod merge_pdf;
 pub mod pdf_lopdf_util;
 pub mod split_pdf;
