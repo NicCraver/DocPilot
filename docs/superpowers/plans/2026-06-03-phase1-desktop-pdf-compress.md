@@ -24,6 +24,7 @@
 ## 文件结构（本阶段创建/修改）
 
 **前端：**
+
 - `package.json` —— 前端依赖与脚本（vp dev/build/test/check）
 - `vite.config.ts` —— Vite+ 配置（Tauri 端口/HMR/envPrefix）
 - `uno.config.ts` —— UnoCSS 配置
@@ -35,6 +36,7 @@
 - `src/components/tools/compress-pdf/FEATURE.md`
 
 **Rust：**
+
 - `src-tauri/Cargo.toml` —— 依赖（tauri, lopdf, serde, thiserror, async-trait）
 - `src-tauri/tauri.conf.json` —— Tauri 配置（beforeDevCommand/devUrl/frontendDist/bundle）
 - `src-tauri/src/main.rs`、`src-tauri/src/lib.rs` —— 入口与 builder
@@ -44,6 +46,7 @@
 - `src-tauri/src/commands.rs` —— `list_tools` / `run_tool` 两个通用命令
 
 **契约与基础设施：**
+
 - `.cursor/rules/feature-md.mdc` —— FEATURE.md 工作流规则
 - `.github/workflows/ci.yml` —— CI（Rust 测试/clippy + 前端 vp check/test）
 - `README.md` —— 项目说明与开发指引
@@ -53,6 +56,7 @@
 ## Task 1: 前端脚手架（Vite+ + Vue3）
 
 **Files:**
+
 - Create: `package.json`, `vite.config.ts`, `index.html`, `src/main.ts`, `src/App.vue`, `uno.config.ts`, `tsconfig.json`
 
 - [ ] **Step 1: 用 Vite+ 创建 Vue3+TS 项目骨架**
@@ -95,9 +99,9 @@ vp create
 - [ ] **Step 2: 创建 `vite.config.ts`（含 Tauri 必要配置）**
 
 ```typescript
-import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
-import UnoCSS from 'unocss/vite';
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import UnoCSS from "unocss/vite";
 
 const host = process.env.TAURI_DEV_HOST;
 
@@ -109,17 +113,17 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     host: host || false,
-    hmr: host ? { protocol: 'ws', host, port: 1421 } : undefined,
-    watch: { ignored: ['**/src-tauri/**'] },
+    hmr: host ? { protocol: "ws", host, port: 1421 } : undefined,
+    watch: { ignored: ["**/src-tauri/**"] },
   },
-  envPrefix: ['VITE_', 'TAURI_ENV_*'],
+  envPrefix: ["VITE_", "TAURI_ENV_*"],
 });
 ```
 
 - [ ] **Step 3: 创建 `uno.config.ts`**
 
 ```typescript
-import { defineConfig, presetUno } from 'unocss';
+import { defineConfig, presetUno } from "unocss";
 
 export default defineConfig({
   presets: [presetUno()],
@@ -148,18 +152,18 @@ export default defineConfig({
 `src/main.ts`:
 
 ```typescript
-import { createApp } from 'vue';
-import 'virtual:uno.css';
-import App from './App.vue';
+import { createApp } from "vue";
+import "virtual:uno.css";
+import App from "./App.vue";
 
-createApp(App).mount('#app');
+createApp(App).mount("#app");
 ```
 
 `src/App.vue`:
 
 ```vue
 <script setup lang="ts">
-import CompressPdf from './components/tools/compress-pdf/CompressPdf.vue';
+import CompressPdf from "./components/tools/compress-pdf/CompressPdf.vue";
 </script>
 
 <template>
@@ -187,12 +191,14 @@ git commit -m "feat: 初始化 Vite+ Vue3 前端脚手架"
 ## Task 2: Tauri2 后端初始化
 
 **Files:**
+
 - Create: `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json`, `src-tauri/build.rs`, `src-tauri/src/main.rs`, `src-tauri/src/lib.rs`
 
 - [ ] **Step 1: 初始化 Tauri 后端**
 
 Run: `npx tauri init`
 回答提示：
+
 - App name: `DocPilot`
 - Window title: `DocPilot`
 - Web assets location: `../dist`
@@ -247,6 +253,7 @@ git commit -m "feat: 初始化 Tauri2 后端并配置 Vite+ 集成"
 ## Task 3: Rust 统一工具接口（Tool trait + ToolRegistry）
 
 **Files:**
+
 - Create: `src-tauri/src/tools/mod.rs`
 
 - [ ] **Step 1: 编写 ToolRegistry 的失败测试**
@@ -413,6 +420,7 @@ git commit -m "feat: 实现 Rust 统一工具接口 Tool trait 与 ToolRegistry"
 ## Task 4: compress_pdf 工具实现（lopdf）
 
 **Files:**
+
 - Create: `src-tauri/src/tools/compress_pdf/mod.rs`, `src-tauri/src/tools/compress_pdf/FEATURE.md`
 
 - [ ] **Step 1: 编写压缩工具的失败测试**
@@ -582,6 +590,7 @@ git commit -m "feat: 实现 compress_pdf 工具（lopdf 无损结构压缩）"
 ## Task 5: 通用 Tauri 命令（list_tools / run_tool）
 
 **Files:**
+
 - Create: `src-tauri/src/commands.rs`
 - Modify: `src-tauri/src/lib.rs`
 
@@ -683,6 +692,7 @@ git commit -m "feat: 新增 list_tools/run_tool 通用命令并注册工具"
 ## Task 6: 前端工具封装 lib/tools.ts
 
 **Files:**
+
 - Create: `src/lib/tools.ts`, `src/lib/tools.test.ts`
 - Modify: `package.json`（加 `@tauri-apps/api`）
 
@@ -695,31 +705,31 @@ Run: `vp install` 后确认 `@tauri-apps/api` 在依赖中；若无则 `vp add @
 `src/lib/tools.test.ts`：
 
 ```typescript
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const invokeMock = vi.fn();
-vi.mock('@tauri-apps/api/core', () => ({ invoke: invokeMock }));
+vi.mock("@tauri-apps/api/core", () => ({ invoke: invokeMock }));
 
-import { runTool, listTools } from './tools';
+import { runTool, listTools } from "./tools";
 
-describe('tools 封装', () => {
+describe("tools 封装", () => {
   beforeEach(() => invokeMock.mockReset());
 
-  it('runTool 透传 id 与 args 给 run_tool', async () => {
-    invokeMock.mockResolvedValue({ data: { after_size: 10 }, message: 'ok' });
-    const res = await runTool('compress_pdf', { input_path: 'a', output_path: 'b' });
-    expect(invokeMock).toHaveBeenCalledWith('run_tool', {
-      id: 'compress_pdf',
-      input: { args: { input_path: 'a', output_path: 'b' } },
+  it("runTool 透传 id 与 args 给 run_tool", async () => {
+    invokeMock.mockResolvedValue({ data: { after_size: 10 }, message: "ok" });
+    const res = await runTool("compress_pdf", { input_path: "a", output_path: "b" });
+    expect(invokeMock).toHaveBeenCalledWith("run_tool", {
+      id: "compress_pdf",
+      input: { args: { input_path: "a", output_path: "b" } },
     });
-    expect(res.message).toBe('ok');
+    expect(res.message).toBe("ok");
   });
 
-  it('listTools 调用 list_tools', async () => {
-    invokeMock.mockResolvedValue([{ id: 'compress_pdf' }]);
+  it("listTools 调用 list_tools", async () => {
+    invokeMock.mockResolvedValue([{ id: "compress_pdf" }]);
     const tools = await listTools();
-    expect(invokeMock).toHaveBeenCalledWith('list_tools');
-    expect(tools[0].id).toBe('compress_pdf');
+    expect(invokeMock).toHaveBeenCalledWith("list_tools");
+    expect(tools[0].id).toBe("compress_pdf");
   });
 });
 ```
@@ -734,7 +744,7 @@ Expected: FAIL（`./tools` 模块/导出不存在）。
 `src/lib/tools.ts`：
 
 ```typescript
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from "@tauri-apps/api/core";
 
 export interface ToolSchema {
   id: string;
@@ -749,14 +759,11 @@ export interface ToolOutput {
 }
 
 export async function listTools(): Promise<ToolSchema[]> {
-  return invoke<ToolSchema[]>('list_tools');
+  return invoke<ToolSchema[]>("list_tools");
 }
 
-export async function runTool(
-  id: string,
-  args: Record<string, unknown>,
-): Promise<ToolOutput> {
-  return invoke<ToolOutput>('run_tool', { id, input: { args } });
+export async function runTool(id: string, args: Record<string, unknown>): Promise<ToolOutput> {
+  return invoke<ToolOutput>("run_tool", { id, input: { args } });
 }
 ```
 
@@ -777,6 +784,7 @@ git commit -m "feat: 新增前端工具调用统一封装 runTool/listTools"
 ## Task 7: PDF 压缩工具页 CompressPdf.vue
 
 **Files:**
+
 - Create: `src/components/tools/compress-pdf/CompressPdf.vue`, `src/components/tools/compress-pdf/CompressPdf.test.ts`, `src/components/tools/compress-pdf/FEATURE.md`
 
 - [ ] **Step 1: 编写组件失败测试**
@@ -784,36 +792,39 @@ git commit -m "feat: 新增前端工具调用统一封装 runTool/listTools"
 `src/components/tools/compress-pdf/CompressPdf.test.ts`：
 
 ```typescript
-import { describe, it, expect, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { describe, it, expect, vi } from "vitest";
+import { mount } from "@vue/test-utils";
 
 const runToolMock = vi.fn();
-vi.mock('../../../lib/tools', () => ({ runTool: runToolMock }));
+vi.mock("../../../lib/tools", () => ({ runTool: runToolMock }));
 // 模拟文件选择对话框
 const openMock = vi.fn();
-vi.mock('@tauri-apps/plugin-dialog', () => ({ open: openMock, save: vi.fn() }));
+vi.mock("@tauri-apps/plugin-dialog", () => ({ open: openMock, save: vi.fn() }));
 
-import CompressPdf from './CompressPdf.vue';
+import CompressPdf from "./CompressPdf.vue";
 
-describe('CompressPdf', () => {
-  it('选择文件并压缩后展示前后大小', async () => {
-    openMock.mockResolvedValueOnce('/tmp/in.pdf');   // 选输入
+describe("CompressPdf", () => {
+  it("选择文件并压缩后展示前后大小", async () => {
+    openMock.mockResolvedValueOnce("/tmp/in.pdf"); // 选输入
     runToolMock.mockResolvedValue({
-      data: { before_size: 1000, after_size: 400, output_path: '/tmp/out.pdf' },
-      message: '已压缩：1000 → 400 字节',
+      data: { before_size: 1000, after_size: 400, output_path: "/tmp/out.pdf" },
+      message: "已压缩：1000 → 400 字节",
     });
 
     const wrapper = mount(CompressPdf);
-    await wrapper.find('[data-test="pick-file"]').trigger('click');
+    await wrapper.find('[data-test="pick-file"]').trigger("click");
     await wrapper.vm.$nextTick();
-    await wrapper.find('[data-test="compress"]').trigger('click');
+    await wrapper.find('[data-test="compress"]').trigger("click");
     await wrapper.vm.$nextTick();
     await Promise.resolve();
 
-    expect(runToolMock).toHaveBeenCalledWith('compress_pdf', expect.objectContaining({
-      input_path: '/tmp/in.pdf',
-    }));
-    expect(wrapper.text()).toContain('400');
+    expect(runToolMock).toHaveBeenCalledWith(
+      "compress_pdf",
+      expect.objectContaining({
+        input_path: "/tmp/in.pdf",
+      }),
+    );
+    expect(wrapper.text()).toContain("400");
   });
 });
 ```
@@ -829,9 +840,9 @@ Expected: FAIL（组件不存在）。
 
 ```vue
 <script setup lang="ts">
-import { ref } from 'vue';
-import { open } from '@tauri-apps/plugin-dialog';
-import { runTool } from '../../../lib/tools';
+import { ref } from "vue";
+import { open } from "@tauri-apps/plugin-dialog";
+import { runTool } from "../../../lib/tools";
 
 const inputPath = ref<string | null>(null);
 const result = ref<{ before: number; after: number; output: string } | null>(null);
@@ -841,9 +852,9 @@ const loading = ref(false);
 async function pickFile() {
   const selected = await open({
     multiple: false,
-    filters: [{ name: 'PDF', extensions: ['pdf'] }],
+    filters: [{ name: "PDF", extensions: ["pdf"] }],
   });
-  if (typeof selected === 'string') {
+  if (typeof selected === "string") {
     inputPath.value = selected;
     result.value = null;
     error.value = null;
@@ -855,8 +866,8 @@ async function compress() {
   loading.value = true;
   error.value = null;
   try {
-    const outputPath = inputPath.value.replace(/\.pdf$/i, '') + '-compressed.pdf';
-    const out = await runTool('compress_pdf', {
+    const outputPath = inputPath.value.replace(/\.pdf$/i, "") + "-compressed.pdf";
+    const out = await runTool("compress_pdf", {
       input_path: inputPath.value,
       output_path: outputPath,
     });
@@ -888,7 +899,7 @@ async function compress() {
         :disabled="!inputPath || loading"
         @click="compress"
       >
-        {{ loading ? '压缩中…' : '开始压缩' }}
+        {{ loading ? "压缩中…" : "开始压缩" }}
       </button>
     </div>
 
@@ -931,6 +942,7 @@ git commit -m "feat: 新增 PDF 压缩工具页并接通端到端链路"
 ## Task 8: FEATURE.md Cursor 规则
 
 **Files:**
+
 - Create: `.cursor/rules/feature-md.mdc`
 
 - [ ] **Step 1: 创建规则文件**
@@ -952,13 +964,21 @@ alwaysApply: true
 
 统一模板：
 \`\`\`markdown
+
 # <功能名>
+
 ## 现状 (Status)
+
 ## 设计意图 (Intent)
+
 ## 接口契约 (Interface)
+
 ## 变更日志 (Changelog)
+
 - YYYY-MM-DD: ...
+
 ## 待办 / 风险 (TODO / Risks)
+
 \`\`\`
 ```
 
@@ -974,6 +994,7 @@ git commit -m "chore: 新增 FEATURE.md 工作流的 Cursor 规则"
 ## Task 9: CI（GitHub Actions）
 
 **Files:**
+
 - Create: `.github/workflows/ci.yml`
 
 - [ ] **Step 1: 创建 CI 工作流**
@@ -1029,6 +1050,7 @@ git commit -m "ci: 新增前端与 Rust 的 GitHub Actions 流水线"
 ## Task 10: mac 安装包打包 + README
 
 **Files:**
+
 - Create: `README.md`
 - Modify: `src-tauri/tauri.conf.json`（bundle 配置）
 
@@ -1071,6 +1093,7 @@ git commit -m "build: 配置 mac 安装包打包并补充 README"
 ## Self-Review（计划自审）
 
 **1. Spec coverage（对照架构 spec 阶段一交付标准）：**
+
 - monorepo + Vite+ + Tauri2 骨架 → Task 1, 2 ✓
 - Tool trait + ToolRegistry + list_tools/run_tool → Task 3, 5 ✓
 - compress_pdf（Rust，lopdf 路线）→ Task 4 ✓
@@ -1085,5 +1108,6 @@ git commit -m "build: 配置 mac 安装包打包并补充 README"
 **3. Type consistency：** `ToolInput{args}`、`ToolOutput{data,message}`、`ToolSchema{id,description,parameters,requires_confirmation}` 在 Rust（Task 3）、命令（Task 5）、前端封装（Task 6）、组件（Task 7）中保持一致；`run_tool` 入参 `{id, input:{args}}` 在 Rust 命令与前端封装、组件测试三处一致。
 
 **已知偏差（合理收敛，符合"最小可用"）：**
+
 - 压缩"档位"先不做，仅做 lopdf 无损结构压缩（多档位/图片降采样属阶段三）。
 - E2E（Playwright/WebDriver）框架本阶段以手动端到端 + 组件测试替代，避免拖慢第一步；正式接入可在阶段一收尾或阶段二补。

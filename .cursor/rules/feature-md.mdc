@@ -1,0 +1,23 @@
+---
+description: 每个功能模块维护 FEATURE.md，作为上下文+日志双用文件
+alwaysApply: true
+---
+
+# FEATURE.md 约定
+
+- 每个功能/工具目录必须有一个 `FEATURE.md`（上下文 + 日志双用）。
+- 动手修改某模块前，先读该目录的 `FEATURE.md` 进入状态。
+- 改完后，立即在同一次提交内更新「现状(Status)」与「变更日志(Changelog)」。
+- 新建功能模块时，必须同时创建 `FEATURE.md`（至少填写「现状」）。
+
+统一模板：
+
+```markdown
+# <功能名>
+## 现状 (Status)
+## 设计意图 (Intent)
+## 接口契约 (Interface)
+## 变更日志 (Changelog)
+- YYYY-MM-DD: ...
+## 待办 / 风险 (TODO / Risks)
+```
