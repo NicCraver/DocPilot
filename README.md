@@ -1,6 +1,6 @@
 # DocPilot
 
-跨平台「文件工具集 + AI 智能体」桌面应用（阶段一 PDF 压缩 + 阶段二 Agent 最小可用）。
+跨平台「文件工具集 + AI 智能体」桌面应用（阶段一～三 MVP 已完成）。
 
 ## 技术栈
 
@@ -49,6 +49,7 @@ npx tauri build
 
 ## 阶段路线图
 
-1. **已完成**：PDF 压缩工具 + 统一 `list_tools` / `run_tool` 接口
-2. **已完成**：Agent 对话（Vercel AI SDK，自然语言调用工具；需在「设置」配置 OpenAI 兼容 API / Ollama）
-3. **下一步**：扩展更多文件工具、Windows/移动端打包
+1. **工具**：PDF 压缩、合并、拆分（Rust / lopdf）+ 统一 `list_tools` / `run_tool`
+2. **Agent**：自然语言调用全部已注册工具（设置页配置 OpenAI 兼容 API / Ollama）
+3. **CI**：macOS Rust 测试 + Ubuntu 前端 + Windows `tauri build`
+4. **待办**：图片处理、OCR、PDF 转 Word（Python sidecar）、移动端

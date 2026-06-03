@@ -10,6 +10,10 @@ function propToZod(prop: Record<string, unknown>): ZodTypeAny {
       return z.number().int();
     case "boolean":
       return z.boolean();
+    case "array": {
+      const items = (prop.items ?? { type: "string" }) as Record<string, unknown>;
+      return z.array(propToZod(items));
+    }
     default:
       return z.unknown();
   }

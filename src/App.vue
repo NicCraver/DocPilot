@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import CompressPdf from "./components/tools/compress-pdf/CompressPdf.vue";
+import ToolsHome from "./components/tools/ToolsHome.vue";
 import AgentChat from "./components/agent/AgentChat.vue";
 import ProviderSettings from "./components/settings/ProviderSettings.vue";
 
@@ -37,7 +37,7 @@ const tab = ref<Tab>("agent");
         设置
       </button>
     </nav>
-    <CompressPdf v-if="tab === 'tools'" />
+    <ToolsHome v-if="tab === 'tools'" />
     <AgentChat v-else-if="tab === 'agent'" />
     <ProviderSettings v-else />
   </main>

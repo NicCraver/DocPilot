@@ -25,3 +25,18 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
       - run: cargo test --manifest-path src-tauri/Cargo.toml
+
+  windows-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm i -g @vitejs/plus
+      - run: pnpm install
+      - run: vp build
+      - run: npx tauri build
+        env:
+          CI: true

@@ -1,9 +1,14 @@
-use crate::tools::{compress_pdf::CompressPdf, ToolInput, ToolOutput, ToolRegistry, ToolSchema};
+use crate::tools::{
+    compress_pdf::CompressPdf, merge_pdf::MergePdf, split_pdf::SplitPdf, ToolInput, ToolOutput,
+    ToolRegistry, ToolSchema,
+};
 use tauri::State;
 
 pub fn build_registry() -> ToolRegistry {
     let mut reg = ToolRegistry::new();
     reg.register(Box::new(CompressPdf));
+    reg.register(Box::new(MergePdf));
+    reg.register(Box::new(SplitPdf));
     reg
 }
 
@@ -38,5 +43,7 @@ mod tests {
         let reg = build_registry();
         let ids: Vec<String> = reg.list().into_iter().map(|s| s.id).collect();
         assert!(ids.contains(&"compress_pdf".to_string()));
+        assert!(ids.contains(&"merge_pdf".to_string()));
+        assert!(ids.contains(&"split_pdf".to_string()));
     }
 }

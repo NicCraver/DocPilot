@@ -18,6 +18,18 @@ describe("jsonSchemaToZod", () => {
     expect(parsed.input_path).toBe("/a.pdf");
   });
 
+  it("转换 array 类型参数", () => {
+    const schema = jsonSchemaToZod({
+      type: "object",
+      properties: {
+        input_paths: { type: "array", items: { type: "string" } },
+      },
+      required: ["input_paths"],
+    });
+    const parsed = schema.parse({ input_paths: ["/a.pdf", "/b.pdf"] });
+    expect(parsed.input_paths).toHaveLength(2);
+  });
+
   it("缺少必填字段时失败", () => {
     const schema = jsonSchemaToZod({
       type: "object",

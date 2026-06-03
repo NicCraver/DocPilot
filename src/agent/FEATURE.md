@@ -2,7 +2,7 @@
 
 ## 现状 (Status)
 
-已实现：`list_tools` 动态注册为 AI SDK tools、`streamText` 多步编排、Provider 可配置（store 持久化）、对话 UI + 工具调用卡片、`requires_confirmation` 确认（dialog ask）。
+已实现：`list_tools` 动态注册为 AI SDK tools（含 merge_pdf / split_pdf）、`streamText` 多步编排、Provider 可配置（store 持久化）、对话 UI + 工具调用卡片、`requires_confirmation` 确认（dialog ask）；`jsonSchemaToZod` 支持 array 类型。
 
 ## 设计意图 (Intent)
 
