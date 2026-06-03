@@ -1,4 +1,4 @@
-import { streamText, isStepCount, type CoreMessage, type ToolSet } from "ai";
+import { streamText, stepCountIs, type ModelMessage, type ToolSet } from "ai";
 import { createChatModel } from "./providers";
 import type { ProviderSettings } from "../composables/useProviderSettings";
 
@@ -14,7 +14,7 @@ export interface ToolCallRecord {
 }
 
 export interface RunAgentOptions {
-  messages: CoreMessage[];
+  messages: ModelMessage[];
   tools: ToolSet;
   settings: ProviderSettings;
   onTextDelta?: (text: string) => void;
@@ -29,7 +29,7 @@ export async function runAgentChat(options: RunAgentOptions): Promise<string> {
     system: SYSTEM_PROMPT,
     messages,
     tools,
-    stopWhen: isStepCount(5),
+    stopWhen: stepCountIs(5),
     onStepFinish: ({ toolCalls, toolResults }) => {
       for (let i = 0; i < toolCalls.length; i++) {
         const call = toolCalls[i];

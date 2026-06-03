@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import type { CoreMessage } from "ai";
+import type { ModelMessage } from "ai";
 import { ask } from "@tauri-apps/plugin-dialog";
 import { buildAgentTools } from "../agent/registry";
 import { runAgentChat, type ToolCallRecord } from "../agent/runner";
@@ -24,7 +24,7 @@ export function useAgentChat(getSettings: () => ProviderSettings) {
     });
   }
 
-  function toCoreMessages(): CoreMessage[] {
+  function toModelMessages(): ModelMessage[] {
     return messages.value.map((m) => ({
       role: m.role,
       content: m.content,
@@ -51,7 +51,7 @@ export function useAgentChat(getSettings: () => ProviderSettings) {
     try {
       const tools = await buildAgentTools(confirmTool);
       const reply = await runAgentChat({
-        messages: toCoreMessages().slice(0, -1),
+        messages: toModelMessages().slice(0, -1),
         tools,
         settings,
         onTextDelta: (t) => {
