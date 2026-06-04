@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: 安装系统依赖（OCR / 打包）
+        run: brew install poppler tesseract dylibbundler python@3.11
+
+      - name: 安装 Node 依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 测试
+        run: |
+          pnpm run test
+          cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: 构建内置转换 sidecar
+        run: pnpm run build:sidecar
+
+      - name: 构建 Tauri 安装包
+        run: pnpm run tauri:build
+        env:
+          CI: true
+
+      - name: 收集产物
+        run: |
+          DMG=$(find src-tauri/target/release/bundle/dmg -name '*.dmg' | head -1)
+          APP=$(find src-tauri/target/release/bundle/macos -name '*.app' -maxdepth 1 | head -1)
+          echo "DMG=$DMG" >> "$GITHUB_ENV"
+          echo "APP=$APP" >> "$GITHUB_ENV"
+          ls -la src-tauri/target/release/bundle/
+
+      - name: 创建 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.DMG }}
+          generate_release_notes: true

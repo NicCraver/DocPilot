@@ -38,6 +38,7 @@ const TOOL_LABELS: Record<string, string> = {
   copy_file: "复制文件",
   move_file: "移动文件",
   text_to_pdf: "文本转 PDF",
+  convert_to_markdown: "转 Markdown",
 };
 
 export function toolFriendlyName(toolId: string): string {

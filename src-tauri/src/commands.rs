@@ -3,7 +3,8 @@ use crate::tools::{
     extra::{
         AddBlankPages, ComputeHash, CompressImage, ConvertImage, CopyFile, CropImage, DeletePages,
         DuplicatePage, ExtractPages, GetFileInfo, GetImageInfo, GetPdfInfo, ImagesToPdf,
-        MergeImages, MoveFile, ReorderPages, ResizeImage, RotateImage, RotatePdf, TextToPdf,
+        ConvertToMarkdown, MergeImages, MoveFile, ReorderPages, ResizeImage, RotateImage,
+        RotatePdf, TextToPdf,
     },
     merge_pdf::MergePdf,
     split_pdf::SplitPdf,
@@ -36,6 +37,7 @@ pub fn build_registry() -> ToolRegistry {
     reg.register(Box::new(ComputeHash));
     reg.register(Box::new(CopyFile));
     reg.register(Box::new(MoveFile));
+    reg.register(Box::new(ConvertToMarkdown));
     reg
 }
 
@@ -129,6 +131,6 @@ mod tests {
         expected.sort();
 
         assert_eq!(ids, expected);
-        assert_eq!(ids.len(), 23);
+        assert_eq!(ids.len(), 24);
     }
 }

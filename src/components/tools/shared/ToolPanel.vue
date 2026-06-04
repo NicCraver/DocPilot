@@ -1,17 +1,26 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import AppButton from "../../ui/AppButton.vue";
 import AppCard from "../../ui/AppCard.vue";
 
-defineProps<{
-  title?: string;
-  hint?: string;
-  path: string | null;
-  loading?: boolean;
-  error?: string | null;
-  message?: string | null;
-  actionLabel?: string;
-  canRun?: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    hint?: string;
+    path: string | null;
+    loading?: boolean;
+    error?: string | null;
+    message?: string | null;
+    actionLabel?: string;
+    /** 显式传 false 时禁用主按钮（如须先选输出路径） */
+    canRun?: boolean;
+    /** E2E / 测试用 data-test，默认 tool-run */
+    actionDataTest?: string;
+  }>(),
+  { canRun: true },
+);
+
+const actionDisabled = computed(() => !props.path || props.loading || props.canRun === false);
 
 defineEmits<{
   pick: [];
@@ -77,11 +86,12 @@ defineEmits<{
 
       <slot />
 
-      <div v-if="path || canRun" class="flex justify-end pt-1">
+      <div v-if="path" class="flex justify-end pt-1">
         <AppButton
           variant="primary"
+          :data-test="actionDataTest ?? 'tool-run'"
           :loading="loading"
-          :disabled="canRun === false"
+          :disabled="actionDisabled"
           @click="$emit('run')"
         >
           {{ loading ? "处理中..." : (actionLabel ?? "开始处理") }}

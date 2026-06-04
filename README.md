@@ -60,6 +60,14 @@ npx tauri build
 
 产物位于 `src-tauri/target/release/bundle/`（`.app` / `.dmg`）。
 
+发布构建（内置 MarkItDown + OCR，无需用户单独安装依赖）：
+
+```bash
+pnpm run tauri:build
+```
+
+打 tag `v*` 推送后将由 GitHub Actions 自动构建 Release 并上传 `.dmg`。
+
 ## 架构文档
 
 - [整体架构设计](docs/superpowers/specs/2026-06-03-docpilot-architecture-design.md)

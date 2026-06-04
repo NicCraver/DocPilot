@@ -27,6 +27,10 @@ const INTENT_RULES: { pattern: RegExp; toolIds: string[] }[] = [
     pattern: /压缩.*图|图片.*压缩/i,
     toolIds: ["compress_image", "get_image_info"],
   },
+  {
+    pattern: /markdown|转\s*md|\.md\b|word|docx|pptx|xlsx|markitdown|文档.*文本/i,
+    toolIds: ["convert_to_markdown", "get_file_info"],
+  },
 ];
 
 export function selectToolsForUserText(allTools: ToolSet, userText: string): ToolSet {

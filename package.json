@@ -1,6 +1,6 @@
 {
   "name": "docpilot",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,11 @@
     "build": "vp build",
     "test": "vp test",
     "check": "vp check",
-    "icons:build": "node scripts/prepare-app-icon.mjs && tauri icon src-tauri/app-icon.png -o src-tauri/icons && node scripts/prepare-app-icon.mjs --icns-only"
+    "icons:build": "node scripts/prepare-app-icon.mjs && tauri icon src-tauri/app-icon.png -o src-tauri/icons && node scripts/prepare-app-icon.mjs --icns-only",
+    "markitdown:install": "node scripts/ensure-markitdown.mjs",
+    "build:sidecar": "bash scripts/build-docpilot-convert-sidecar.sh",
+    "tauri:build": "pnpm run build && pnpm run build:sidecar && npx tauri build --config src-tauri/tauri.release.conf.json",
+    "tauri:build:dev": "pnpm run build && npx tauri build"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.67",

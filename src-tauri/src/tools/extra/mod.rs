@@ -2,6 +2,7 @@
 
 mod file_tools;
 mod image_tools;
+mod markitdown_tools;
 mod pdf_tools;
 mod text_tools;
 
@@ -13,4 +14,5 @@ pub use image_tools::{
 pub use pdf_tools::{
     AddBlankPages, DeletePages, DuplicatePage, ExtractPages, GetPdfInfo, ReorderPages, RotatePdf,
 };
+pub use markitdown_tools::ConvertToMarkdown;
 pub use text_tools::TextToPdf;

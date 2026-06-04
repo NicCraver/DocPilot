@@ -2,7 +2,7 @@
 
 ## 现状 (Status)
 
-已实现：`list_tools` 动态注册全部 **23** 个 AI SDK tools、streamText 多步编排（`consumeStream` + `stepCountIs(8)`）、**`provider.chat`** 兼容智谱/Ollama、按用户意图筛选工具子集、路径上下文注入 system（对齐 VercelAISDK demo）、Provider 可配置（store 持久化）、对话 UI + 工具调用卡片、`requires_confirmation` 确认（dialog ask）；`jsonSchemaToZod` 支持 array 类型。
+已实现：`list_tools` 动态注册全部 **24** 个 AI SDK tools、streamText 多步编排（`consumeStream` + `stepCountIs(8)`）、**`provider.chat`** 兼容智谱/Ollama、按用户意图筛选工具子集、路径上下文注入 system（对齐 VercelAISDK demo）、Provider 可配置（store 持久化）、对话 UI + 工具调用卡片、`requires_confirmation` 确认（dialog ask）；`jsonSchemaToZod` 支持 array 类型。
 **文件附件**：发送前可添加本地文件/文件夹（文件夹一层展开为 pdf/图片路径列表），路径块注入模型消息；工具执行前对缺失/无效的 `input_path` / `input_paths` / `path` / `src` 弹出系统文件选择器。
 对话界面与工具调用卡片已全面美化，包含：
 
@@ -31,6 +31,8 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 
 ## 变更日志 (Changelog)
 
+- 2026-06-04: 集成 `convert_to_markdown`（MarkItDown）；意图筛选与 system prompt 支持转 MD。
+
 - 2026-06-04: 执行过程与任务结果分离；`buildAgentTools` / `resolveToolArgs` 上报 `AgentActivity`。
 - 2026-06-04: 助理消息改用 markstream-vue Markdown 流式渲染。
 - 2026-06-04: 对齐 VercelAISDK demo：`provider.chat`、强化 system/路径 hint、`consumeStream` 多步编排、按意图筛选工具；修复智谱等兼容 API 空回复。
@@ -38,7 +40,7 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 - 2026-06-04: Agent 右侧操作日志面板，记录模型步骤与工具执行全链路。
 - 2026-06-04: Agent 聊天支持文件/文件夹附件；工具执行前自动补全输入路径。
 - 2026-06-04: Agent 消费 `@docpilot/shared-types` 的 `ToolSchema`，与 Rust IPC 信封对齐。
-- 2026-06-03: Agent 自动识别扩展后的 23 个工具（PDF/图片/文件/文本）。
+- 2026-06-03: Agent 自动识别扩展后的工具集（PDF/图片/文件/文本）。
 - 2026-06-04: 接入全局设计令牌与共享 UI 组件；聊天区全高布局、可访问性（aria-live/alert）优化。
 - 2026-06-03: 全面美化 AI Agent 聊天界面，新增空白引导、打字机动画、自动滚动及高颜值工具调用卡片。
 - 2026-06-03: 阶段二最小 Agent（compress_pdf 自然语言调用）。

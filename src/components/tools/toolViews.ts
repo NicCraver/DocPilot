@@ -25,4 +25,7 @@ export const toolViews = {
   copy_file: defineAsyncComponent(() => import("./copy-file/CopyFile.vue")),
   move_file: defineAsyncComponent(() => import("./move-file/MoveFile.vue")),
   text_to_pdf: defineAsyncComponent(() => import("./text-to-pdf/TextToPdf.vue")),
+  convert_to_markdown: defineAsyncComponent(
+    () => import("./convert-to-markdown/ConvertToMarkdown.vue"),
+  ),
 } satisfies Record<ToolId, Component>;

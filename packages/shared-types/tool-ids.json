@@ -21,5 +21,6 @@
   "compute_hash",
   "copy_file",
   "move_file",
-  "text_to_pdf"
+  "text_to_pdf",
+  "convert_to_markdown"
 ]

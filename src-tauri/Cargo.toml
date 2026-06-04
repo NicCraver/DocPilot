@@ -1,6 +1,6 @@
 [package]
 name = "docpilot"
-version = "0.1.0"
+version = "0.1.1"
 description = "DocPilot - 跨平台文件工具集 + AI 智能体桌面应用"
 authors = ["DocPilot"]
 edition = "2021"
