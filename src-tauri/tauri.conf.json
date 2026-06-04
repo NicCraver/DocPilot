@@ -4,8 +4,8 @@
   "version": "0.1.1",
   "identifier": "dev.docpilot.app",
   "build": {
-    "beforeDevCommand": "vp dev",
-    "beforeBuildCommand": "vp build",
+    "beforeDevCommand": "pnpm run dev",
+    "beforeBuildCommand": "pnpm run build",
     "devUrl": "http://localhost:5173",
     "frontendDist": "../dist"
   },
