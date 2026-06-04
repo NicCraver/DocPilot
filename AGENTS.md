@@ -1,0 +1,28 @@
+# DocPilot — Agent 协作说明
+
+## 开发完成后的必做项
+
+**每次功能/修复开发完成后，必须重新运行项目**，以便验证 Tauri 桌面端与前端热更新状态一致。
+
+推荐步骤：
+
+1. 释放端口并结束旧进程（如有）：
+   ```bash
+   lsof -ti:5173 | xargs kill -9 2>/dev/null
+   pkill -f "tauri dev" 2>/dev/null
+   ```
+2. 在项目根目录启动开发环境：
+   ```bash
+   cd /Users/nic/NicProjects/DocPilot && npx tauri dev
+   ```
+3. 确认：
+   - 前端：http://localhost:5173/
+   - 桌面应用 `docpilot` 窗口已打开
+
+Agent 在告知用户「开发完成」前，应自行执行上述重启（或等价操作），并在回复中说明已重新启动。
+
+## 项目约定（摘要）
+
+- 修改功能模块前阅读该目录 `FEATURE.md`；改完后同次提交更新「现状」与「变更日志」。
+- 技术栈：Vue 3 + UnoCSS + Tauri；Agent 层使用 Vercel AI SDK，助理回复用 markstream-vue 流式渲染。
+- 不要未经用户明确要求就 `git commit` / `git push`。

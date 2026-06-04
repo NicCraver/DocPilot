@@ -23,7 +23,7 @@ function mergeSettings(saved?: Partial<ProviderSettings> | null): ProviderSettin
   const fromEnv = providerSettingsFromEnv();
   return {
     ...emptySettings,
-    ...(saved ?? {}),
+    ...saved,
     ...fromEnv,
   };
 }

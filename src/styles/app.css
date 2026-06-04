@@ -1,3 +1,5 @@
+@import "markstream-vue/index.css" layer(components);
+
 /* ============================================================================
  * DocPilot 设计令牌系统 (Design Tokens)
  * 风格：Flat Design · Inter · 蓝主色 (#2563EB) · 浅灰文档背景 (#F8FAFC)
@@ -211,4 +213,12 @@ button {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ----------------------------------------------------------------------------
+ * markstream-vue 聊天区微调
+ * --------------------------------------------------------------------------*/
+.markstream-vue.agent-markdown {
+  font-size: 0.875rem;
+  line-height: 1.625;
 }

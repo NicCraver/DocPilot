@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useProviderSettings } from "../../composables/useProviderSettings";
-import { useAgentChat } from "../../composables/useAgentChat";
+import { useAgentChat, type ChatMessage } from "../../composables/useAgentChat";
 import { useAgentAttachments } from "../../composables/useAgentAttachments";
 import { attachmentChips } from "../../agent/attachments";
-import ToolCallCard from "./ToolCallCard.vue";
+import AgentActivityTimeline from "./AgentActivityTimeline.vue";
+import AgentMarkdown from "./AgentMarkdown.vue";
 import AgentLogPanel from "./AgentLogPanel.vue";
 import AppButton from "../ui/AppButton.vue";
 import AppInput from "../ui/AppInput.vue";
@@ -12,9 +13,7 @@ import AppInput from "../ui/AppInput.vue";
 const input = ref("");
 const chatContainer = ref<HTMLElement | null>(null);
 const { settings, loadSettings } = useProviderSettings();
-const { messages, toolCalls, loading, error, logs, send, clear } = useAgentChat(
-  () => settings.value,
-);
+const { messages, loading, error, logs, send, clear } = useAgentChat(() => settings.value);
 const {
   chips: pendingChips,
   hasPending,
@@ -47,7 +46,7 @@ function scrollToBottom() {
 }
 
 watch(
-  [messages, toolCalls],
+  messages,
   () => {
     nextTick(() => {
       scrollToBottom();
@@ -72,10 +71,19 @@ function onClearChat() {
   clear();
   clearAttachments();
 }
+
+/** 流式中的文稿或已定稿内容 */
+function assistantResultText(msg: ChatMessage): string {
+  return msg.content || msg.draftContent || "";
+}
+
+function isLastAssistant(index: number): boolean {
+  return messages.value[index]?.role === "assistant" && index === messages.value.length - 1;
+}
 </script>
 
 <template>
-  <div class="flex gap-4 h-[calc(100vh-10rem)] min-h-[28rem] w-full">
+  <div class="flex gap-4 h-full min-h-0 w-full">
     <div
       class="flex flex-col flex-1 min-w-0 bg-[var(--dp-surface)] border border-[var(--dp-border)] rounded-[var(--dp-radius-xl)] shadow-[var(--dp-shadow)] overflow-hidden"
     >
@@ -248,30 +256,68 @@ function onClearChat() {
                 </span>
               </div>
               <div
-                class="px-4 py-3 rounded-2xl text-sm whitespace-pre-wrap leading-relaxed"
+                class="rounded-2xl text-sm leading-relaxed min-w-0"
                 :class="
                   msg.role === 'user'
-                    ? 'bg-[var(--dp-primary)] text-white rounded-br-md'
-                    : 'bg-white border border-[var(--dp-border)] text-[var(--dp-text)] rounded-bl-md shadow-[var(--dp-shadow-sm)]'
+                    ? 'px-4 py-3 bg-[var(--dp-primary)] text-white rounded-br-md whitespace-pre-wrap'
+                    : 'space-y-3'
                 "
               >
-                <template v-if="msg.content">
+                <template v-if="msg.role === 'user'">
                   {{ msg.content }}
                 </template>
-                <template v-else-if="loading && i === messages.length - 1">
-                  <div class="flex items-center gap-1.5 py-0.5" aria-label="正在输入">
-                    <span
-                      class="w-2 h-2 rounded-full bg-[var(--dp-primary)]/50 animate-bounce"
-                      style="animation-delay: 0ms"
+                <template v-else>
+                  <AgentActivityTimeline
+                    v-if="msg.activities?.length"
+                    :activities="msg.activities"
+                    :loading="loading && i === messages.length - 1"
+                  />
+
+                  <div
+                    v-if="assistantResultText(msg)"
+                    class="px-4 py-3 bg-white border border-[var(--dp-border)] text-[var(--dp-text)] rounded-bl-md shadow-[var(--dp-shadow-sm)]"
+                  >
+                    <p
+                      class="text-[10px] font-semibold uppercase tracking-wide mb-2"
+                      :class="
+                        loading && isLastAssistant(i) && !msg.content
+                          ? 'text-[var(--dp-primary)]'
+                          : 'text-[var(--dp-success)]'
+                      "
+                    >
+                      {{
+                        loading && isLastAssistant(i) && !msg.content
+                          ? "正在生成结果"
+                          : "任务结果"
+                      }}
+                    </p>
+                    <AgentMarkdown
+                      :content="assistantResultText(msg)"
+                      :streaming="loading && isLastAssistant(i)"
                     />
-                    <span
-                      class="w-2 h-2 rounded-full bg-[var(--dp-primary)]/50 animate-bounce"
-                      style="animation-delay: 150ms"
-                    />
-                    <span
-                      class="w-2 h-2 rounded-full bg-[var(--dp-primary)]/50 animate-bounce"
-                      style="animation-delay: 300ms"
-                    />
+                  </div>
+
+                  <div
+                    v-else-if="loading && isLastAssistant(i)"
+                    class="px-4 py-3 bg-white border border-[var(--dp-border)] rounded-bl-md shadow-[var(--dp-shadow-sm)]"
+                  >
+                    <p class="text-xs text-[var(--dp-text-muted)] flex items-center gap-2">
+                      <span class="inline-flex gap-1" aria-hidden="true">
+                        <span
+                          class="w-1.5 h-1.5 rounded-full bg-[var(--dp-primary)]/50 animate-bounce"
+                          style="animation-delay: 0ms"
+                        />
+                        <span
+                          class="w-1.5 h-1.5 rounded-full bg-[var(--dp-primary)]/50 animate-bounce"
+                          style="animation-delay: 150ms"
+                        />
+                        <span
+                          class="w-1.5 h-1.5 rounded-full bg-[var(--dp-primary)]/50 animate-bounce"
+                          style="animation-delay: 300ms"
+                        />
+                      </span>
+                      <span aria-live="polite">正在处理，完成后将在此显示结果…</span>
+                    </p>
                   </div>
                 </template>
               </div>
@@ -284,10 +330,6 @@ function onClearChat() {
             >
               我
             </div>
-          </div>
-
-          <div v-if="toolCalls.length" class="space-y-3 pl-12">
-            <ToolCallCard v-for="(tc, j) in toolCalls" :key="j" :record="tc" />
           </div>
         </div>
       </div>

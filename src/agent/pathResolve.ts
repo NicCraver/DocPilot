@@ -1,7 +1,12 @@
 import type { ToolSchema } from "../lib/tools";
 import { pathExists } from "../lib/tools";
+import type { AgentActivity } from "./activities";
+import { basename } from "./attachments";
+import { createActivityId } from "./activities";
 import { pushAgentLog } from "./agentLog";
 import { pickAgentFile, pickAgentFiles } from "./filePicker";
+
+export type OnAgentActivity = (activity: AgentActivity) => void;
 
 const INPUT_PATH_KEYS = new Set(["input_path", "path", "src"]);
 const INPUT_PATH_ARRAY_KEYS = new Set(["input_paths"]);
@@ -49,6 +54,7 @@ async function needsResolve(value: unknown, multiple: boolean): Promise<boolean>
 export async function resolveToolArgs(
   schema: ToolSchema,
   args: Record<string, unknown>,
+  onActivity?: OnAgentActivity,
 ): Promise<Record<string, unknown>> {
   const params = schema.parameters as JsonObjectSchema;
   const properties = params.properties ?? {};
@@ -61,12 +67,27 @@ export async function resolveToolArgs(
     if (isPathArrayField(key, prop)) {
       if (!(required.has(key) || key in out)) continue;
       if (await needsResolve(out[key], true)) {
+        const fileActId = createActivityId();
+        onActivity?.({
+          id: fileActId,
+          kind: "file",
+          status: "running",
+          title: "正在选择/读取文件…",
+        });
         const picked = await pickAgentFiles();
         if (!picked.length) throw new Error("用户未选择文件");
+        const detail = picked.join("\n");
         pushAgentLog({
           level: "step",
           title: `已选择文件（${key}）`,
-          detail: picked.join("\n"),
+          detail,
+        });
+        onActivity?.({
+          id: fileActId,
+          kind: "file",
+          status: "success",
+          title: `已读取 ${picked.length} 个文件`,
+          detail,
         });
         out[key] = picked;
       }
@@ -75,11 +96,25 @@ export async function resolveToolArgs(
     if (isPathStringField(key, prop)) {
       if (!(required.has(key) || key in out)) continue;
       if (await needsResolve(out[key], false)) {
+        const fileActId = createActivityId();
+        onActivity?.({
+          id: fileActId,
+          kind: "file",
+          status: "running",
+          title: "正在选择/读取文件…",
+        });
         const picked = await pickAgentFile();
         if (!picked) throw new Error("用户未选择文件");
         pushAgentLog({
           level: "step",
           title: `已选择文件（${key}）`,
+          detail: picked,
+        });
+        onActivity?.({
+          id: fileActId,
+          kind: "file",
+          status: "success",
+          title: `已读取：${basename(picked)}`,
           detail: picked,
         });
         out[key] = picked;

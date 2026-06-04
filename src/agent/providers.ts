@@ -14,5 +14,6 @@ export function createChatModel(settings: ProviderSettings) {
     baseURL,
     apiKey: settings.apiKey.trim() || "ollama",
   });
-  return provider(modelId);
+  // 智谱 GLM、Ollama 等 OpenAI 兼容接口走 /chat/completions；provider() 默认走 Responses API 会空回复
+  return provider.chat(modelId);
 }
