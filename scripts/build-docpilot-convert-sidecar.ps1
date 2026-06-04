@@ -41,19 +41,20 @@ function Copy-ToolWithDlls([string]$ExePath, [string]$DestDir) {
 
 function Ensure-PopplerBinDir {
     $dir = Join-Path $Build "poppler-windows"
-    $pdftoppm = Join-Path $dir "Library\bin\pdftoppm.exe"
-    if (Test-Path $pdftoppm) {
-        return (Split-Path $pdftoppm -Parent)
+    $existing = Get-ChildItem $dir -Recurse -Filter "pdftoppm.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($existing) {
+        return $existing.Directory.FullName
     }
     $zip = Join-Path $Build "poppler-windows.zip"
     $url = "https://github.com/oschwartz10612/poppler-windows/releases/download/v24.08.0-0/Release-24.08.0-0.zip"
     Write-Host "==> 下载 poppler-windows"
     Invoke-WebRequest -Uri $url -OutFile $zip -UseBasicParsing
     Expand-Archive -Path $zip -DestinationPath $dir -Force
-    if (-not (Test-Path $pdftoppm)) {
+    $pdftoppm = Get-ChildItem $dir -Recurse -Filter "pdftoppm.exe" | Select-Object -First 1
+    if (-not $pdftoppm) {
         throw "poppler-windows 中未找到 pdftoppm.exe"
     }
-    return (Split-Path $pdftoppm -Parent)
+    return $pdftoppm.Directory.FullName
 }
 
 function Resolve-Executable([string]$Name) {
