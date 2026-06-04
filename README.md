@@ -23,6 +23,19 @@
 1. 安装 [Rust](https://rustup.rs/) 与 [Node.js](https://nodejs.org/)（推荐 22+）
 2. 安装 Vite+ CLI：`npm i -g @vitejs/plus`
 3. 安装依赖：`pnpm install`
+4. 复制 `.env.example` 为 `.env`，填写大模型配置（见下）
+
+### 大模型配置（.env）
+
+在项目根目录创建 `.env`（已被 git 忽略），使用 `VITE_` 前缀以便前端读取：
+
+| 变量                | 说明                             |
+| ------------------- | -------------------------------- |
+| `VITE_LLM_BASE_URL` | OpenAI 兼容接口地址              |
+| `VITE_LLM_API_KEY`  | API 密钥（Ollama 可填 `ollama`） |
+| `VITE_LLM_MODEL`    | 模型名，须支持 Tool Call         |
+
+设置 `VITE_LLM_MODEL` 后，应用内「系统设置」以只读方式展示当前值；**修改 .env 后需重启** `npx tauri dev`。未配置 env 时仍可在设置页保存到本地 store。
 
 ## 常用命令
 

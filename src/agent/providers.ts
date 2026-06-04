@@ -1,14 +1,18 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import type { ProviderSettings } from "../composables/useProviderSettings";
 
-const DEFAULT_BASE_URL = "https://api.openai.com/v1";
-
 export function createChatModel(settings: ProviderSettings) {
-  const baseURL = settings.baseURL.trim() || DEFAULT_BASE_URL;
+  const modelId = settings.model.trim();
+  const baseURL = settings.baseURL.trim();
+  if (!modelId) {
+    throw new Error("未配置模型：请在 .env 设置 VITE_LLM_MODEL 或在系统设置中保存");
+  }
+  if (!baseURL) {
+    throw new Error("未配置接口地址：请在 .env 设置 VITE_LLM_BASE_URL");
+  }
   const provider = createOpenAI({
     baseURL,
-    apiKey: settings.apiKey || "ollama",
+    apiKey: settings.apiKey.trim() || "ollama",
   });
-  const modelId = settings.model.trim() || "gpt-4o-mini";
   return provider(modelId);
 }

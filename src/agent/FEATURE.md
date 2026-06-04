@@ -28,6 +28,7 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 
 ## 变更日志 (Changelog)
 
+- 2026-06-04: 大模型配置支持 `.env`（`VITE_LLM_BASE_URL` / `VITE_LLM_API_KEY` / `VITE_LLM_MODEL`）。
 - 2026-06-04: Agent 右侧操作日志面板，记录模型步骤与工具执行全链路。
 - 2026-06-04: Agent 聊天支持文件/文件夹附件；工具执行前自动补全输入路径。
 - 2026-06-04: Agent 消费 `@docpilot/shared-types` 的 `ToolSchema`，与 Rust IPC 信封对齐。
@@ -38,6 +39,7 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 
 ## 待办 / 风险 (TODO / Risks)
 
-- API Key 存于 plugin-store 文件，非 Keychain；后续可换强安全存储。
+- 大模型优先读 `.env`（`VITE_LLM_*`）；未设 `VITE_LLM_MODEL` 时回退 plugin-store。
+- API Key 在 .env 或 store 中，非 Keychain；生产环境注意勿提交 `.env`。
 - 需用户自行配置可用模型与网络/本地 Ollama。
 - 文件夹仅扫描一层；`output_path` 仍由模型生成，未自动弹出保存对话框。
