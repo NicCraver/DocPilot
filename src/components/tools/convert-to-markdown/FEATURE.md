@@ -16,6 +16,7 @@
 
 ## 变更日志 (Changelog)
 
+- 2026-06-04: Release 增加 Windows x64 / ARM64 构建与 sidecar（`build-docpilot-convert-sidecar.ps1`）。
 - 2026-06-04: 发布版内置 `docpilot-convert` sidecar（PyInstaller + magika 模型 + 捆绑 poppler/tesseract），用户无需单独安装 Python/OCR。
 - 2026-06-04: PNG/JPG 等图片在 markitdown 无输出时自动 tesseract OCR（与扫描 PDF 同一套回退）。
 - 2026-06-04: 扫描件 PDF 在 markitdown 无文本时自动 OCR（pdftoppm + tesseract）；空文件会报错而非 0 字节成功。
@@ -25,7 +26,7 @@
 
 ## 待办 / 风险 (TODO / Risks)
 
-- 当前 sidecar 仅 macOS（`aarch64`/`x86_64` apple-darwin）；Windows 未内置。
+- Release CI 构建 macOS DMG、Windows x64/ARM64 NSIS；sidecar 命名遵循 Tauri `*-pc-windows-msvc.exe` / `*-apple-darwin`。
 - 开发态 OCR 仍依赖本机 `poppler`/`tesseract`；发行版已捆绑。
 - 中文 OCR 质量取决于打包的 tessdata；可选在构建脚本中加入 `tesseract-lang`。
 - 大文件预览仅截断展示，勿将全部 markdown 塞进 Agent 上下文。

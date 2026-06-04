@@ -1,6 +1,6 @@
 {
   "name": "docpilot",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,8 +10,8 @@
     "check": "vue-tsc --noEmit",
     "icons:build": "node scripts/prepare-app-icon.mjs && tauri icon src-tauri/app-icon.png -o src-tauri/icons && node scripts/prepare-app-icon.mjs --icns-only",
     "markitdown:install": "node scripts/ensure-markitdown.mjs",
-    "build:sidecar": "bash scripts/build-docpilot-convert-sidecar.sh",
-    "tauri:build": "pnpm run build && pnpm run build:sidecar && npx tauri build --config src-tauri/tauri.release.conf.json",
+    "build:sidecar": "node scripts/run-build-sidecar.mjs",
+    "tauri:build": "pnpm run build && pnpm run build:sidecar && node scripts/tauri-release-build.mjs",
     "tauri:build:dev": "pnpm run build && npx tauri build"
   },
   "dependencies": {

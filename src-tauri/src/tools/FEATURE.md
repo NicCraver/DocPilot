@@ -15,6 +15,7 @@ UI 与 Agent 共用同一套工具执行入口；新增工具只需实现 trait 
 
 ## 变更日志 (Changelog)
 
+- 2026-06-04: `markitdown_util` sidecar 解析支持 Tauri 三元组文件名（含 Windows `.exe`）。
 - 2026-06-04: `markitdown_util` 发布态优先 `docpilot-convert` sidecar（`tauri.release.conf.json` externalBin）。
 - 2026-06-04: `markitdown_util` OCR 回退扩展至 PNG/JPG 等图片（直接 tesseract）。
 - 2026-06-04: `markitdown_util` 对无文本层 PDF 增加 pdftoppm+tesseract OCR 回退；空输出视为失败。

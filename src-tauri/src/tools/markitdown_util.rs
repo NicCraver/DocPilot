@@ -4,12 +4,34 @@ use tempfile::TempDir;
 
 const INSTALL_HINT: &str = "请先安装 MarkItDown：在项目根执行 `pnpm run markitdown:install`，或使用已内置转换组件的正式版安装包。";
 
-fn sidecar_binary_name() -> String {
-    format!(
-        "docpilot-convert-{}-{}",
-        std::env::consts::ARCH,
-        std::env::consts::OS
-    )
+/// Tauri externalBin 与开发构建使用的 sidecar 文件名（按优先级）
+fn sidecar_file_names() -> Vec<String> {
+    let arch = std::env::consts::ARCH;
+    let os = std::env::consts::OS;
+    let mut names = Vec::new();
+    if os == "macos" {
+        names.push(format!("docpilot-convert-{arch}-apple-darwin"));
+    }
+    if os == "windows" {
+        names.push(format!("docpilot-convert-{arch}-pc-windows-msvc.exe"));
+        names.push(format!("docpilot-convert-{arch}-windows.exe"));
+    }
+    names.push(format!("docpilot-convert-{arch}-{os}"));
+    if os == "windows" {
+        names.push("docpilot-convert.exe".into());
+    }
+    names.push("docpilot-convert".into());
+    names
+}
+
+fn find_sidecar_in_dir(dir: &Path) -> Option<PathBuf> {
+    for name in sidecar_file_names() {
+        let candidate = dir.join(name);
+        if candidate.is_file() {
+            return Some(candidate);
+        }
+    }
+    None
 }
 
 /// 发布包内嵌的转换 sidecar（markitdown + OCR）
@@ -26,23 +48,14 @@ fn resolve_sidecar() -> Option<PathBuf> {
 
     if let Ok(exe) = std::env::current_exe() {
         if let Some(dir) = exe.parent() {
-            for name in [sidecar_binary_name(), "docpilot-convert".to_string()] {
-                let candidate = dir.join(&name);
-                if candidate.is_file() {
-                    return Some(candidate);
-                }
+            if let Some(p) = find_sidecar_in_dir(dir) {
+                return Some(p);
             }
         }
     }
 
-    let dev = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("binaries")
-        .join(sidecar_binary_name());
-    if dev.is_file() {
-        return Some(dev);
-    }
-
-    None
+    let binaries = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("binaries");
+    find_sidecar_in_dir(&binaries)
 }
 
 fn run_sidecar_convert(

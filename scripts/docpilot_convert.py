@@ -28,10 +28,21 @@ def setup_bundle_env() -> None:
     if bin_dir.is_dir():
         os.environ["PATH"] = f"{bin_dir}{os.pathsep}{os.environ.get('PATH', '')}"
     if lib_dir:
-        old = os.environ.get("DYLD_LIBRARY_PATH", "")
-        os.environ["DYLD_LIBRARY_PATH"] = (
-            f"{lib_dir}{os.pathsep}{old}" if old else str(lib_dir)
-        )
+        if sys.platform == "win32":
+            try:
+                os.add_dll_directory(str(lib_dir))
+            except (AttributeError, OSError):
+                pass
+            if bin_dir.is_dir():
+                try:
+                    os.add_dll_directory(str(bin_dir))
+                except (AttributeError, OSError):
+                    pass
+        else:
+            old = os.environ.get("DYLD_LIBRARY_PATH", "")
+            os.environ["DYLD_LIBRARY_PATH"] = (
+                f"{lib_dir}{os.pathsep}{old}" if old else str(lib_dir)
+            )
     if tess.is_dir():
         os.environ["TESSDATA_PREFIX"] = str(tess)
 
