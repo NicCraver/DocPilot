@@ -4,8 +4,8 @@
 
 - Release 构建在 `tauri build`（仅 `app` bundle）后，由 `scripts/postprocess-dmg.mjs` 调用 `create-dmg` 生成最终 `.dmg`。
 - DMG 内含：`DocPilot.app`、「应用程序」快捷方式、`解除隔离.command`（双击打开终端并执行 `xattr -d com.apple.quarantine`）。
-- 背景图 `background.png` 由 `scripts/generate-dmg-background.mjs` 按 DocPilot 配色（`#2563EB` / `#F8FAFC`）生成，含三步中文引导。
-- 图标坐标：App `(130,230)`、应用程序 `(330,230)`、解除隔离 `(530,230)`；窗口 `660×440`。
+- 背景图 `background.png` 由 `scripts/generate-dmg-background.mjs` 生成：逻辑窗口 `660×440` pt，输出 `1320×880` px @144dpi（Retina @2x），含三步中文引导。
+- 图标坐标：App `(130,230)`、应用程序 `(330,230)`、解除隔离 `(530,230)`；`create-dmg --window-size` 仍为 `660×440` pt。
 
 ## 设计意图 (Intent)
 
@@ -24,9 +24,10 @@
 ## 变更日志 (Changelog)
 
 - 2026-06-05: 初版 — create-dmg 后处理、引导背景图、解除隔离 `.command`、CI 安装 create-dmg。
+- 2026-06-05: 背景图改为 1320×880 @144dpi，修复 Retina 屏提示文字发糊；副文案最小字号 10→11pt。
 
 ## 待办 / 风险 (TODO / Risks)
 
 - Tauri 原生 DMG 与 create-dmg 双路径：开发 `tauri:build:dev` 仍走 Tauri 默认 DMG，无解除隔离脚本；仅 Release 流水线使用 postprocess。
-- 背景图 DPI：当前 660×440 逻辑像素；高 DPI 屏可能略糊（见 tauri-apps/tauri#12009）。
+- 非 macOS 环境生成背景图时 `sips` 不可用，需在本机 macOS 重新执行 `pnpm dmg:background` 以写入 144dpi 元数据。
 - 未公证构建仍可能需要「右键 → 打开」；脚本仅处理 `com.apple.quarantine`。

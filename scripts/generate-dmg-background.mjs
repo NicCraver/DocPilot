@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 /**
- * 生成 DocPilot DMG 安装引导背景图（660×440，与 create-dmg 窗口尺寸一致）
+ * 生成 DocPilot DMG 安装引导背景图
+ *
+ * - 逻辑窗口：660×440 pt（与 create-dmg --window-size 一致）
+ * - 输出像素：1320×880 @2x，DPI 144，避免 Retina 屏文字发糊
  */
 import sharp from "sharp";
-import { writeFile, mkdir } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { writeFile, mkdir, access } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,11 +15,13 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = path.join(ROOT, "src-tauri/dmg");
 const OUT_FILE = path.join(OUT_DIR, "background.png");
 
-const W = 660;
-const H = 440;
+const LOGICAL_W = 660;
+const LOGICAL_H = 440;
+const SCALE = 2;
+const DPI = 72 * SCALE;
 
 const svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+<svg width="${LOGICAL_W}" height="${LOGICAL_H}" viewBox="0 0 ${LOGICAL_W} ${LOGICAL_H}" xmlns="http://www.w3.org/2000/svg" text-rendering="geometricPrecision">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#f8fafc"/>
@@ -26,9 +32,9 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
     </filter>
   </defs>
 
-  <rect width="${W}" height="${H}" fill="url(#bg)"/>
-  <rect x="0" y="0" width="${W}" height="56" fill="#ffffff" opacity="0.72"/>
-  <line x1="0" y1="56" x2="${W}" y2="56" stroke="#e2e8f0" stroke-width="1"/>
+  <rect width="${LOGICAL_W}" height="${LOGICAL_H}" fill="url(#bg)"/>
+  <rect x="0" y="0" width="${LOGICAL_W}" height="56" fill="#ffffff" opacity="0.72"/>
+  <line x1="0" y1="56" x2="${LOGICAL_W}" y2="56" stroke="#e2e8f0" stroke-width="1"/>
 
   <!-- 标题 -->
   <circle cx="36" cy="28" r="14" fill="#2563eb"/>
@@ -42,19 +48,19 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
     <circle cx="58" cy="98" r="12" fill="#2563eb"/>
     <text x="58" y="103" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">1</text>
     <text x="78" y="94" font-size="12" font-weight="600" fill="#0f172a">拖到「应用程序」</text>
-    <text x="78" y="110" font-size="10" fill="#64748b">将左侧图标拖入文件夹</text>
+    <text x="78" y="110" font-size="11" fill="#64748b">将左侧图标拖入文件夹</text>
 
     <rect x="240" y="72" width="180" height="52" rx="10" fill="#ffffff" filter="url(#shadow)"/>
     <circle cx="258" cy="98" r="12" fill="#2563eb"/>
     <text x="258" y="103" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">2</text>
     <text x="278" y="94" font-size="12" font-weight="600" fill="#0f172a">双击「解除隔离」</text>
-    <text x="278" y="110" font-size="10" fill="#64748b">终端会自动执行命令</text>
+    <text x="278" y="110" font-size="11" fill="#64748b">终端会自动执行命令</text>
 
     <rect x="440" y="72" width="180" height="52" rx="10" fill="#ffffff" filter="url(#shadow)"/>
     <circle cx="458" cy="98" r="12" fill="#2563eb"/>
     <text x="458" y="103" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">3</text>
     <text x="478" y="94" font-size="12" font-weight="600" fill="#0f172a">打开 DocPilot</text>
-    <text x="478" y="110" font-size="10" fill="#64748b">从启动台或应用程序打开</text>
+    <text x="478" y="110" font-size="11" fill="#64748b">从启动台或应用程序打开</text>
   </g>
 
   <!-- 箭头 1 → 2 -->
@@ -68,7 +74,7 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <!-- 图标区引导箭头（拖到应用程序） -->
   <path d="M 200 168 Q 265 148 330 168" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="5 4"/>
   <path d="M 322 162 L 330 168 L 324 174" fill="#94a3b8"/>
-  <text x="265" y="142" text-anchor="middle" font-family="PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="10" fill="#64748b">拖到这里</text>
+  <text x="265" y="142" text-anchor="middle" font-family="PingFang SC, Helvetica Neue, Arial, sans-serif" font-size="11" fill="#64748b">拖到这里</text>
 
   <!-- 图标占位虚线框（仅视觉引导，实际图标由 create-dmg 放置） -->
   <rect x="88" y="188" width="84" height="84" rx="14" fill="none" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4 3"/>
@@ -82,7 +88,33 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   </text>
 </svg>`;
 
+async function setRetinaDpi(file) {
+  const r = spawnSync("sips", ["-s", "dpiWidth", String(DPI), "-s", "dpiHeight", String(DPI), file], {
+    stdio: "inherit",
+  });
+  if (r.status !== 0) {
+    console.warn("sips 设置 DPI 失败，背景图在 Retina 屏可能仍有偏移");
+  }
+}
+
 await mkdir(OUT_DIR, { recursive: true });
-const png = await sharp(Buffer.from(svg)).png().toBuffer();
+
+const png = await sharp(Buffer.from(svg), { density: DPI })
+  .png({ compressionLevel: 9, adaptiveFiltering: true })
+  .toBuffer();
+
+const meta = await sharp(png).metadata();
+if (meta.width !== LOGICAL_W * SCALE || meta.height !== LOGICAL_H * SCALE) {
+  console.warn(
+    `背景图尺寸 ${meta.width}×${meta.height}，期望 ${LOGICAL_W * SCALE}×${LOGICAL_H * SCALE}`,
+  );
+}
+
 await writeFile(OUT_FILE, png);
-console.log(`已生成 DMG 背景图：${OUT_FILE}`);
+if (process.platform === "darwin") {
+  await setRetinaDpi(OUT_FILE);
+}
+
+console.log(
+  `已生成 DMG 背景图：${OUT_FILE}（${LOGICAL_W * SCALE}×${LOGICAL_H * SCALE}px @${DPI}dpi，窗口 ${LOGICAL_W}×${LOGICAL_H}pt）`,
+);
