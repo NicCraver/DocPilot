@@ -16,6 +16,7 @@
 
 ## 变更日志 (Changelog)
 
+- 2026-06-05: 修复 UnoCSS `presetIcons` 的 Lucide 集合配置（改为函数返回 IconifyJSON），恢复 `i-lucide-*` 图标显示。
 - 2026-06-04: 初版 UI 套件与全局样式，替换散落 Tailwind 硬编码。
 
 ## 待办 / 风险 (TODO / Risks)

@@ -10,7 +10,8 @@ export default defineConfig({
     presetUno(),
     presetIcons({
       collections: {
-        lucide: lucideIcons,
+        // IconifyJSON 须以函数返回，loadIcon 才会走 searchForIcon；直接传对象会被当成 SVG 字符串表而加载失败
+        lucide: () => Promise.resolve(lucideIcons),
       },
       extraProperties: {
         display: "inline-block",
