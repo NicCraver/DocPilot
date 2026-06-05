@@ -13,7 +13,8 @@
 - 精致的工具调用详情卡片（ToolCallCard），支持执行中、成功、失败状态徽章，格式化 JSON 参数与结果展示。
 - 助理单轮消息含 `activities[]`（执行过程）与 `content`（最终任务结果）；见 `agent/activities.ts`。
 - 助理「任务结果」由 **markstream-vue** 渲染（见 `components/agent/AgentMarkdown.vue`）。
-- **右侧操作日志**（`AgentLogPanel`）：按时间记录用户发送、模型步骤、工具执行、路径补全、确认与错误等每一步。
+- **右侧操作日志**（`AgentLogPanel`，经典布局）/ **编排检视器**（Inspector 布局合并 activities + 日志）：按时间记录用户发送、模型步骤、工具执行等。
+- **三套 Agent UI**：`App.vue` 三个助理菜单，数据层 `agentChatSession` 单例共享消息。
 
 ## 设计意图 (Intent)
 
@@ -31,6 +32,7 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 
 ## 变更日志 (Changelog)
 
+- 2026-06-05: `agentChatSession.ts` 单例会话，供三种 Agent UI 布局共用。
 - 2026-06-04: 集成 `convert_to_markdown`（MarkItDown）；意图筛选与 system prompt 支持转 MD。
 
 - 2026-06-04: 执行过程与任务结果分离；`buildAgentTools` / `resolveToolArgs` 上报 `AgentActivity`。

@@ -2,10 +2,12 @@
 
 ## 现状 (Status)
 
-- `AgentChat.vue`：聊天主界面、附件、推荐 prompt、操作日志侧栏。
-- `AgentMarkdown.vue`：助理「任务结果」区 Markdown 流式渲染。
-- `AgentActivityTimeline.vue` + `AgentActivityItem.vue`：执行过程（读文件、调工具）默认折叠，可展开查看参数/结果。
-- `ToolCallCard.vue`（遗留，已由 Activity 时间线替代）/ `AgentLogPanel.vue`：右侧技术日志。
+- `AgentChat.vue`：聊天主界面；`layout` 切换三套 UI（见 `layouts/FEATURE.md`）。
+- 侧边栏三个菜单：**经典编排** / **Claude 流式** / **编排检视器**；会话 `agentChatSession.ts` 跨布局共享。
+- `AgentMarkdown.vue`：助理 Markdown 流式渲染。
+- `AgentActivityTimeline.vue` + `AgentActivityItem.vue`：经典布局折叠执行过程。
+- `layouts/*`：Stream / Inspector 专用消息体与 `AgentOrchestrationPanel`。
+- `ToolCallCard.vue`（遗留）/ `AgentLogPanel.vue`：经典布局右侧技术日志。
 
 ## 设计意图 (Intent)
 
@@ -18,6 +20,7 @@
 
 ## 变更日志 (Changelog)
 
+- 2026-06-05: 三套 Agent UI（经典 / Claude 流式 / 编排检视器）+ 三个侧边栏菜单；共享会话状态。
 - 2026-06-04: 修复全屏/大窗口时聊天区底部留白：`AgentChat` 改用 `h-full` 随主区域 flex 撑满，不再使用 `calc(100vh - 10rem)`。
 - 2026-06-04: 「任务结果」在生成阶段即通过 `draftContent` + markstream 流式展示，定稿后写入 `content`。
 - 2026-06-04: 助理消息分区：折叠「执行过程」+ 底部「任务结果」；读文件/工具步骤可展开详情。

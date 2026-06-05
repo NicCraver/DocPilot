@@ -28,7 +28,9 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@iconify-json/lucide": "^1.2.111",
     "@tauri-apps/cli": "^2.11.2",
+    "@unocss/preset-icons": "^66.7.0",
     "@vitejs/plugin-vue": "^5.2.0",
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^20.9.0",
