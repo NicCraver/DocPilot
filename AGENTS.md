@@ -21,6 +21,18 @@
 
 Agent 在告知用户「开发完成」前，应自行执行上述重启（或等价操作），并在回复中说明已重新启动。
 
+## 提交前本地 CI（必做）
+
+日常 push **不触发** GitHub 自动 CI；在本地验证通过后再推送：
+
+```bash
+pnpm run hooks:install   # 首次克隆后执行一次
+pnpm run ci:local        # 手动全量检查（push 时 pre-push 也会自动跑）
+git push                 # 本地 CI 通过才会推送
+```
+
+紧急跳过：`git push --no-verify`。需要云端复检时在 GitHub Actions 手动运行 **CI** workflow。
+
 ## 项目约定（摘要）
 
 - 修改功能模块前阅读该目录 `FEATURE.md`；改完后同次提交更新「现状」与「变更日志」。

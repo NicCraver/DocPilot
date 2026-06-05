@@ -1,0 +1,6 @@
+#!/bin/sh
+# push 前自动跑本地 CI；跳过：git push --no-verify
+set -e
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+exec bash scripts/ci-local.sh

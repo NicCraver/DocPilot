@@ -1,9 +1,8 @@
 name: CI
 
+# 日常开发在本地 pre-push 跑 ci:local；此 workflow 仅手动触发，节省 Actions 额度。
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   frontend:
@@ -15,7 +14,7 @@ jobs:
           node-version: 22
       - run: npm i -g @vitejs/plus
       - run: pnpm install
-      - run: vp check
+      - run: vp check src packages/shared-types/src/index.ts packages/shared-types/src/tool-ids.ts
       - run: vp test
 
   rust:

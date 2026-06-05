@@ -29,9 +29,7 @@ const levelVariant = (level: AgentLogEntry["level"]) => {
 };
 
 const stepCount = computed(() => props.activities.length);
-const runningCount = computed(
-  () => props.activities.filter((a) => a.status === "running").length,
-);
+const runningCount = computed(() => props.activities.filter((a) => a.status === "running").length);
 </script>
 
 <template>
@@ -60,7 +58,9 @@ const runningCount = computed(
     <!-- 垂直管道：AG-UI / AgentGUI 步骤编排 -->
     <div class="flex-1 overflow-y-auto min-h-0">
       <section class="p-3 border-b border-[var(--dp-border)]">
-        <h4 class="text-[10px] font-semibold uppercase tracking-wide text-[var(--dp-text-muted)] mb-2">
+        <h4
+          class="text-[10px] font-semibold uppercase tracking-wide text-[var(--dp-text-muted)] mb-2"
+        >
           执行管道
         </h4>
         <div v-if="activities.length" class="relative pl-4 space-y-2">
@@ -89,7 +89,9 @@ const runningCount = computed(
       </section>
 
       <section class="p-3">
-        <h4 class="text-[10px] font-semibold uppercase tracking-wide text-[var(--dp-text-muted)] mb-2">
+        <h4
+          class="text-[10px] font-semibold uppercase tracking-wide text-[var(--dp-text-muted)] mb-2"
+        >
           事件日志
         </h4>
         <div v-if="logs.length" class="space-y-2">

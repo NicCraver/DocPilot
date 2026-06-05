@@ -21,10 +21,7 @@ const props = withDefaults(
   { layout: "classic" },
 );
 
-const layoutMeta: Record<
-  AgentUiLayout,
-  { title: string; subtitle: string; reference: string }
-> = {
+const layoutMeta: Record<AgentUiLayout, { title: string; subtitle: string; reference: string }> = {
   classic: {
     title: "经典编排",
     subtitle: "折叠执行过程 + 独立任务结果区（Vercel AI SDK 风格）",
@@ -160,9 +157,7 @@ function onClearChat() {
             <p class="text-xs text-[var(--dp-text-muted)] truncate">
               {{ meta.subtitle }}
             </p>
-            <p class="text-[10px] text-[var(--dp-text-muted)] mt-0.5">
-              参考：{{ meta.reference }}
-            </p>
+            <p class="text-[10px] text-[var(--dp-text-muted)] mt-0.5">参考：{{ meta.reference }}</p>
           </div>
         </div>
 

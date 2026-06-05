@@ -44,7 +44,7 @@ function assistantResultText(msg: ChatMessage): string {
   >
     <!-- Claude Agent SDK 风格：顶部实时状态条 -->
     <div
-      v-if="statusLine && (loading && isLast)"
+      v-if="statusLine && loading && isLast"
       class="px-4 py-2 border-b border-[var(--dp-border)] bg-[var(--dp-primary-soft)]/40 flex items-center gap-2"
       aria-live="polite"
     >
@@ -56,7 +56,10 @@ function assistantResultText(msg: ChatMessage): string {
     </div>
 
     <!-- 工具/步骤块交错展示（claude-agent-ui ToolUseBlock 思路） -->
-    <div v-if="activities.length" class="px-3 py-2 space-y-1.5 border-b border-[var(--dp-border)]/80">
+    <div
+      v-if="activities.length"
+      class="px-3 py-2 space-y-1.5 border-b border-[var(--dp-border)]/80"
+    >
       <p class="text-[10px] font-semibold text-[var(--dp-text-muted)] uppercase tracking-wide px-1">
         执行流
       </p>
@@ -69,10 +72,7 @@ function assistantResultText(msg: ChatMessage): string {
         <AppBadge v-if="loading && isLast && !msg.content" variant="info" pulse>输出中</AppBadge>
         <AppBadge v-else-if="msg.content" variant="success">完成</AppBadge>
       </div>
-      <AgentMarkdown
-        :content="assistantResultText(msg)"
-        :streaming="loading && isLast"
-      />
+      <AgentMarkdown :content="assistantResultText(msg)" :streaming="loading && isLast" />
     </div>
 
     <div

@@ -7,7 +7,13 @@ import ProviderSettings from "./components/settings/ProviderSettings.vue";
 import AppNavItem from "./components/ui/AppNavItem.vue";
 import AppBadge from "./components/ui/AppBadge.vue";
 
-type Tab = "agent-classic" | "agent-stream" | "agent-inspector" | "agent-craft" | "tools" | "settings";
+type Tab =
+  | "agent-classic"
+  | "agent-stream"
+  | "agent-inspector"
+  | "agent-craft"
+  | "tools"
+  | "settings";
 const tab = ref<Tab>("agent-classic");
 
 const agentLayout = computed((): AgentUiLayout => {
@@ -32,7 +38,10 @@ const tabMeta = computed(() => {
     case "agent-inspector":
       return { title: "助理 · 编排检视器", desc: "对话区精简，右侧管道展示步骤与日志（AgentGUI）" };
     case "agent-craft":
-      return { title: "助理 · Craft Demo", desc: "会话面板 + turn card + 权限确认（Craft Agents）" };
+      return {
+        title: "助理 · Craft Demo",
+        desc: "会话面板 + turn card + 权限确认（Craft Agents）",
+      };
     case "tools":
       return { title: "PDF 工具箱", desc: "本地批量处理与格式转换" };
     case "settings":
@@ -63,7 +72,9 @@ const tabMeta = computed(() => {
       </div>
 
       <nav class="flex-1 p-4 space-y-1 overflow-y-auto" aria-label="功能模块">
-        <p class="px-3 pt-1 pb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--dp-text-muted)]">
+        <p
+          class="px-3 pt-1 pb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--dp-text-muted)]"
+        >
           AI 助理 UI
         </p>
 
@@ -97,17 +108,15 @@ const tabMeta = computed(() => {
           </template>
         </AppNavItem>
 
-        <AppNavItem
-          :active="tab === 'agent-craft'"
-          label="Craft Demo"
-          @click="tab = 'agent-craft'"
-        >
+        <AppNavItem :active="tab === 'agent-craft'" label="Craft Demo" @click="tab = 'agent-craft'">
           <template #icon>
             <span class="i-lucide-list-tree w-5 h-5" />
           </template>
         </AppNavItem>
 
-        <p class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--dp-text-muted)]">
+        <p
+          class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--dp-text-muted)]"
+        >
           工具
         </p>
 

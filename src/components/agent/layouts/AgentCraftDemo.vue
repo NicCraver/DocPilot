@@ -180,7 +180,9 @@ const activeSession = computed(
 const runningActivities = computed(() =>
   turns.value.flatMap((turn) =>
     turn.type === "assistant"
-      ? turn.activities.filter((activity) => activity.status === "running" || activity.status === "pending")
+      ? turn.activities.filter(
+          (activity) => activity.status === "running" || activity.status === "pending",
+        )
       : [],
   ),
 );
@@ -198,7 +200,8 @@ onBeforeUnmount(() => clearAllTimers());
 
 function cloneTurns(source: Turn[]): Turn[] {
   return source.map((turn) => {
-    if (turn.type === "user") return { ...turn, attachments: turn.attachments ? [...turn.attachments] : undefined };
+    if (turn.type === "user")
+      return { ...turn, attachments: turn.attachments ? [...turn.attachments] : undefined };
     return { ...turn, activities: turn.activities.map((activity) => ({ ...activity })) };
   });
 }
@@ -269,7 +272,12 @@ function pushActivity(turnId: string, activity: Activity) {
 }
 
 function streamResponse(turnId: string, text: string) {
-  updateAssistant(turnId, (turn) => ({ ...turn, response: "", streaming: true, title: "正在生成回复" }));
+  updateAssistant(turnId, (turn) => ({
+    ...turn,
+    response: "",
+    streaming: true,
+    title: "正在生成回复",
+  }));
 
   let index = 0;
   const interval = window.setInterval(() => {
@@ -467,7 +475,8 @@ function denyPermission() {
   });
   updateAssistant(pendingPermission.value.turnId, (turn) => ({
     ...turn,
-    response: "我已跳过本次命令执行，并保留当前草稿状态。可以继续手动审阅，也可以换成不需要命令的检查方式。",
+    response:
+      "我已跳过本次命令执行，并保留当前草稿状态。可以继续手动审阅，也可以换成不需要命令的检查方式。",
     streaming: false,
     complete: true,
     title: "已跳过命令",
@@ -634,7 +643,11 @@ function activityIconClass(toolName: string) {
           <template v-for="turn in turns" :key="turn.id">
             <div v-if="turn.type === 'user'" class="craft-user-turn">
               <div v-if="turn.attachments?.length" class="craft-attachment-row">
-                <span v-for="attachment in turn.attachments" :key="attachment" class="craft-attachment">
+                <span
+                  v-for="attachment in turn.attachments"
+                  :key="attachment"
+                  class="craft-attachment"
+                >
                   {{ attachment }}
                 </span>
               </div>
@@ -649,7 +662,11 @@ function activityIconClass(toolName: string) {
                 <div class="craft-turn-header">
                   <button class="craft-turn-toggle" type="button" @click="toggleTurn(turn.id)">
                     <span
-                      :class="['i-lucide-chevron-right', 'craft-chevron', turn.expanded && 'is-open']"
+                      :class="[
+                        'i-lucide-chevron-right',
+                        'craft-chevron',
+                        turn.expanded && 'is-open',
+                      ]"
                       aria-hidden="true"
                     />
                     <span class="craft-step-count">{{ turn.activities.length }}</span>
@@ -672,7 +689,10 @@ function activityIconClass(toolName: string) {
                     @click="selectedActivity = activity"
                   >
                     <span :class="['craft-status', activity.status]" aria-hidden="true" />
-                    <span :class="['craft-tool-shell', activityKind(activity.toolName)]" aria-hidden="true">
+                    <span
+                      :class="['craft-tool-shell', activityKind(activity.toolName)]"
+                      aria-hidden="true"
+                    >
                       <span :class="['craft-tool-icon', activityIconClass(activity.toolName)]" />
                     </span>
                     <span class="craft-activity-title">{{ activity.title }}</span>
@@ -680,10 +700,16 @@ function activityIconClass(toolName: string) {
                     <span v-if="activity.description" class="craft-activity-description">
                       {{ activity.description }}
                     </span>
-                    <span v-if="activity.additions !== undefined" class="craft-diff add">+{{ activity.additions }}</span>
-                    <span v-if="activity.deletions" class="craft-diff del">-{{ activity.deletions }}</span>
+                    <span v-if="activity.additions !== undefined" class="craft-diff add"
+                      >+{{ activity.additions }}</span
+                    >
+                    <span v-if="activity.deletions" class="craft-diff del"
+                      >-{{ activity.deletions }}</span
+                    >
                     <span v-if="activity.fileName" class="craft-file">{{ activity.fileName }}</span>
-                    <span v-if="activity.elapsed" class="craft-elapsed">{{ activity.elapsed }}</span>
+                    <span v-if="activity.elapsed" class="craft-elapsed">{{
+                      activity.elapsed
+                    }}</span>
                   </button>
                 </div>
               </div>
@@ -709,7 +735,8 @@ function activityIconClass(toolName: string) {
                     :class="block.number && 'numbered'"
                   >
                     <template v-if="block.number">
-                      <span>{{ block.number }}</span>{{ block.text }}
+                      <span>{{ block.number }}</span
+                      >{{ block.text }}
                     </template>
                     <template v-else>{{ block.text }}</template>
                   </p>
@@ -735,18 +762,26 @@ function activityIconClass(toolName: string) {
 
       <form v-else class="craft-composer-wrap" @submit.prevent="submitMessage">
         <div class="craft-option-row">
-          <button :class="['craft-option', `mode-${permissionMode}`]" type="button" @click="cycleMode">
+          <button
+            :class="['craft-option', `mode-${permissionMode}`]"
+            type="button"
+            @click="cycleMode"
+          >
             {{ modeLabel[permissionMode] }}
           </button>
           <button class="craft-option" type="button">Claude Sonnet 4</button>
           <button class="craft-option" type="button">/contracts</button>
         </div>
 
-	        <div class="craft-composer">
+        <div class="craft-composer">
           <div v-if="attachments.length" class="craft-attachment-row">
             <span v-for="attachment in attachments" :key="attachment" class="craft-attachment">
               {{ attachment }}
-              <button type="button" :aria-label="`移除 ${attachment}`" @click="removeAttachment(attachment)">
+              <button
+                type="button"
+                :aria-label="`移除 ${attachment}`"
+                @click="removeAttachment(attachment)"
+              >
                 <span class="i-lucide-x craft-remove-icon" aria-hidden="true" />
               </button>
             </span>
@@ -759,7 +794,12 @@ function activityIconClass(toolName: string) {
             @keydown="onTextareaKeydown"
           />
           <div class="craft-composer-bar">
-            <button type="button" class="craft-icon-button is-framed" aria-label="Attach file" @click="addAttachment">
+            <button
+              type="button"
+              class="craft-icon-button is-framed"
+              aria-label="Attach file"
+              @click="addAttachment"
+            >
               <span class="i-lucide-paperclip craft-action-icon" aria-hidden="true" />
             </button>
             <div class="craft-segmented" role="group" aria-label="Permission mode">
@@ -773,10 +813,22 @@ function activityIconClass(toolName: string) {
                 {{ modeLabel[mode] }}
               </button>
             </div>
-            <button v-if="processing" class="craft-send is-stop" type="button" aria-label="Stop" @click="stopProcessing">
+            <button
+              v-if="processing"
+              class="craft-send is-stop"
+              type="button"
+              aria-label="Stop"
+              @click="stopProcessing"
+            >
               <span class="i-lucide-square craft-action-icon" aria-hidden="true" />
             </button>
-            <button v-else class="craft-send" type="submit" aria-label="Send" :disabled="!input.trim()">
+            <button
+              v-else
+              class="craft-send"
+              type="submit"
+              aria-label="Send"
+              :disabled="!input.trim()"
+            >
               <span class="i-lucide-arrow-up craft-action-icon" aria-hidden="true" />
             </button>
           </div>
@@ -793,12 +845,17 @@ function activityIconClass(toolName: string) {
       </div>
       <div v-if="selectedActivity" class="craft-inspector-body">
         <div class="craft-activity-hero">
-          <span :class="['craft-tool-shell', activityKind(selectedActivity.toolName)]" aria-hidden="true">
+          <span
+            :class="['craft-tool-shell', activityKind(selectedActivity.toolName)]"
+            aria-hidden="true"
+          >
             <span :class="['craft-tool-icon', activityIconClass(selectedActivity.toolName)]" />
           </span>
           <div>
             <h3>{{ selectedActivity.title }}</h3>
-            <span :class="['craft-status-text', selectedActivity.status]">{{ selectedActivity.status }}</span>
+            <span :class="['craft-status-text', selectedActivity.status]">{{
+              selectedActivity.status
+            }}</span>
           </div>
         </div>
         <section>
