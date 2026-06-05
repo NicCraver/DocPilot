@@ -12,12 +12,13 @@ export type OnAgentActivity = (activity: AgentActivity) => void;
 export async function buildAgentTools(
   confirm?: ConfirmToolFn,
   onActivity?: OnAgentActivity,
+  confirmAll = false,
 ): Promise<ToolSet> {
   const schemas = await listTools();
   const tools: ToolSet = {};
 
   for (const schema of schemas) {
-    tools[schema.id] = createAgentTool(schema, confirm, onActivity);
+    tools[schema.id] = createAgentTool(schema, confirm, onActivity, confirmAll);
   }
   return tools;
 }
@@ -26,6 +27,7 @@ function createAgentTool(
   schema: ToolSchema,
   confirm?: ConfirmToolFn,
   onActivity?: OnAgentActivity,
+  confirmAll = false,
 ) {
   return tool({
     description: schema.description,
@@ -49,7 +51,7 @@ function createAgentTool(
       });
       try {
         record = await resolveToolArgs(schema, record, onActivity);
-        if (schema.requires_confirmation) {
+        if (schema.requires_confirmation || confirmAll) {
           const ok = await confirm?.(schema.id, record);
           if (!ok) {
             throw new Error("用户已取消该工具执行");

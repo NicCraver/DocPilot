@@ -3,7 +3,7 @@ import type { ModelMessage } from "ai";
 import { ask } from "@tauri-apps/plugin-dialog";
 import type { AgentActivity } from "../agent/activities";
 import { createActivityId } from "../agent/activities";
-import { buildAgentTools } from "../agent/registry";
+import { buildAgentTools, type ConfirmToolFn } from "../agent/registry";
 import { pushAgentLog } from "../agent/agentLog";
 import { runAgentChat } from "../agent/runner";
 import type { ProviderSettings } from "./useProviderSettings";
@@ -39,8 +39,17 @@ export function useAgentChatSession() {
   return { messages, loading, error, logs };
 }
 
-export function useAgentChatActions(getSettings: () => ProviderSettings) {
-  async function confirmTool(toolId: string, args: Record<string, unknown>) {
+export interface AgentChatActionOptions {
+  confirmTool?: ConfirmToolFn;
+  /** 为 true 时每次工具执行前均调用 confirm（Craft Ask 模式） */
+  confirmAllTools?: boolean | (() => boolean);
+}
+
+export function useAgentChatActions(
+  getSettings: () => ProviderSettings,
+  options: AgentChatActionOptions = {},
+) {
+  async function defaultConfirmTool(toolId: string, args: Record<string, unknown>) {
     const preview = JSON.stringify(args, null, 2);
     pushAgentLog({
       level: "warn",
@@ -57,6 +66,8 @@ export function useAgentChatActions(getSettings: () => ProviderSettings) {
     });
     return ok;
   }
+
+  const confirmTool = options.confirmTool ?? defaultConfirmTool;
 
   function toModelMessages(): ModelMessage[] {
     return messages.value.map((m) => ({
@@ -125,7 +136,11 @@ export function useAgentChatActions(getSettings: () => ProviderSettings) {
 
     try {
       pushAgentLog({ level: "step", title: "正在加载工具并连接模型…" });
-      const tools = await buildAgentTools(confirmTool, onActivity);
+      const confirmAll =
+        typeof options.confirmAllTools === "function"
+          ? options.confirmAllTools()
+          : (options.confirmAllTools ?? false);
+      const tools = await buildAgentTools(confirmTool, onActivity, confirmAll);
       const toolCount = Object.keys(tools).length;
       upsertActivity(assistantMsg(), {
         id: prepareId,

@@ -2,8 +2,9 @@
 
 ## 现状 (Status)
 
-- `AgentChat.vue`：聊天主界面；`layout` 切换三套 UI（见 `layouts/FEATURE.md`）。
-- 侧边栏三个菜单：**经典编排** / **Claude 流式** / **编排检视器**；会话 `agentChatSession.ts` 跨布局共享。
+- **`AgentCraftDemo.vue`**（`layouts/`）：主 Agent 界面，Craft 三栏布局 + 真实工具编排。
+- `AgentChat.vue`：遗留三套对比布局容器，侧边栏入口已移除。
+- 会话 `agentChatSession.ts` 单例，Craft 与遗留布局共用。
 - `AgentMarkdown.vue`：助理 Markdown 流式渲染。
 - `AgentActivityTimeline.vue` + `AgentActivityItem.vue`：经典布局折叠执行过程。
 - `layouts/*`：Stream / Inspector 专用消息体与 `AgentOrchestrationPanel`。
@@ -20,6 +21,7 @@
 
 ## 变更日志 (Changelog)
 
+- 2026-06-05: Craft Demo 作为主 Agent UI，接入 `runAgentChat` 与 PDF 工具链；侧边栏简化为「AI 助理」单入口。
 - 2026-06-05: 三套 Agent UI（经典 / Claude 流式 / 编排检视器）+ 三个侧边栏菜单；共享会话状态。
 - 2026-06-04: 修复全屏/大窗口时聊天区底部留白：`AgentChat` 改用 `h-full` 随主区域 flex 撑满，不再使用 `calc(100vh - 10rem)`。
 - 2026-06-04: 「任务结果」在生成阶段即通过 `draftContent` + markstream 流式展示，定稿后写入 `content`。

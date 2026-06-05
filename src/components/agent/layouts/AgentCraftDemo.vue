@@ -1,181 +1,124 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onMounted, onBeforeUnmount, ref, shallowRef, watch } from "vue";
+import { useProviderSettings } from "../../../composables/useProviderSettings";
+import { useAgentAttachments } from "../../../composables/useAgentAttachments";
+import { attachmentChips } from "../../../agent/attachments";
+import {
+  useCraftAgentChat,
+  type CraftActivity,
+  type CraftAssistantTurn,
+  type CraftPermissionMode,
+} from "../../../composables/useCraftAgentChat";
+import AgentMarkdown from "../AgentMarkdown.vue";
 
-type ActivityStatus = "pending" | "running" | "success" | "error";
-type PermissionMode = "ask" | "auto" | "safe";
-
-interface Activity {
-  id: string;
-  toolName: string;
-  status: ActivityStatus;
-  title: string;
-  description?: string;
-  input?: string;
-  output?: string;
-  fileName?: string;
-  additions?: number;
-  deletions?: number;
-  elapsed?: string;
-}
-
-interface UserTurn {
-  id: string;
-  type: "user";
-  content: string;
-  time: string;
-  attachments?: string[];
-}
-
-interface AssistantTurn {
-  id: string;
-  type: "assistant";
-  title: string;
-  activities: Activity[];
-  response: string;
-  time: string;
-  streaming: boolean;
-  complete: boolean;
-  expanded: boolean;
-  plan?: boolean;
-  planAccepted?: boolean;
-}
-
-type Turn = UserTurn | AssistantTurn;
-
-interface PermissionRequest {
-  turnId: string;
-  activityId: string;
-  command: string;
-}
-
-const sessions = [
-  {
-    id: "contract-risk",
-    title: "合同风险摘要",
-    preview: "OCR, 条款抽取, 风险标注",
-    state: "active",
-    label: "Legal",
-  },
-  {
-    id: "medical-summary",
-    title: "病例材料整理",
-    preview: "就诊时间线与材料归档",
-    state: "queued",
-    label: "Docs",
-  },
-  {
-    id: "bid-compare",
-    title: "招标文件对比",
-    preview: "差异项与评分项",
-    state: "done",
-    label: "Review",
-  },
-] as const;
-
-const seedTurns: Turn[] = [
-  {
-    id: "u-1",
-    type: "user",
-    content: "把合同上传后的 OCR 结果整理成一份摘要，然后标出风险条款。",
-    attachments: ["采购合同_OCR.pdf", "供应商补充协议.docx"],
-    time: "09:41",
-  },
-  {
-    id: "a-1",
-    type: "assistant",
-    title: "已完成文档风险初筛",
-    expanded: false,
-    streaming: false,
-    complete: true,
-    time: "09:43",
-    activities: [
-      {
-        id: "act-1",
-        toolName: "Read",
-        status: "success",
-        title: "Read",
-        description: "读取 OCR 文本与补充协议",
-        fileName: "采购合同_OCR.pdf",
-        input: "file_path: /contracts/采购合同_OCR.pdf",
-        output: "读取 42 页文本，识别到 18 个主要章节。",
-      },
-      {
-        id: "act-2",
-        toolName: "Search",
-        status: "success",
-        title: "Risk Pattern Search",
-        description: "匹配违约、付款、保密和终止条款",
-        input: "pattern: 违约|赔偿|保密|终止|不可抗力",
-        output: "命中 31 处，其中 7 处需要人工复核。",
-      },
-      {
-        id: "act-3",
-        toolName: "Edit",
-        status: "success",
-        title: "Draft Summary",
-        description: "生成结构化摘要",
-        fileName: "risk-summary.md",
-        additions: 96,
-        deletions: 4,
-        output: "已创建风险摘要草稿。",
-      },
-    ],
-    response:
-      "合同摘要已经整理好。重点风险集中在付款节点、单方验收、违约金上限和数据保密四块；其中“乙方交付即视为甲方验收通过”建议改成带验收期限和异议窗口的表述。",
-  },
-  {
-    id: "u-2",
-    type: "user",
-    content: "先给我一个执行计划，再开始生成正式审阅稿。",
-    time: "09:46",
-  },
-  {
-    id: "a-2",
-    type: "assistant",
-    title: "等待计划确认",
-    expanded: true,
-    streaming: false,
-    complete: true,
-    plan: true,
-    planAccepted: false,
-    time: "09:46",
-    activities: [
-      {
-        id: "act-4",
-        toolName: "Plan",
-        status: "success",
-        title: "Plan",
-        description: "拆分正式审阅稿流程",
-        output: "计划已生成，等待用户确认。",
-      },
-    ],
-    response:
-      "1. 重新读取合同正文、附件和补充协议。\n2. 建立条款索引，按付款、交付、验收、保密、解除、争议解决分组。\n3. 对高风险条款生成“原文摘录、风险说明、修改建议”。\n4. 输出正式审阅稿，并保留待人工确认的问题列表。",
-  },
-];
-
-const modeLabel: Record<PermissionMode, string> = {
+const modeLabel: Record<CraftPermissionMode, string> = {
   ask: "Ask",
   auto: "Auto",
   safe: "Safe",
 };
 
-const modeOrder: PermissionMode[] = ["ask", "auto", "safe"];
+const modeOrder: CraftPermissionMode[] = ["ask", "auto", "safe"];
+const ACTIVITY_LIST_LIMIT = 5;
 
-const activeSessionId = ref("contract-risk");
-const turns = shallowRef<Turn[]>(cloneTurns(seedTurns));
+const suggestions = [
+  "请帮我压缩这个 PDF 文件",
+  "我想把这两个 PDF 文件合并",
+  "帮我把这份文档转成 Markdown",
+];
+
+const { settings, loadSettings } = useProviderSettings();
+const permissionMode = ref<CraftPermissionMode>("ask");
+const {
+  messages,
+  turns,
+  sessions,
+  loading,
+  error,
+  send,
+  clear,
+  pendingPermission,
+  denyPermission,
+  allowPermission,
+} = useCraftAgentChat(() => settings.value, permissionMode);
+
+const {
+  chips: pendingChips,
+  hasPending,
+  addFile,
+  addFolder,
+  removeChip,
+  takePending,
+  clear: clearAttachments,
+} = useAgentAttachments();
+
 const input = ref("");
-const attachments = shallowRef<string[]>([]);
-const permissionMode = ref<PermissionMode>("ask");
-const processing = ref(false);
-const pendingPermission = shallowRef<PermissionRequest | null>(null);
-const selectedActivity = shallowRef<Activity | null>((seedTurns[1] as AssistantTurn).activities[0]);
+const activeSessionId = ref("current");
+const expandedTurns = ref<Record<string, boolean>>({});
+const expandedActivityLists = ref<Record<string, boolean>>({});
+const permissionDetailsExpanded = ref(false);
+const selectedActivity = shallowRef<CraftActivity | null>(null);
 const chatScroll = ref<HTMLElement | null>(null);
-const timers: number[] = [];
+
+const elapsedSeconds = ref(0);
+let timerId: number | null = null;
+
+const lastUserTurn = computed(() => {
+  for (let i = messages.value.length - 1; i >= 0; i--) {
+    const m = messages.value[i];
+    if (m.role === "user") {
+      return m;
+    }
+  }
+  return null;
+});
+
+const lastUserTurnContent = computed(() => lastUserTurn.value?.content || "");
+
+const lastUserTurnAttachments = computed(() => {
+  if (!lastUserTurn.value?.attachments) return [];
+  return attachmentChips(lastUserTurn.value.attachments).map((c) => c.label);
+});
+
+watch(loading, (isLoading) => {
+  if (isLoading) {
+    elapsedSeconds.value = 0;
+    if (timerId !== null) {
+      window.clearInterval(timerId);
+    }
+    timerId = window.setInterval(() => {
+      elapsedSeconds.value++;
+    }, 1000);
+  } else {
+    if (timerId !== null) {
+      window.clearInterval(timerId);
+      timerId = null;
+    }
+  }
+});
+
+onBeforeUnmount(() => {
+  if (timerId !== null) {
+    window.clearInterval(timerId);
+  }
+});
 
 const activeSession = computed(
-  () => sessions.find((session) => session.id === activeSessionId.value) ?? sessions[0],
+  () => sessions.value.find((session) => session.id === activeSessionId.value) ?? sessions.value[0],
 );
+
+const canSend = computed(
+  () =>
+    !loading.value &&
+    !pendingPermission.value &&
+    (input.value.trim().length > 0 || hasPending.value),
+);
+
+const modelLabel = computed(() => settings.value.model.trim() || "未配置模型");
+
+const pendingPermissionSummary = computed(() => {
+  if (!pendingPermission.value) return null;
+  return permissionSummary(pendingPermission.value.args);
+});
 
 const runningActivities = computed(() =>
   turns.value.flatMap((turn) =>
@@ -188,7 +131,7 @@ const runningActivities = computed(() =>
 );
 
 watch(
-  () => [turns.value, pendingPermission.value],
+  () => [turns.value, pendingPermission.value, loading.value],
   () => {
     nextTick(() => {
       chatScroll.value?.scrollTo({ top: chatScroll.value.scrollHeight, behavior: "smooth" });
@@ -196,15 +139,21 @@ watch(
   },
 );
 
-onBeforeUnmount(() => clearAllTimers());
+watch(pendingPermission, (value) => {
+  if (value) permissionDetailsExpanded.value = false;
+});
 
-function cloneTurns(source: Turn[]): Turn[] {
-  return source.map((turn) => {
-    if (turn.type === "user")
-      return { ...turn, attachments: turn.attachments ? [...turn.attachments] : undefined };
-    return { ...turn, activities: turn.activities.map((activity) => ({ ...activity })) };
-  });
-}
+watch(
+  runningActivities,
+  (activities) => {
+    if (activities.length) selectedActivity.value = activities[activities.length - 1];
+  },
+  { deep: true },
+);
+
+onMounted(() => {
+  loadSettings();
+});
 
 function blocks(text: string) {
   return text
@@ -216,312 +165,92 @@ function blocks(text: string) {
     });
 }
 
-function nowTime() {
-  return new Intl.DateTimeFormat("zh-CN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(new Date());
+function isTurnActive(turn: CraftAssistantTurn) {
+  return (
+    turn.streaming || turn.activities.some((a) => a.status === "running" || a.status === "pending")
+  );
 }
 
-function makeId(prefix: string) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+function isTurnExpanded(turn: CraftAssistantTurn) {
+  if (turn.id in expandedTurns.value) return expandedTurns.value[turn.id];
+  if (isTurnActive(turn)) return true;
+  return turn.activities.length <= ACTIVITY_LIST_LIMIT;
 }
 
-function clearAllTimers() {
-  while (timers.length > 0) {
-    const id = timers.pop();
-    if (id !== undefined) {
-      window.clearTimeout(id);
-      window.clearInterval(id);
-    }
+function isActivityListExpanded(turnId: string) {
+  return expandedActivityLists.value[turnId] ?? false;
+}
+
+function visibleActivities(turn: CraftAssistantTurn) {
+  if (isActivityListExpanded(turn.id) || turn.activities.length <= ACTIVITY_LIST_LIMIT) {
+    return turn.activities;
+  }
+  return turn.activities.slice(0, ACTIVITY_LIST_LIMIT);
+}
+
+function hiddenActivityCount(turn: CraftAssistantTurn) {
+  return Math.max(0, turn.activities.length - ACTIVITY_LIST_LIMIT);
+}
+
+function toggleActivityList(turnId: string) {
+  expandedActivityLists.value = {
+    ...expandedActivityLists.value,
+    [turnId]: !isActivityListExpanded(turnId),
+  };
+}
+
+function pathBasename(path: unknown) {
+  if (typeof path !== "string" || !path) return "";
+  const parts = path.split(/[/\\]/);
+  return parts[parts.length - 1] || path;
+}
+
+function permissionSummary(args: Record<string, unknown>) {
+  const inputPath =
+    (args.input_path as string) ||
+    (Array.isArray(args.input_paths) ? (args.input_paths[0] as string) : undefined) ||
+    (args.path as string) ||
+    (args.src as string);
+  const outputPath = (args.output_path as string) || (args.dest as string);
+  const inputPaths = Array.isArray(args.input_paths)
+    ? (args.input_paths as string[])
+    : inputPath
+      ? [inputPath]
+      : [];
+  return { inputPath, outputPath, inputPaths };
+}
+
+function permissionArgsPreview(args: Record<string, unknown>) {
+  try {
+    return JSON.stringify(args, null, 2);
+  } catch {
+    return String(args);
   }
 }
 
-function schedule(callback: () => void, delay: number) {
-  timers.push(window.setTimeout(callback, delay));
-}
-
-function updateAssistant(turnId: string, updater: (turn: AssistantTurn) => AssistantTurn) {
-  turns.value = turns.value.map((turn) => {
-    if (turn.type !== "assistant" || turn.id !== turnId) return turn;
-    return updater(turn);
-  });
-}
-
-function updateActivity(turnId: string, activityId: string, patch: Partial<Activity>) {
-  updateAssistant(turnId, (turn) => ({
-    ...turn,
-    activities: turn.activities.map((activity) => {
-      if (activity.id !== activityId) return activity;
-      const next = { ...activity, ...patch };
-      if (selectedActivity.value?.id === activityId) selectedActivity.value = next;
-      return next;
-    }),
-  }));
-}
-
-function pushActivity(turnId: string, activity: Activity) {
-  updateAssistant(turnId, (turn) => ({
-    ...turn,
-    activities: [...turn.activities, activity],
-    title: activity.description || activity.title,
-    expanded: true,
-  }));
-  selectedActivity.value = activity;
-}
-
-function streamResponse(turnId: string, text: string) {
-  updateAssistant(turnId, (turn) => ({
-    ...turn,
-    response: "",
-    streaming: true,
-    title: "正在生成回复",
-  }));
-
-  let index = 0;
-  const interval = window.setInterval(() => {
-    index = Math.min(index + 8, text.length);
-    updateAssistant(turnId, (turn) => ({
-      ...turn,
-      response: text.slice(0, index),
-      streaming: index < text.length,
-      complete: index >= text.length,
-      title: index >= text.length ? "已完成正式审阅稿" : "正在生成回复",
-    }));
-
-    if (index >= text.length) {
-      window.clearInterval(interval);
-      const timerIndex = timers.indexOf(interval);
-      if (timerIndex >= 0) timers.splice(timerIndex, 1);
-      processing.value = false;
-    }
-  }, 34);
-  timers.push(interval);
-}
-
-function submitMessage() {
-  const text = input.value.trim();
-  if (!text || processing.value || pendingPermission.value) return;
-  startAgentRun(text);
-}
-
-function startAgentRun(message: string) {
-  clearAllTimers();
-  pendingPermission.value = null;
-  processing.value = true;
-
-  const turnId = makeId("assistant");
-  const nextTurns: Turn[] = [
-    {
-      id: makeId("user"),
-      type: "user",
-      content: message,
-      attachments: attachments.value,
-      time: nowTime(),
-    },
-    {
-      id: turnId,
-      type: "assistant",
-      title: "准备处理",
-      activities: [],
-      response: "",
-      time: nowTime(),
-      streaming: true,
-      complete: false,
-      expanded: true,
-    },
-  ];
-
-  turns.value = [...turns.value, ...nextTurns];
+async function submitMessage() {
+  if (!canSend.value) return;
+  const text = input.value;
+  const attachments = takePending();
   input.value = "";
-  attachments.value = [];
-
-  const thinkingId = makeId("act");
-  const searchId = makeId("act");
-  const readId = makeId("act");
-  const bashId = makeId("act");
-
-  schedule(() => {
-    pushActivity(turnId, {
-      id: thinkingId,
-      toolName: "Thinking",
-      status: "running",
-      title: "Thinking",
-      description: "分析目标和上下文",
-      output: "正在确认文档类型、产出格式和风险分类。",
-    });
-  }, 250);
-
-  schedule(() => {
-    updateActivity(turnId, thinkingId, { status: "success", elapsed: "0.7s" });
-    pushActivity(turnId, {
-      id: searchId,
-      toolName: "Search",
-      status: "running",
-      title: "Search",
-      description: "检索相关条款与历史审阅稿",
-      input: "query: payment acceptance confidentiality termination",
-    });
-  }, 950);
-
-  schedule(() => {
-    updateActivity(turnId, searchId, {
-      status: "success",
-      elapsed: "1.1s",
-      output: "找到 13 个相似审阅片段和 4 个风险模板。",
-    });
-    pushActivity(turnId, {
-      id: readId,
-      toolName: "Read",
-      status: "running",
-      title: "Read",
-      description: "读取合同正文与附件",
-      fileName: "供应商补充协议.docx",
-      input: "file_path: /workspace/contracts/供应商补充协议.docx",
-    });
-  }, 1850);
-
-  schedule(() => {
-    updateActivity(turnId, readId, {
-      status: "success",
-      elapsed: "0.9s",
-      output: "读取 6 个附件，抽取 22 条可引用条款。",
-    });
-    pushActivity(turnId, {
-      id: bashId,
-      toolName: "Bash",
-      status: permissionMode.value === "auto" ? "running" : "pending",
-      title: "Run verification",
-      description: "运行审阅稿格式校验",
-      input: "npm run lint:review -- contracts/risk-summary.md",
-    });
-
-    if (permissionMode.value === "auto") {
-      continueAfterPermission(turnId, bashId);
-    } else {
-      processing.value = false;
-      pendingPermission.value = {
-        turnId,
-        activityId: bashId,
-        command: "npm run lint:review -- contracts/risk-summary.md",
-      };
-    }
-  }, 2800);
+  await send(text, attachments);
 }
 
-function continueAfterPermission(turnId: string, activityId: string) {
-  pendingPermission.value = null;
-  processing.value = true;
-  updateActivity(turnId, activityId, { status: "running", output: undefined });
-
-  const editId = makeId("act");
-  const previewId = makeId("act");
-
-  schedule(() => {
-    updateActivity(turnId, activityId, {
-      status: "success",
-      elapsed: "1.4s",
-      output: "格式校验通过，发现 2 处引用编号可优化。",
-    });
-    pushActivity(turnId, {
-      id: editId,
-      toolName: "Edit",
-      status: "running",
-      title: "Compose Review Draft",
-      description: "写入正式审阅稿",
-      fileName: "formal-review.md",
-      additions: 128,
-      deletions: 7,
-      input: "changes: formal-review.md",
-    });
-  }, 1200);
-
-  schedule(() => {
-    updateActivity(turnId, editId, {
-      status: "success",
-      elapsed: "2.2s",
-      output: "已生成正式审阅稿，并附上问题列表。",
-    });
-    pushActivity(turnId, {
-      id: previewId,
-      toolName: "Preview",
-      status: "running",
-      title: "Preview",
-      description: "检查导出视图",
-      input: "route: /review/formal-review",
-    });
-  }, 2600);
-
-  schedule(() => {
-    updateActivity(turnId, previewId, {
-      status: "success",
-      elapsed: "0.8s",
-      output: "导出预览正常，长条款已自动换行。",
-    });
-    streamResponse(
-      turnId,
-      "正式审阅稿已生成。高风险项包括：\n1. 付款条件缺少验收异议期，建议补充 5 个工作日确认窗口。\n2. 违约责任只约束乙方，建议加入甲方逾期付款责任。\n3. 保密条款没有约定数据销毁，建议加入终止后 30 日内销毁或返还。\n\n我还保留了一份待确认问题列表，方便你逐条决定是否采纳修改建议。",
-    );
-  }, 3700);
-}
-
-function denyPermission() {
-  if (!pendingPermission.value) return;
-  clearAllTimers();
-  updateActivity(pendingPermission.value.turnId, pendingPermission.value.activityId, {
-    status: "error",
-    output: "用户拒绝执行命令。",
-  });
-  updateAssistant(pendingPermission.value.turnId, (turn) => ({
-    ...turn,
-    response:
-      "我已跳过本次命令执行，并保留当前草稿状态。可以继续手动审阅，也可以换成不需要命令的检查方式。",
-    streaming: false,
-    complete: true,
-    title: "已跳过命令",
-  }));
-  pendingPermission.value = null;
-  processing.value = false;
-}
-
-function allowPermission(alwaysAllow = false) {
-  if (!pendingPermission.value) return;
-  if (alwaysAllow) permissionMode.value = "auto";
-  continueAfterPermission(pendingPermission.value.turnId, pendingPermission.value.activityId);
-}
-
-function acceptPlan(turnId: string) {
-  updateAssistant(turnId, (turn) => ({
-    ...turn,
-    planAccepted: true,
-    title: "计划已确认",
-  }));
-  startAgentRun("执行已确认计划，生成正式审阅稿。");
+function onNewChat() {
+  clear();
+  clearAttachments();
+  input.value = "";
+  expandedTurns.value = {};
+  expandedActivityLists.value = {};
+  permissionDetailsExpanded.value = false;
+  selectedActivity.value = null;
 }
 
 function stopProcessing() {
-  clearAllTimers();
-  processing.value = false;
-  pendingPermission.value = null;
-
-  const latest = [...turns.value]
-    .reverse()
-    .find((turn): turn is AssistantTurn => turn.type === "assistant" && !turn.complete);
-  if (!latest) return;
-
-  updateAssistant(latest.id, (turn) => ({
-    ...turn,
-    activities: turn.activities.map((activity) =>
-      activity.status === "running" || activity.status === "pending"
-        ? { ...activity, status: "error", output: "当前回合已中止。" }
-        : activity,
-    ),
-    response: turn.response || "当前 agent 回合已中止。",
-    streaming: false,
-    complete: true,
-    title: "已中止",
-  }));
+  loading.value = false;
+  if (pendingPermission.value) {
+    denyPermission();
+  }
 }
 
 function cycleMode() {
@@ -541,39 +270,47 @@ function onTextareaKeydown(event: KeyboardEvent) {
   }
 }
 
-function addAttachment() {
-  if (!attachments.value.includes("新增材料.pdf")) {
-    attachments.value = [...attachments.value, "新增材料.pdf"];
-  }
-}
-
-function removeAttachment(attachment: string) {
-  attachments.value = attachments.value.filter((item) => item !== attachment);
-}
-
 function toggleTurn(turnId: string) {
-  updateAssistant(turnId, (turn) => ({ ...turn, expanded: !turn.expanded }));
+  expandedTurns.value = {
+    ...expandedTurns.value,
+    [turnId]: !expandedTurns.value[turnId],
+  };
 }
 
-function previewText(turn: AssistantTurn) {
+function applySuggestion(text: string) {
+  input.value = text;
+}
+
+function previewText(turn: CraftAssistantTurn) {
   const running = turn.activities.find((activity) => activity.status === "running");
   if (running) return running.description || running.title;
   const pending = turn.activities.find((activity) => activity.status === "pending");
-  if (pending) return `Waiting for ${pending.title}`;
-  if (turn.streaming) return "Preparing response";
-  if (turn.plan && !turn.planAccepted) return "Plan ready";
-  return turn.title || "Steps completed";
+  if (pending) return `等待：${pending.title}`;
+  if (turn.streaming) return "正在生成回复";
+  return turn.title || "步骤已完成";
 }
 
 function activityKind(toolName: string) {
   const name = toolName.toLowerCase();
-  if (name.includes("think")) return "think";
-  if (name.includes("read")) return "read";
-  if (name.includes("search")) return "search";
-  if (name.includes("edit") || name.includes("draft") || name.includes("compose")) return "edit";
+  if (name.includes("prepare") || name.includes("think")) return "think";
+  if (name.includes("read") || name.includes("get_") || name.includes("info")) return "read";
+  if (name.includes("search") || name.includes("hash")) return "search";
+  if (
+    name.includes("edit") ||
+    name.includes("compress") ||
+    name.includes("merge") ||
+    name.includes("split") ||
+    name.includes("convert") ||
+    name.includes("rotate") ||
+    name.includes("crop") ||
+    name.includes("move") ||
+    name.includes("copy")
+  )
+    return "edit";
+  if (name.includes("file")) return "read";
   if (name.includes("bash") || name.includes("run") || name.includes("terminal")) return "terminal";
   if (name.includes("plan")) return "plan";
-  if (name.includes("preview")) return "preview";
+  if (name.includes("preview") || name.includes("markdown")) return "preview";
   return "agent";
 }
 
@@ -597,19 +334,77 @@ function activityIconClass(toolName: string) {
       return "i-lucide-wand-sparkles";
   }
 }
+
+function getFileTypeAndIcon(fileName: string) {
+  const ext = fileName.split(".").pop()?.toLowerCase() || "";
+  switch (ext) {
+    case "pdf":
+      return {
+        type: "PDF",
+        icon: "i-lucide-file-text",
+        class: "file-pdf",
+      };
+    case "md":
+    case "markdown":
+      return {
+        type: "Markdown",
+        icon: "i-lucide-file-code",
+        class: "file-md",
+      };
+    case "html":
+    case "htm":
+      return {
+        type: "HTML",
+        icon: "i-lucide-file-code",
+        class: "file-html",
+      };
+    case "doc":
+    case "docx":
+      return {
+        type: "Word",
+        icon: "i-lucide-file-text",
+        class: "file-word",
+      };
+    case "jpg":
+    case "jpeg":
+    case "png":
+    case "gif":
+    case "webp":
+      return {
+        type: "Image",
+        icon: "i-lucide-image",
+        class: "file-img",
+      };
+    default:
+      return {
+        type: ext.toUpperCase() || "FILE",
+        icon: "i-lucide-file",
+        class: "file-default",
+      };
+  }
+}
 </script>
 
 <template>
-  <section class="craft-demo" aria-label="Craft Agent Demo">
-    <aside class="craft-session-rail" aria-label="Craft demo sessions">
+  <section class="craft-demo" aria-label="DocPilot AI 助理">
+    <aside class="craft-session-rail" aria-label="会话列表">
       <div class="craft-rail-header">
         <div class="craft-logo" aria-hidden="true">
           <span class="i-lucide-list-tree craft-logo-icon" />
         </div>
         <div>
-          <p>Craft Demo</p>
-          <span>Agent turns</span>
+          <p>AI 助理</p>
+          <span>PDF 工具编排</span>
         </div>
+        <button
+          class="craft-icon-button"
+          type="button"
+          title="新建对话"
+          aria-label="新建对话"
+          @click="onNewChat"
+        >
+          <span class="i-lucide-plus craft-action-icon" aria-hidden="true" />
+        </button>
       </div>
 
       <div class="craft-session-list">
@@ -637,22 +432,44 @@ function activityIconClass(toolName: string) {
           <span>{{ activeSession.preview }}</span>
         </div>
         <span :class="['craft-pill', runningActivities.length ? 'is-info' : 'is-success']">
-          {{ runningActivities.length ? `${runningActivities.length} running` : "idle" }}
+          {{ runningActivities.length ? `${runningActivities.length} 进行中` : "空闲" }}
         </span>
       </header>
 
       <div ref="chatScroll" class="craft-message-scroll" role="log" aria-live="polite">
-        <div class="craft-message-stack">
+        <div v-if="!messages.length" class="craft-empty">
+          <h3>您好，我是 DocPilot 智能助理</h3>
+          <p>通过自然语言调用本地 PDF / 图片工具。可添加文件附件后描述需求。</p>
+          <div class="craft-suggestions">
+            <button v-for="s in suggestions" :key="s" type="button" @click="applySuggestion(s)">
+              {{ s }}
+            </button>
+          </div>
+        </div>
+
+        <div v-else class="craft-message-stack">
           <template v-for="turn in turns" :key="turn.id">
             <div v-if="turn.type === 'user'" class="craft-user-turn">
-              <div v-if="turn.attachments?.length" class="craft-attachment-row">
-                <span
+              <div v-if="turn.attachments?.length" class="craft-attachment-scroll w-full">
+                <div
                   v-for="attachment in turn.attachments"
                   :key="attachment"
-                  class="craft-attachment"
+                  class="craft-attachment-card"
                 >
-                  {{ attachment }}
-                </span>
+                  <div
+                    :class="['craft-attachment-icon-wrapper', getFileTypeAndIcon(attachment).class]"
+                  >
+                    <span :class="['craft-attachment-icon', getFileTypeAndIcon(attachment).icon]" />
+                  </div>
+                  <div class="craft-attachment-info">
+                    <span class="craft-attachment-name" :title="attachment">
+                      {{ attachment }}
+                    </span>
+                    <span class="craft-attachment-type">
+                      {{ getFileTypeAndIcon(attachment).type }}
+                    </span>
+                  </div>
+                </div>
               </div>
               <div class="craft-user-bubble">
                 <p v-for="block in blocks(turn.content)" :key="block.raw">{{ block.text }}</p>
@@ -668,7 +485,7 @@ function activityIconClass(toolName: string) {
                       :class="[
                         'i-lucide-chevron-right',
                         'craft-chevron',
-                        turn.expanded && 'is-open',
+                        isTurnExpanded(turn) && 'is-open',
                       ]"
                       aria-hidden="true"
                     />
@@ -683,9 +500,9 @@ function activityIconClass(toolName: string) {
                   </button>
                 </div>
 
-                <div v-if="turn.expanded" class="craft-activity-list">
+                <div v-if="isTurnExpanded(turn)" class="craft-activity-list">
                   <button
-                    v-for="activity in turn.activities"
+                    v-for="activity in visibleActivities(turn)"
                     :key="activity.id"
                     class="craft-activity-row"
                     type="button"
@@ -703,137 +520,225 @@ function activityIconClass(toolName: string) {
                     <span v-if="activity.description" class="craft-activity-description">
                       {{ activity.description }}
                     </span>
-                    <span v-if="activity.additions !== undefined" class="craft-diff add"
-                      >+{{ activity.additions }}</span
-                    >
-                    <span v-if="activity.deletions" class="craft-diff del"
-                      >-{{ activity.deletions }}</span
-                    >
                     <span v-if="activity.fileName" class="craft-file">{{ activity.fileName }}</span>
                     <span v-if="activity.elapsed" class="craft-elapsed">{{
                       activity.elapsed
                     }}</span>
                   </button>
+                  <button
+                    v-if="hiddenActivityCount(turn) > 0 || isActivityListExpanded(turn.id)"
+                    class="craft-activity-more"
+                    type="button"
+                    @click="toggleActivityList(turn.id)"
+                  >
+                    <span
+                      :class="[
+                        'i-lucide-chevron-down',
+                        'craft-chevron',
+                        isActivityListExpanded(turn.id) && 'is-open',
+                      ]"
+                      aria-hidden="true"
+                    />
+                    {{
+                      isActivityListExpanded(turn.id)
+                        ? "收起工具步骤"
+                        : `展开其余 ${hiddenActivityCount(turn)} 项`
+                    }}
+                  </button>
                 </div>
               </div>
 
-              <article v-if="turn.response" :class="['craft-response', turn.plan && 'is-plan']">
-                <div v-if="turn.plan" class="craft-plan-header">
-                  <span>
-                    <span class="craft-tool-shell plan" aria-hidden="true">
-                      <span class="craft-tool-icon i-lucide-clipboard-list" />
-                    </span>
-                    Plan
-                  </span>
-                  <span v-if="turn.planAccepted" class="craft-pill is-success">Accepted</span>
-                  <button v-else class="craft-accept" type="button" @click="acceptPlan(turn.id)">
-                    <span class="i-lucide-play craft-action-icon" aria-hidden="true" />
-                    Accept
-                  </button>
-                </div>
-                <div class="craft-markdown">
-                  <p
-                    v-for="block in blocks(turn.response)"
-                    :key="block.raw"
-                    :class="block.number && 'numbered'"
-                  >
-                    <template v-if="block.number">
-                      <span>{{ block.number }}</span
-                      >{{ block.text }}
-                    </template>
-                    <template v-else>{{ block.text }}</template>
-                  </p>
-                </div>
-                <span v-if="turn.streaming" class="craft-caret" aria-hidden="true" />
+              <article v-if="turn.response" class="craft-response">
+                <AgentMarkdown :content="turn.response" :streaming="turn.streaming" />
               </article>
             </section>
           </template>
         </div>
       </div>
 
+      <div v-if="error" role="alert" class="craft-error">{{ error }}</div>
+
       <div v-if="pendingPermission" class="craft-permission">
-        <div>
-          <strong>Command Permission</strong>
-          <code>{{ pendingPermission.command }}</code>
+        <div class="craft-permission-card">
+          <div class="craft-permission-head">
+            <span
+              :class="['craft-tool-shell', activityKind(pendingPermission.toolId)]"
+              aria-hidden="true"
+            >
+              <span :class="['craft-tool-icon', activityIconClass(pendingPermission.toolId)]" />
+            </span>
+            <div class="craft-permission-title">
+              <strong>工具执行确认</strong>
+              <span>{{ pendingPermission.toolLabel }}</span>
+            </div>
+          </div>
+
+          <dl v-if="pendingPermissionSummary" class="craft-permission-summary">
+            <template v-if="pendingPermissionSummary.inputPaths.length === 1">
+              <div>
+                <dt>输入文件</dt>
+                <dd>{{ pathBasename(pendingPermissionSummary.inputPath) }}</dd>
+              </div>
+            </template>
+            <template v-else-if="pendingPermissionSummary.inputPaths.length > 1">
+              <div>
+                <dt>输入文件</dt>
+                <dd>{{ pendingPermissionSummary.inputPaths.length }} 个文件</dd>
+              </div>
+            </template>
+            <div v-if="pendingPermissionSummary.outputPath">
+              <dt>输出路径</dt>
+              <dd>{{ pathBasename(pendingPermissionSummary.outputPath) }}</dd>
+            </div>
+          </dl>
+
+          <button
+            class="craft-permission-toggle"
+            type="button"
+            :aria-expanded="permissionDetailsExpanded"
+            @click="permissionDetailsExpanded = !permissionDetailsExpanded"
+          >
+            <span
+              :class="[
+                'i-lucide-chevron-right',
+                'craft-chevron',
+                permissionDetailsExpanded && 'is-open',
+              ]"
+              aria-hidden="true"
+            />
+            {{ permissionDetailsExpanded ? "收起参数详情" : "查看参数详情" }}
+          </button>
+
+          <pre v-if="permissionDetailsExpanded" class="craft-permission-pre">{{
+            permissionArgsPreview(pendingPermission.args)
+          }}</pre>
         </div>
+
         <div class="craft-permission-actions">
-          <button type="button" @click="denyPermission">Deny</button>
-          <button type="button" @click="allowPermission(false)">Allow once</button>
-          <button type="button" class="primary" @click="allowPermission(true)">Always allow</button>
+          <button type="button" @click="denyPermission">拒绝</button>
+          <button type="button" @click="allowPermission(false)">允许一次</button>
+          <button type="button" class="primary" @click="allowPermission(true)">始终允许</button>
+        </div>
+      </div>
+
+      <div v-else-if="loading" class="craft-composer-running">
+        <div v-if="lastUserTurnAttachments.length" class="craft-running-files-grid">
+          <div v-for="file in lastUserTurnAttachments" :key="file" class="craft-attachment-card">
+            <div :class="['craft-attachment-icon-wrapper', getFileTypeAndIcon(file).class]">
+              <span :class="['craft-attachment-icon', getFileTypeAndIcon(file).icon]" />
+            </div>
+            <div class="craft-attachment-info">
+              <span class="craft-attachment-name" :title="file">
+                {{ file }}
+              </span>
+              <span class="craft-attachment-type">
+                {{ getFileTypeAndIcon(file).type }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="craft-running-query">
+          {{ lastUserTurnContent }}
+        </div>
+
+        <div class="craft-running-bar">
+          <div class="craft-running-status">
+            <span class="i-lucide-grip-vertical w-4 h-4 text-slate-400" />
+            <span class="craft-running-text">疾驰中...</span>
+            <span class="craft-running-timer">{{ elapsedSeconds }}s</span>
+          </div>
+          <button
+            class="craft-send is-stop"
+            type="button"
+            aria-label="停止"
+            title="停止"
+            @click="stopProcessing"
+          >
+            <span class="i-lucide-square craft-action-icon" aria-hidden="true" />
+          </button>
         </div>
       </div>
 
       <form v-else class="craft-composer-wrap" @submit.prevent="submitMessage">
-        <div class="craft-option-row">
-          <button
-            :class="['craft-option', `mode-${permissionMode}`]"
-            type="button"
-            @click="cycleMode"
-          >
-            {{ modeLabel[permissionMode] }}
-          </button>
-          <button class="craft-option" type="button">Claude Sonnet 4</button>
-          <button class="craft-option" type="button">/contracts</button>
-        </div>
-
         <div class="craft-composer">
-          <div v-if="attachments.length" class="craft-attachment-row">
-            <span v-for="attachment in attachments" :key="attachment" class="craft-attachment">
-              {{ attachment }}
+          <div v-if="pendingChips.length" class="craft-attachment-scroll">
+            <div v-for="chip in pendingChips" :key="chip.path" class="craft-attachment-card">
+              <div :class="['craft-attachment-icon-wrapper', getFileTypeAndIcon(chip.label).class]">
+                <span :class="['craft-attachment-icon', getFileTypeAndIcon(chip.label).icon]" />
+              </div>
+              <div class="craft-attachment-info">
+                <span class="craft-attachment-name" :title="chip.label">
+                  {{ chip.label }}
+                </span>
+                <span class="craft-attachment-type">
+                  {{ getFileTypeAndIcon(chip.label).type }}
+                </span>
+              </div>
               <button
                 type="button"
-                :aria-label="`移除 ${attachment}`"
-                @click="removeAttachment(attachment)"
+                class="craft-attachment-close"
+                :aria-label="`移除 ${chip.label}`"
+                @click="removeChip(chip.path)"
               >
-                <span class="i-lucide-x craft-remove-icon" aria-hidden="true" />
+                <span class="i-lucide-x w-3 h-3" aria-hidden="true" />
               </button>
-            </span>
+            </div>
           </div>
           <textarea
             v-model="input"
             rows="3"
-            placeholder="让 DocPilot 处理文档、生成摘要或继续审阅"
-            :disabled="processing"
+            placeholder="描述您想对 PDF 进行的操作…"
+            :disabled="loading"
             @keydown="onTextareaKeydown"
           />
           <div class="craft-composer-bar">
-            <button
-              type="button"
-              class="craft-icon-button is-framed"
-              aria-label="Attach file"
-              @click="addAttachment"
-            >
-              <span class="i-lucide-paperclip craft-action-icon" aria-hidden="true" />
-            </button>
-            <div class="craft-segmented" role="group" aria-label="Permission mode">
-              <button
-                v-for="mode in modeOrder"
-                :key="mode"
-                :class="mode === permissionMode && 'is-selected'"
-                type="button"
-                @click="permissionMode = mode"
-              >
-                {{ modeLabel[mode] }}
+            <div class="craft-composer-bar-left">
+              <div class="craft-composer-attach-group" role="group" aria-label="添加附件">
+                <button
+                  type="button"
+                  class="craft-icon-button is-framed"
+                  aria-label="添加文件"
+                  title="添加文件"
+                  :disabled="loading"
+                  @click="addFile"
+                >
+                  <span class="i-lucide-paperclip craft-action-icon" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  class="craft-icon-button is-framed"
+                  aria-label="选择文件夹"
+                  title="选择文件夹"
+                  :disabled="loading"
+                  @click="addFolder"
+                >
+                  <span class="i-lucide-folder-open craft-action-icon" aria-hidden="true" />
+                </button>
+              </div>
+              <span v-if="pendingChips.length" class="craft-composer-file-count">
+                <span class="i-lucide-files w-3.5 h-3.5" aria-hidden="true" />
+                <span>{{ pendingChips.length }} 个文件</span>
+              </span>
+            </div>
+
+            <div class="craft-composer-bar-right">
+              <span class="craft-composer-model" :title="modelLabel">{{ modelLabel }}</span>
+              <div class="craft-segmented" role="group" aria-label="权限模式">
+                <button
+                  v-for="mode in modeOrder"
+                  :key="mode"
+                  :class="['mode-btn', `mode-${mode}`, mode === permissionMode && 'is-selected']"
+                  type="button"
+                  @click="permissionMode = mode"
+                >
+                  {{ modeLabel[mode] }}
+                </button>
+              </div>
+              <button class="craft-send" type="submit" aria-label="发送" :disabled="!canSend">
+                <span class="i-lucide-arrow-up craft-action-icon" aria-hidden="true" />
               </button>
             </div>
-            <button
-              v-if="processing"
-              class="craft-send is-stop"
-              type="button"
-              aria-label="Stop"
-              @click="stopProcessing"
-            >
-              <span class="i-lucide-square craft-action-icon" aria-hidden="true" />
-            </button>
-            <button
-              v-else
-              class="craft-send"
-              type="submit"
-              aria-label="Send"
-              :disabled="!input.trim()"
-            >
-              <span class="i-lucide-arrow-up craft-action-icon" aria-hidden="true" />
-            </button>
           </div>
         </div>
       </form>
@@ -843,7 +748,7 @@ function activityIconClass(toolName: string) {
       <div class="craft-inspector-head">
         <strong>Activity</strong>
         <span :class="['craft-pill', runningActivities.length ? 'is-info' : 'is-success']">
-          {{ runningActivities.length ? "running" : "idle" }}
+          {{ runningActivities.length ? "进行中" : "空闲" }}
         </span>
       </div>
       <div v-if="selectedActivity" class="craft-inspector-body">
@@ -919,6 +824,10 @@ function activityIconClass(toolName: string) {
 
 .craft-rail-header {
   justify-content: flex-start;
+}
+
+.craft-rail-header > .craft-icon-button {
+  margin-left: auto;
 }
 
 .craft-rail-header p,
@@ -1071,11 +980,63 @@ function activityIconClass(toolName: string) {
   background: color-mix(in srgb, var(--dp-surface-muted) 65%, white);
 }
 
+.craft-empty {
+  display: grid;
+  gap: 0.75rem;
+  width: min(36rem, 100%);
+  margin: 2rem auto 0;
+  text-align: center;
+}
+
+.craft-empty h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--dp-text);
+}
+
+.craft-empty p {
+  font-size: 0.875rem;
+  color: var(--dp-text-secondary);
+  line-height: 1.6;
+}
+
+.craft-suggestions {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  text-align: left;
+}
+
+.craft-suggestions button {
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--dp-border);
+  border-radius: var(--dp-radius-lg);
+  background: var(--dp-surface);
+  color: var(--dp-text);
+  font-size: 0.8125rem;
+  text-align: left;
+}
+
+.craft-suggestions button:hover {
+  border-color: var(--dp-primary);
+  background: var(--dp-primary-soft);
+}
+
 .craft-message-stack {
   display: grid;
   gap: 1rem;
   width: min(44rem, 100%);
   margin: 0 auto;
+}
+
+.craft-error {
+  margin: 0 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--dp-danger) 35%, var(--dp-border));
+  border-radius: var(--dp-radius-md);
+  background: var(--dp-danger-soft);
+  color: var(--dp-danger);
+  font-size: 0.8125rem;
 }
 
 .craft-user-turn {
@@ -1099,37 +1060,212 @@ function activityIconClass(toolName: string) {
   font-size: 0.6875rem;
 }
 
-.craft-attachment-row {
+.craft-attachment-scroll {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
+  overflow-x: auto;
+  gap: 0.625rem;
+  padding: 0.25rem 0.25rem 0.625rem;
+  margin-bottom: 0.25rem;
+  scrollbar-width: thin;
 }
 
-.craft-attachment {
+.craft-attachment-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.craft-attachment-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.craft-attachment-scroll::-webkit-scrollbar-thumb {
+  background: var(--dp-border);
+  border-radius: 99px;
+}
+
+.craft-attachment-card {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex: 0 0 13.5rem;
+  width: 13.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--dp-border);
+  border-radius: var(--dp-radius-lg);
+  background: var(--dp-surface);
+  box-shadow: var(--dp-shadow-sm);
+  position: relative;
+  transition:
+    border-color var(--dp-dur-fast) ease,
+    box-shadow var(--dp-dur-fast) ease;
+}
+
+.craft-attachment-card:hover {
+  border-color: var(--dp-primary);
+  box-shadow: var(--dp-shadow-md);
+}
+
+.craft-attachment-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--dp-radius-md);
+  flex-shrink: 0;
+}
+
+.craft-attachment-icon-wrapper.file-pdf {
+  background: #fef2f2;
+  color: #ef4444;
+}
+.dark .craft-attachment-icon-wrapper.file-pdf {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.craft-attachment-icon-wrapper.file-md {
+  background: #f0fdf4;
+  color: #10b981;
+}
+.dark .craft-attachment-icon-wrapper.file-md {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.craft-attachment-icon-wrapper.file-word {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+.dark .craft-attachment-icon-wrapper.file-word {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.craft-attachment-icon-wrapper.file-img {
+  background: #fffbeb;
+  color: #d97706;
+}
+.dark .craft-attachment-icon-wrapper.file-img {
+  background: rgba(217, 119, 6, 0.15);
+  color: #fbbf24;
+}
+
+.craft-attachment-icon-wrapper.file-default {
+  background: var(--dp-surface-muted);
+  color: var(--dp-text-secondary);
+}
+
+.craft-attachment-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.craft-attachment-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.craft-attachment-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--dp-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.craft-attachment-type {
+  font-size: 0.6875rem;
+  color: var(--dp-text-muted);
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-top: 0.125rem;
+}
+
+.craft-attachment-close {
+  display: inline-grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 99px;
+  color: var(--dp-text-muted);
+  background: var(--dp-surface-muted);
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition:
+    opacity var(--dp-dur-fast) ease,
+    background var(--dp-dur-fast) ease,
+    color var(--dp-dur-fast) ease;
+}
+
+.craft-attachment-close:hover {
+  opacity: 1;
+  background: #fee2e2;
+  color: #ef4444;
+}
+.dark .craft-attachment-close:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.craft-composer-bar-left,
+.craft-composer-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.craft-composer-bar-right {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.craft-composer-attach-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem;
+  border-radius: var(--dp-radius-md);
+  background: var(--dp-surface-muted);
+}
+
+.craft-composer-file-count {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  min-height: 1.7rem;
-  max-width: 100%;
-  padding: 0 0.45rem;
+  min-height: 1.85rem;
+  padding: 0 0.55rem;
+  border-radius: 99px;
+  background: var(--dp-primary-soft);
+  color: var(--dp-primary);
+  font-size: 0.75rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.craft-composer-model {
+  display: none;
+  max-width: 8rem;
+  overflow: hidden;
+  padding: 0.3rem 0.55rem;
   border: 1px solid var(--dp-border);
   border-radius: var(--dp-radius-md);
-  background: var(--dp-surface);
+  background: var(--dp-surface-muted);
   color: var(--dp-text-secondary);
   font-size: 0.75rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.craft-attachment button {
-  display: inline-grid;
-  width: 1.25rem;
-  height: 1.25rem;
-  place-items: center;
-  border-radius: 0.35rem;
-  color: var(--dp-text-muted);
-}
-
-.craft-attachment button:hover {
-  background: var(--dp-surface-muted);
+@media (min-width: 720px) {
+  .craft-composer-model {
+    display: inline-block;
+  }
 }
 
 .craft-assistant-turn {
@@ -1222,6 +1358,28 @@ function activityIconClass(toolName: string) {
   margin-left: 1rem;
   padding-left: 0.875rem;
   border-left: 2px solid var(--dp-border);
+}
+
+.craft-activity-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 1.85rem;
+  margin-top: 0.2rem;
+  padding: 0.125rem 0.35rem;
+  color: var(--dp-text-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.craft-activity-more:hover {
+  color: var(--dp-primary);
+  background: var(--dp-primary-soft);
+  border-radius: var(--dp-radius-sm);
+}
+
+.craft-activity-more .craft-chevron.is-open {
+  transform: rotate(180deg);
 }
 
 .craft-activity-row {
@@ -1448,11 +1606,82 @@ function activityIconClass(toolName: string) {
 }
 
 .craft-permission,
-.craft-composer-wrap {
+.craft-composer-wrap,
+.craft-composer-running {
   flex: 0 0 auto;
   padding: 0.75rem;
   border-top: 1px solid var(--dp-border);
   background: var(--dp-surface);
+}
+
+.craft-composer-running {
+  display: flex;
+  flex-direction: column;
+}
+
+.craft-running-files-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  max-height: 14rem;
+  overflow-y: auto;
+  padding: 0.25rem 0.25rem 0.625rem;
+  margin-bottom: 0.25rem;
+  scrollbar-width: thin;
+}
+
+.craft-running-files-grid::-webkit-scrollbar {
+  width: 4px;
+}
+
+.craft-running-files-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.craft-running-files-grid::-webkit-scrollbar-thumb {
+  background: var(--dp-border);
+  border-radius: 99px;
+}
+
+.craft-running-query {
+  font-size: 0.875rem;
+  color: var(--dp-text);
+  line-height: 1.6;
+  padding: 0.5rem 0.25rem;
+  margin-bottom: 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.craft-running-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--dp-border);
+}
+
+.craft-running-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--dp-border);
+  border-radius: var(--dp-radius-md);
+  background: var(--dp-surface-muted);
+}
+
+.craft-running-text {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--dp-text-secondary);
+}
+
+.craft-running-timer {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--dp-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .craft-permission {
@@ -1460,21 +1689,95 @@ function activityIconClass(toolName: string) {
   gap: 0.75rem;
 }
 
-.craft-permission strong {
-  display: block;
-  margin-bottom: 0.4rem;
+.craft-permission-card {
+  display: grid;
+  gap: 0.625rem;
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--dp-accent) 28%, var(--dp-border));
+  border-radius: var(--dp-radius-lg);
+  background: color-mix(in srgb, var(--dp-accent-soft) 35%, var(--dp-surface));
+}
+
+.craft-permission-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.craft-permission-title {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.craft-permission-title strong {
   color: var(--dp-accent);
   font-size: 0.875rem;
 }
 
-.craft-permission code {
-  display: block;
+.craft-permission-title span {
+  color: var(--dp-text);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.craft-permission-summary {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.craft-permission-summary > div {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.craft-permission-summary dt {
+  margin: 0;
+  color: var(--dp-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.craft-permission-summary dd {
+  margin: 0;
+  overflow: hidden;
+  color: var(--dp-text);
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.craft-permission-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 1.85rem;
+  padding: 0 0.35rem;
+  color: var(--dp-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.craft-permission-toggle:hover {
+  color: var(--dp-text);
+}
+
+.craft-permission-pre {
   overflow: auto;
+  max-height: 10rem;
+  margin: 0;
   padding: 0.625rem;
+  border: 1px solid var(--dp-border);
   border-radius: var(--dp-radius-md);
   background: var(--dp-surface-muted);
-  font-size: 0.8125rem;
-  white-space: nowrap;
+  color: var(--dp-text);
+  font-size: 0.75rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .craft-permission-actions {
@@ -1527,34 +1830,50 @@ function activityIconClass(toolName: string) {
 .craft-composer-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.75rem;
   padding-top: 0.35rem;
 }
 
 .craft-segmented {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   min-height: 2.2rem;
   padding: 0.18rem;
   border-radius: var(--dp-radius-md);
   background: var(--dp-surface-muted);
 }
 
-.craft-segmented button {
+.craft-segmented .mode-btn {
   min-height: 1.85rem;
-  min-width: 3.1rem;
-  padding: 0 0.6rem;
+  min-width: 2.75rem;
+  padding: 0 0.55rem;
   border-radius: var(--dp-radius-sm);
   color: var(--dp-text-secondary);
   font-size: 0.75rem;
   font-weight: 650;
+  transition:
+    background var(--dp-dur-fast) ease,
+    color var(--dp-dur-fast) ease,
+    box-shadow var(--dp-dur-fast) ease;
 }
 
-.craft-segmented button.is-selected {
+.craft-segmented .mode-btn.is-selected {
   background: var(--dp-surface);
   color: var(--dp-text);
   box-shadow: var(--dp-shadow-sm);
+}
+
+.craft-segmented .mode-btn.mode-ask.is-selected {
+  color: var(--dp-accent);
+}
+
+.craft-segmented .mode-btn.mode-auto.is-selected {
+  color: var(--dp-primary);
+}
+
+.craft-segmented .mode-btn.mode-safe.is-selected {
+  color: var(--dp-success);
 }
 
 .craft-send {
@@ -1696,14 +2015,25 @@ function activityIconClass(toolName: string) {
 
   .craft-composer-bar {
     flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
-  .craft-segmented {
-    order: 3;
+  .craft-composer-bar-left,
+  .craft-composer-bar-right {
     width: 100%;
   }
 
-  .craft-segmented button {
+  .craft-composer-bar-right {
+    justify-content: space-between;
+    margin-left: 0;
+  }
+
+  .craft-segmented {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .craft-segmented .mode-btn {
     flex: 1;
   }
 }

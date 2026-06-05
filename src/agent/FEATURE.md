@@ -14,7 +14,7 @@
 - 助理单轮消息含 `activities[]`（执行过程）与 `content`（最终任务结果）；见 `agent/activities.ts`。
 - 助理「任务结果」由 **markstream-vue** 渲染（见 `components/agent/AgentMarkdown.vue`）。
 - **右侧操作日志**（`AgentLogPanel`，经典布局）/ **编排检视器**（Inspector 布局合并 activities + 日志）：按时间记录用户发送、模型步骤、工具执行等。
-- **三套 Agent UI**：`App.vue` 三个助理菜单，数据层 `agentChatSession` 单例共享消息。
+- **Craft Agent UI**：`App.vue`「Craft Demo」→ `AgentCraftDemo`，数据层 `agentChatSession` 单例；`buildAgentTools` 支持 `confirmAll`（Ask 模式逐工具确认）。
 
 ## 设计意图 (Intent)
 
@@ -22,7 +22,7 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 
 ## 接口契约 (Interface)
 
-- `buildAgentTools(confirm?)` → `ToolSet`（`ToolSchema` 类型来自 `@docpilot/shared-types`）
+- `buildAgentTools(confirm?, onActivity?, confirmAll?)` → `ToolSet`（`ToolSchema` 类型来自 `@docpilot/shared-types`）
 - `runAgentChat({ messages, tools, settings, onTextDelta, onToolCall })` → 最终文本（内部 `selectToolsForUserText` + `buildAttachmentContextHint`）
 - `selectToolsForUserText` / `buildAttachmentContextHint` — 意图工具筛选与路径 hint
 - `createChatModel(settings)` → LanguageModel
@@ -32,8 +32,9 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 
 ## 变更日志 (Changelog)
 
-- 2026-06-05: `agentChatSession.ts` 单例会话，供三种 Agent UI 布局共用。
+- 2026-06-06: Craft UI 接入 Agent；`buildAgentTools` 增加 `confirmAll`；`useCraftAgentChat` 映射 activities → turn card；`App.vue` 侧边栏简化为 Craft Demo 单入口。
 - 2026-06-05: 新增 `format_docx_batch` / `format_docx_text` Word 排版工具与意图筛选。
+- 2026-06-05: `agentChatSession.ts` 单例会话，供 Agent UI 布局共用。
 - 2026-06-04: 集成 `convert_to_markdown`（MarkItDown）；意图筛选与 system prompt 支持转 MD。
 
 - 2026-06-04: 执行过程与任务结果分离；`buildAgentTools` / `resolveToolArgs` 上报 `AgentActivity`。

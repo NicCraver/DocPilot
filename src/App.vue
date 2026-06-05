@@ -1,49 +1,23 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import ToolsHome from "./components/tools/ToolsHome.vue";
-import AgentChat, { type AgentUiLayout } from "./components/agent/AgentChat.vue";
 import AgentCraftDemo from "./components/agent/layouts/AgentCraftDemo.vue";
 import ProviderSettings from "./components/settings/ProviderSettings.vue";
 import WordTypeset from "./components/word-typeset/WordTypeset.vue";
 import AppNavItem from "./components/ui/AppNavItem.vue";
 import AppBadge from "./components/ui/AppBadge.vue";
 
-type Tab =
-  | "agent-classic"
-  | "agent-stream"
-  | "agent-inspector"
-  | "agent-craft"
-  | "tools"
-  | "word-typeset"
-  | "settings";
-const tab = ref<Tab>("agent-classic");
+type Tab = "agent" | "tools" | "word-typeset" | "settings";
+const tab = ref<Tab>("agent");
 
-const agentLayout = computed((): AgentUiLayout => {
-  switch (tab.value) {
-    case "agent-stream":
-      return "stream";
-    case "agent-inspector":
-      return "inspector";
-    default:
-      return "classic";
-  }
-});
-
-const isAgentTab = computed(() => tab.value.startsWith("agent-"));
-const isFullWidthTab = computed(() => isAgentTab.value || tab.value === "word-typeset");
+const isFullWidthTab = computed(() => tab.value === "agent" || tab.value === "word-typeset");
 
 const tabMeta = computed(() => {
   switch (tab.value) {
-    case "agent-classic":
-      return { title: "助理 · 经典编排", desc: "折叠执行过程 + 独立任务结果（Vercel AI SDK）" };
-    case "agent-stream":
-      return { title: "助理 · Claude 流式", desc: "实时状态条与工具块交错输出（claude-agent-ui）" };
-    case "agent-inspector":
-      return { title: "助理 · 编排检视器", desc: "对话区精简，右侧管道展示步骤与日志（AgentGUI）" };
-    case "agent-craft":
+    case "agent":
       return {
-        title: "助理 · Craft Demo",
-        desc: "会话面板 + turn card + 权限确认（Craft Agents）",
+        title: "Craft Demo",
+        desc: "会话面板 + 工具编排 + 权限确认（Craft 布局，接入 DocPilot 工具链）",
       };
     case "tools":
       return { title: "PDF 工具箱", desc: "本地批量处理与格式转换" };
@@ -80,40 +54,10 @@ const tabMeta = computed(() => {
         <p
           class="px-3 pt-1 pb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--dp-text-muted)]"
         >
-          AI 助理 UI
+          核心功能
         </p>
 
-        <AppNavItem
-          :active="tab === 'agent-classic'"
-          label="经典编排"
-          @click="tab = 'agent-classic'"
-        >
-          <template #icon>
-            <span class="i-lucide-list-checks w-5 h-5" />
-          </template>
-        </AppNavItem>
-
-        <AppNavItem
-          :active="tab === 'agent-stream'"
-          label="Claude 流式"
-          @click="tab = 'agent-stream'"
-        >
-          <template #icon>
-            <span class="i-lucide-route w-5 h-5" />
-          </template>
-        </AppNavItem>
-
-        <AppNavItem
-          :active="tab === 'agent-inspector'"
-          label="编排检视器"
-          @click="tab = 'agent-inspector'"
-        >
-          <template #icon>
-            <span class="i-lucide-panel-top w-5 h-5" />
-          </template>
-        </AppNavItem>
-
-        <AppNavItem :active="tab === 'agent-craft'" label="Craft Demo" @click="tab = 'agent-craft'">
+        <AppNavItem :active="tab === 'agent'" label="Craft Demo" @click="tab = 'agent'">
           <template #icon>
             <span class="i-lucide-list-tree w-5 h-5" />
           </template>
@@ -197,8 +141,7 @@ const tabMeta = computed(() => {
                   : 'h-full max-w-6xl mx-auto w-full'
               "
             >
-              <AgentCraftDemo v-if="tab === 'agent-craft'" />
-              <AgentChat v-else-if="isAgentTab" :layout="agentLayout" />
+              <AgentCraftDemo v-if="tab === 'agent'" />
               <ToolsHome v-else-if="tab === 'tools'" />
               <WordTypeset v-else-if="tab === 'word-typeset'" />
               <ProviderSettings v-else />
