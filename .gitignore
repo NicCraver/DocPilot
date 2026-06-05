@@ -11,3 +11,5 @@ src-tauri/gen/schemas/
 __pycache__/
 *.pyc
 .venv/
+build/
+src-tauri/binaries/docpilot-convert-*

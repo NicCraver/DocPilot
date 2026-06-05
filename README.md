@@ -60,6 +60,61 @@ npx tauri build
 
 产物位于 `src-tauri/target/release/bundle/`（`.app` / `.dmg`）。
 
+**Release `.dmg` 安装（推荐）：**
+
+1. 打开 `.dmg`，将 **DocPilot** 拖到 **应用程序** 文件夹
+2. 双击 **解除隔离** 图标 — 终端会自动执行 `xattr -d com.apple.quarantine /Applications/DocPilot.app`
+3. 从启动台或「应用程序」打开 DocPilot
+
+DMG 窗口内有分步引导图；脚本与背景资源见 `src-tauri/dmg/`。
+
+### macOS：提示「DocPilot.app 已损坏，无法打开」
+
+多为 **Gatekeeper / 隔离属性**（从浏览器或 Release 下载、或未公证的本地构建），并非应用文件真的损坏。
+
+**从 Release `.dmg` 安装：** 优先使用 DMG 内的 **解除隔离** 图标（见上）。若已拖入应用程序仍被拦截，可手动执行：
+
+```bash
+xattr -d com.apple.quarantine "/Applications/DocPilot.app"
+# 或清除全部扩展属性：
+xattr -cr "/Applications/DocPilot.app"
+open "/Applications/DocPilot.app"
+```
+
+仍被拦截时，可在 **系统设置 → 隐私与安全性** 中点 **仍要打开**；或右键应用 → **打开**（首次会多一步确认）。
+
+**本地 `tauri build` / `pnpm run tauri:build` 后直接运行 `.app`：**
+
+```bash
+APP="src-tauri/target/release/bundle/macos/DocPilot.app"
+xattr -cr "$APP"
+open "$APP"
+```
+
+**从 `.dmg` 挂载目录运行（未拖入应用程序）：**
+
+```bash
+# 将 /Volumes/DocPilot 换成实际挂载卷名（在 Finder 侧边栏可见）
+xattr -cr "/Volumes/DocPilot/DocPilot.app"
+open "/Volumes/DocPilot/DocPilot.app"
+```
+
+可选：查看 Gatekeeper 评估结果（便于排查签名问题）：
+
+```bash
+spctl -a -vv -t execute "/Applications/DocPilot.app"
+```
+
+开发调试请优先使用 `npx tauri dev`，无需处理上述隔离。
+
+发布构建（内置 MarkItDown + OCR，无需用户单独安装依赖）：
+
+```bash
+pnpm run tauri:build
+```
+
+打 tag `v*` 推送后将由 GitHub Actions 自动构建 Release 并上传 `.dmg`。
+
 ## 架构文档
 
 - [整体架构设计](docs/superpowers/specs/2026-06-03-docpilot-architecture-design.md)

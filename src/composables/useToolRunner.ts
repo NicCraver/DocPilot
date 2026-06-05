@@ -55,6 +55,13 @@ export function stem(path: string) {
   return i > 0 ? path.slice(0, i) : path;
 }
 
+/** 仅取文件名（不含路径）的主文件名，用于默认输出名 */
+export function fileStem(path: string) {
+  const name = path.split(/[/\\]/).pop() ?? path;
+  const i = name.lastIndexOf(".");
+  return i > 0 ? name.slice(0, i) : name;
+}
+
 export function parsePageList(text: string): number[] {
   return text
     .split(/[,，\s]+/)

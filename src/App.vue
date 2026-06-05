@@ -152,8 +152,11 @@ const tabMeta = computed(() => {
         <AppBadge variant="success" pulse>本地服务正常</AppBadge>
       </header>
 
-      <div class="flex-1 overflow-hidden flex flex-col">
-        <div class="flex-1 overflow-y-auto px-8 py-6">
+      <div class="flex-1 overflow-hidden flex flex-col min-h-0">
+        <div
+          class="flex-1 min-h-0 px-8 py-6 flex flex-col"
+          :class="tab === 'agent' ? 'overflow-hidden' : 'overflow-y-auto'"
+        >
           <p v-if="tab !== 'agent'" class="text-sm text-[var(--dp-text-secondary)] mb-5 max-w-3xl">
             {{ tabMeta.desc }}
           </p>
@@ -161,8 +164,11 @@ const tabMeta = computed(() => {
           <Transition name="page" mode="out-in">
             <div
               :key="tab"
-              class="h-full"
-              :class="tab === 'agent' ? 'w-full max-w-none' : 'max-w-6xl mx-auto w-full'"
+              :class="
+                tab === 'agent'
+                  ? 'flex-1 min-h-0 min-w-0 flex flex-col w-full max-w-none'
+                  : 'h-full max-w-6xl mx-auto w-full'
+              "
             >
               <ToolsHome v-if="tab === 'tools'" />
               <AgentChat v-else-if="tab === 'agent'" />
