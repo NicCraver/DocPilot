@@ -19,6 +19,7 @@
 
 ## 变更日志 (Changelog)
 
+- 2026-06-05: Craft Demo 活动步骤图标换用更语义化的 Lucide 字形（sparkles / text-search / book-open-text 等），并按步骤类型使用彩色软底徽章替代灰边框方框。
 - 2026-06-05: 新增三套 Agent UI 布局与侧边栏三个菜单；共享 `agentChatSession` 会话状态。
 
 ## 待办 / 风险 (TODO / Risks)

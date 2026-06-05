@@ -567,10 +567,11 @@ function previewText(turn: AssistantTurn) {
 
 function activityKind(toolName: string) {
   const name = toolName.toLowerCase();
+  if (name.includes("think")) return "think";
   if (name.includes("read")) return "read";
   if (name.includes("search")) return "search";
-  if (name.includes("edit") || name.includes("draft")) return "edit";
-  if (name.includes("bash")) return "terminal";
+  if (name.includes("edit") || name.includes("draft") || name.includes("compose")) return "edit";
+  if (name.includes("bash") || name.includes("run") || name.includes("terminal")) return "terminal";
   if (name.includes("plan")) return "plan";
   if (name.includes("preview")) return "preview";
   return "agent";
@@ -578,20 +579,22 @@ function activityKind(toolName: string) {
 
 function activityIconClass(toolName: string) {
   switch (activityKind(toolName)) {
+    case "think":
+      return "i-lucide-sparkles";
     case "read":
-      return "i-lucide-file-text";
+      return "i-lucide-book-open-text";
     case "search":
-      return "i-lucide-search";
+      return "i-lucide-text-search";
     case "edit":
-      return "i-lucide-file-pen-line";
+      return "i-lucide-notebook-pen";
     case "terminal":
-      return "i-lucide-terminal";
+      return "i-lucide-square-terminal";
     case "plan":
-      return "i-lucide-list-checks";
+      return "i-lucide-clipboard-list";
     case "preview":
-      return "i-lucide-panel-top";
+      return "i-lucide-scan-eye";
     default:
-      return "i-lucide-bot";
+      return "i-lucide-wand-sparkles";
   }
 }
 </script>
@@ -718,7 +721,7 @@ function activityIconClass(toolName: string) {
                 <div v-if="turn.plan" class="craft-plan-header">
                   <span>
                     <span class="craft-tool-shell plan" aria-hidden="true">
-                      <span class="craft-tool-icon i-lucide-list-checks" />
+                      <span class="craft-tool-icon i-lucide-clipboard-list" />
                     </span>
                     Plan
                   </span>
@@ -1275,20 +1278,56 @@ function activityIconClass(toolName: string) {
 
 .craft-tool-shell {
   display: inline-grid;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
   flex: 0 0 auto;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--dp-border) 80%, var(--dp-text-muted));
-  border-radius: 0.32rem;
-  background: color-mix(in srgb, var(--dp-surface) 86%, var(--dp-surface-muted));
-  color: var(--dp-text-secondary);
+  border: none;
+  border-radius: 0.42rem;
+  background: var(--dp-primary-soft);
+  color: var(--dp-primary);
+}
+
+.craft-tool-shell.think,
+.craft-tool-shell.agent {
+  background: color-mix(in srgb, var(--dp-primary) 14%, white);
+  color: var(--dp-primary);
+}
+
+.craft-tool-shell.search {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.craft-tool-shell.read {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.craft-tool-shell.terminal {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.craft-tool-shell.edit {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.craft-tool-shell.plan {
+  background: #fefce8;
+  color: #a16207;
+}
+
+.craft-tool-shell.preview {
+  background: #f0f9ff;
+  color: #0369a1;
 }
 
 .craft-tool-icon {
   display: block;
-  width: 0.9rem;
-  height: 0.9rem;
+  width: 0.875rem;
+  height: 0.875rem;
 }
 
 .craft-activity-title {
