@@ -8,7 +8,7 @@
 
 1. 释放端口并结束旧进程（如有）：
    ```bash
-   lsof -ti:5173 | xargs kill -9 2>/dev/null
+   lsof -ti:4729 | xargs kill -9 2>/dev/null
    pkill -f "tauri dev" 2>/dev/null
    ```
 2. 在项目根目录启动开发环境：
@@ -16,7 +16,7 @@
    cd /Users/nic/NicProjects/DocPilot && npx tauri dev
    ```
 3. 确认：
-   - 前端：http://localhost:5173/
+   - 前端：http://localhost:4729/
    - 桌面应用 `docpilot` 窗口已打开
 
 Agent 在告知用户「开发完成」前，应自行执行上述重启（或等价操作），并在回复中说明已重新启动。
