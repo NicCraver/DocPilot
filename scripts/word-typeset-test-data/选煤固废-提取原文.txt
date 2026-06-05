@@ -1,0 +1,1759 @@
+doi: 10. 11799 /ce202410012
+收稿日期: 2024－06－15
+作者简介: 董宪姝( 1964—) ，女，辽宁葫芦岛人，教授，博士生导师，主要研究方向为煤炭资源清洁高效洗选与煤基固
+废梯级利用等，E－mail: dxshu520@ 163. com。
+引用格式: 董宪姝．选煤固废资源化利用研究进展［J］．煤炭工程，2024，56( 10) : 108－121．
+选煤固废资源化利用研究进展
+董宪姝
+( 太原理工大学矿业工程学院，山西太原
+030024)
+摘
+要: 煤炭洗选是实现煤炭清洁高效利用的前提和基础，洗选过程产生的固体废弃物( 矸石
+和尾煤等) 产量逐年增加，其综合治理及利用已经成为亟待解决的重要问题。论文介绍了选煤固废
+的理化特性，系统总结了选煤固废资源化利用研究进展，就选煤固废综合利用技术的现存问题和发
+展方向进行了展望。煤矸石和尾煤含有大量的硅铝化物及锂、镓、钛等微量元素，在燃烧发电、充
+填、建筑材料制备、土壤改良、高值化利用等方面具有广阔的应用前景。相对而言，目前煤矸石的
+综合利用途径更为全面，尤其是以超高水充填技术、采选充+X 技术等技术为代表的矸石充填开采，
+具有煤矸石大宗处理的巨大潜力。尾煤的资源化利用是近年来的热点，在环境治理、土壤改良等方
+面取得了突破，可以用来制备吸附剂、土壤改良剂等材料。选煤固废资源化利用未来应着眼于适应
+市场需求以及可持续发展理念，通过完善技术、引入智能化等进一步实现选煤固废高效、安全、环
+保、分级梯级利用。
+关键词: 煤炭洗选; 固体废弃物; 物理化学性质; 综合利用
+中图分类号: TD94
+文献标识码: A
+文章编号: 1671－0959( 2024) 10－0108－14
+Ｒesearch progress on resource utilization of solid waste from coal beneficiation
+DONG Xianshu
+( College of Mining Engineering，Taiyuan University of Technology，Taiyuan 030024，China)
+Abstract: Coal beneficiation is the premise and foundation for clean and efficient utilization of coal，and the solid waste
+( gangue and tailing，etc．) generated from the beneficiation process has been increasing year by year，and its comprehensive
+treatment and utilization has become an important problem to be solved．The physical and chemical properties of coal
+beneficiation solid waste is introduced，the research progress on resource utilization of the waste is summarized，and the existing
+problems and development direction of comprehensive utilization technology is analyzed and prospected．Coal beneficiation solid
+waste，mainly comprised of coal gangue and coal tailing，is endowed with a considerable amount of lithium，gallium，titanium
+and other trace elements，which provides promising utilization potential in power generation，mine filling，building materials
+preparation，soil reclamation，and high value utilization．At present，the utilization path of coal gangue is more comprehensive，
+in which，used as filling material has a great potential for bulk consumption，represented by ( super)
+high water filling
+technology，mining filling+X technology．Ｒesource utilization of tailing coal is a hot spot in recent years，and breakthroughs
+have been made in environmental management and soil improvement，which can be used to prepare adsorbents，soil
+conditioners and other materials．The future of coal solid waste should also focus on adapting to market demand and the concept
+of sustainable development，through technology improvement ，the introduction of intelligentization and so on to further realize
+the efficient，safe and environmentally friendly comprehensive utilization of solid waste coal beneficiation．
+Keywords: coal beneficiation; solid waste; physico－chemical properties; comprehensive utilization
+煤炭是我国国民经济和社会发展的支柱产业，据
+《中国矿产资源报告2023》统计
+［1］，2022 年我国一次
+能源生产总量为45. 6 亿tce，比上年增长9. 2%，其中
+煤炭占67. 4%。持续推进煤炭清洁高效利用，对保
+障能源安全稳定供应、推动经济社会高质量发展具
+有重大意义。煤炭洗选是煤炭加工利用的源头技术，
+8
+0
+1
+第56卷第10期
+煤
+炭
+工
+程
+COAL ENGINEEＲING
+Vol. 56，No. 10
+是实现煤炭清洁高效利用的前提和基础。在煤炭分
+选过程中产生的脉石矿物称之为矸石或者尾煤，其
+中，对于粒度较粗的块煤和末煤分选过程产生的重
+产物一般称作矸石产品，对于粒度较细的细煤泥分
+选过程产生的重产物一般称作尾煤产品。大量选煤
+固废的堆积不仅占用土地资源，而且还会污染环境，
+引起地下水污染，造成山体滑坡、塌陷等地质灾害，
+严重威胁人类生存环境。
+选煤固废中赋存的有毒有害物质经过雨水淋溶
+后会进入周边环境，导致水土污染，严重危害人类
+健康和自然环境
+［2，3］。但是煤固废中也含有黄铁矿、
+氧化铝等有用资源，实现选煤固废的资源化利用具
+有显著的经济和社会价值。为此，国家发改委等十
+部委联合印发了《关于“十四五”大宗固体废弃物
+综合利用的指导意见》《“十四五”工业绿色发展规
+划》等
+［4］指导意见，明确指出“开展资源综合利用
+是我国深入实施可持续发展战略的重要内容”，并强
+调“要持续提高煤矸石和粉煤灰综合利用水平”。
+目前，我国煤矸石的综合利用率能够达到70% 左
+右
+［5］，其中以直接填埋、填充路基或者直接复垦的
+低端利用为主，极少部分被应用于提取有价组分及
+制备功能材料等高值化利用途径。未被有效消纳的
+煤炭工业废弃物大量堆积对生态环境造成极大的威
+胁，尤其是自然堆积的矸石山，稳定性差，在雨季
+容易引发滑坡、泥石流等地质灾害
+［6］。含硫分较高
+的矸石山极易发生自燃，产生有毒有害气体( SO2、
+NOx) ，污染大气环境
+［7］。并且，随着采煤机械化的
+发展，入选原煤的细粒含量显著增大，导致尾煤产
+品的产率显著增加，随之产生的尾煤处置问题和环
+境问题也不容小视。
+近年来，众多学者和企业充分挖掘了煤矸石和
+尾煤的资源价值，衍生出多种选煤固废资源化利用
+手段。本文详细阐述了选煤固废来源、分布以及分
+类，细致分析了煤矸石和尾煤的物理化学性质，并
+基于选煤固废关键组分及含量的赋存规律，系统总
+结其大宗利用、提纯回收、材料制备等利用途径，
+从而形成选煤固废梯级化利用成套技术。
+1
+选煤固废的物理化学性质
+1. 1
+煤矸石
+煤矸石的表观颜色主要取决于其内部的物质含
+量，一般含碳量较高的煤矸石呈现黑色，含铁量较
+高的呈现红色。煤矸石的硬度一般在3 左右，硬度
+随着煤矸石风化程度的增加而不断降低
+［8－10］。我国
+部分地区煤矸的物理性能参数见表1，可见煤矸石表
+观密度一般在2000～2700 kg/m
+3; 堆积密度均小于表
+观密度，一般在1100～1700 kg/m
+3; 煤矸石的吸水特
+性取决于其孔隙率，煤矸石的吸水率通常在1. 7% ～
+12. 0%。煤矸石的耐热性较好，煤矸石的烧结温度大
+于1000 ℃，属于中低等耐火材料
+［11］。当煤矸石的含
+硫量与含碳量均较高时，其在堆放的过程中极易发生
+自燃。煤矸石热值受其碳含量、挥发分和灰分等各方
+面性质的多重影响。一般来说碳含量和挥发分越高，
+灰分越低，则煤矸石的发热量越高。煤矸石的熔化温
+度非常高，在1050 ℃和1800 ℃之间，具有作为耐火
+材料的发掘潜质
+［12，13］。
+表1
+不同地区煤矸石的物理特性
+［14］
+表1
+Physical characteristics of coal gangue from different areas
+来源
+表观密度/( kg·m－3)
+堆积密度/( kg·m－3)
+含水率/%
+破碎率/%
+孔隙率/%
+山西
+2083～2689
+1130～1201
+4. 7～11. 4
+18. 1～19. 0
+—
+江苏
+2620～2712
+1430～1612
+1. 7～3. 9
+16. 8～24. 4
+—
+河南
+2510～2540
+1264～1320
+1. 7～3. 9
+17. 9～19. 1
+47. 5～51. 5
+辽宁
+2276～2653
+1220～1550
+3. 15～9. 8
+9. 9～25. 2
+22. 0～52. 8
+从煤矸石的化学元素组成来看，煤矸石主要由
+Si 和Al 元素组成，还包含部分元素如Fe、Ca、Mg、
+K 等，还有重金属元素Hg、Cr、Pb、Cu 等
+［15，16］。
+根据不同地区煤质和岩石组成架构的差异性特征，
+煤矸石中的化学元素可能会呈现出地区间的梯度分
+布，某地区煤矿所产出煤矸石的化学元素组成，见
+表2。煤矸石中还含有部分可以回收利用的元素如
+Li、Ti、Fe 和稀土元素等
+［17］，利用笔者团队自主改
+进的电感耦合等离子体质谱仪ICP－MS) 测得某矿煤
+矸石中所含稀有元素见表3，搭配与选择合适的提
+取工艺即可得到纯度较高的产品。搭配与选择合适
+的提取工艺即可得到纯度较高的产品。各个地区煤
+9
+0
+1
+2024 年第10 期
+煤
+炭
+工
+程
+专家论坛
+矸石的成分比例略有差异( 表4) ，但主要化学组成
+为SiO2、Al2O3，还含有少量其他氧化物如Fe2O3、
+TiO2 以及MgO 等。
+表2
+某矿煤矸石中主要化学元素组成
+［17］
+mg/kg
+Table 2
+Main elements in the coal gangue
+Al
+Fe
+S
+Mg
+Cu
+Hg
+Ni
+Pb
+Zn
+Cr
+12. 50
+0. 14～1. 973
+0. 21～0. 39
+0. 04～1. 25
+61. 2～80. 9
+0. 024～0. 2
+36. 78～43. 49
+11. 61～289
+20～78
+15. 47～29. 62
+表3
+某矿煤矸石中稀有元素组成
+μg/g
+Table 3
+Contents of rare elements in coal gangue of a mine
+Li
+Na
+Ti
+Mn
+Ag
+Ni
+77. 26
+1282. 49
+3920. 35
+252. 81
+1. 48
+43. 40
+煤矸石的矿相组成主要包括石英相、黏土矿物
+相和碳质矿物相等。不同地区煤矸石的矿物相组分
+对比见表5，各地区之间煤矸石的矿物相组分差异
+较大，但每个地区的煤矸石中所含的黏土矿物占比
+最多，约为50% ～70%，主要的黏土矿物包括高岭
+石、伊利石、绿泥石、白云母以及长石等。石英相
+约占煤矸石矿物组成含量的20% ～30%，碳质矿物
+相约占10% ～20%。此外，煤矸石中还含有部分含
+铁矿物，主要包括菱铁矿、赤铁矿和黄铁矿等。
+表4
+煤矸石中的主要化学组成
+［18］
+%
+Table 4
+Chemical element compositions in the coal gangue
+地区
+SiO2
+Al2O3
+CaO
+Fe2O3
+Na2O
+MgO
+TiO2
+K2O
+内蒙古包头
+39. 08
+31. 06
+0. 38
+1. 2
+0. 16
+0. 24
+0. 98
+—
+北京房山
+49. 41
+21. 32
+2. 52
+6. 02
+1. 44
+1. 56
+0. 94
+2. 85
+山东
+48. 82
+19. 03
+2. 03
+4. 47
+1. 43
+2. 29
+—
+0. 19
+陕西西安
+66. 31
+21. 04
+1. 13
+4. 08
+1. 3
+1. 31
+0. 65
+3. 38
+四川攀枝花
+58. 26
+21. 13
+2. 36
+5. 92
+0. 32
+4. 62
+1. 47
+4. 79
+渭南
+45. 14
+26. 97
+0. 47
+1. 21
+0. 21
+0. 32
+0. 51
+1. 02
+山西长治
+37. 8
+21. 2
+2. 6
+2. 5
+33. 2
+0. 3
+0. 9
+1. 4
+鄂尔多斯
+33. 5
+27. 96
+1. 11
+1. 68
+0. 17
+0. 48
+0. 74
+0. 35
+山东
+58
+17. 66
+1. 44
+5. 23
+0. 19
+1. 6
+—
+1. 43
+江苏徐州
+57. 95
+19. 02
+3. 16
+5. 32
+—
+0. 82
+—
+—
+湖北宜昌
+49. 03
+34. 18
+0. 2
+0. 73
+—
+—
+1. 72
+0. 12
+江西萍乡
+52. 56
+16. 57
+1. 24
+3. 35
+0. 21
+2. 01
+—
+2. 39
+表5
+不同地区煤矸石中的矿物相组分
+［15］
+%
+Table 5
+Mineral compositions of coal gangue in different regions
+地区
+高岭石
+石英
+伊利石
+绿泥石
+含铁矿物
+有机质
+中国
+10～67
+15～35
+10～30
+2～11
+2～10
+5～25
+德国
+4～25
+13～27
+41～66
+1～3
+0. 5～5
+5～10
+西班牙
+3～30
+5～57
+20～60
+0～7
+～
+5～25
+英国
+10～40
+15～25
+10～31
+2～7
+2～10
+5～25
+1. 2
+尾煤
+浮选尾煤作为选煤工业的副产品，由于其自身
+独特的物化性质与组成架构，为其在煤基固废产品
+利用及功能制备过程中提供了良好的使用基础。综
+合多地选煤厂浮选尾煤XＲD 分析发现，浮选尾煤矿
+相组成相似，典型的矿相组成分布如图1 所
+示
+［19－22］。可见，尾煤中主要含有高岭土、石英、莫
+来石及结晶性硅酸铝等矿物，这些矿物组分的存在
+导致浮选尾煤通常具有嵌布粒度细、持水性强、灰
+分含量高、粘结指数大、燃烧热值低等特点
+［21］。
+图1
+尾煤X 射线衍射图谱
+［22］
+Fig. 1
+X－ray diffraction pattern of tailing coal
+不同地区浮选尾煤的化学组成分布见表6。可
+0
+1
+1
+专家论坛
+煤
+炭
+工
+程
+2024 年第10 期
+见，不同地区浮尾化学组成变化性差异区别不大，
+以SiO2 和Al2O3 等矿物组分为主。对于浮选尾煤功
+能化改性与利用的各种技术、方法对各个地区的浮
+尾实现高值化利用途径具有较强的参考价值。
+表6
+不同地区浮选尾煤化学组成分析
+%
+Table 6
+Analysis of the chemical composition of floatation tailings in different regions
+地区
+SiO2
+Al2O3
+Fe2O3
+CaO
+MgO
+K2O
+P2O5
+MnO
+ZnO
+LOI
+TiO2
+山西西曲选煤厂［23］
+53. 88
+33. 58
+4. 74
+1. 90
+0. 53
+1. 76
+0. 17
+0. 04
+0. 05
+10. 80
+—
+Paskov Mine［24］
+42. 10
+15. 00
+6. 50
+4. 40
+2. 40
+3. 00
+0. 20
+0. 10
+—
+—
+1. 57
+山西马兰选煤厂［25］
+55. 88
+30. 97
+3. 41
+2. 04
+1. 24
+3. 15
+0. 09
+—
+—
+—
+0. 83
+山东某选煤厂［26］
+51. 92
+23. 96
+5. 63
+9. 69
+2. 01
+1. 38
+—
+—
+—
+—
+0. 60
+2
+煤矸石资源化利用研究进展
+不同国家煤矸石主要利用方式不同，以美国和
+英国为代表的发达国家，煤矸石主要用于筑基修路
+以及其他土建工程，德国和荷兰等国主要集中于燃
+烧发电，俄罗斯则主要用于地下矿区的充填以及生
+产建筑材料
+［27－29］。我国煤矸石主要根据碳含量和热
+值来决定其利用方式，常见的利用方式如图2 所示。
+碳含量较低( 质量分数＜6%) 的煤矸石可以用于采空
+区回填、充填和筑基修路、生产建筑材料、生产化
+工原料等，同时通过煤矸石中多元素、多组分梯级
+利用，提取有用矿物元素( Si、Al、Li 和Ga) 、生产
+农业肥料、胶凝材料和地聚物等高附加值产品来实
+现煤矸石的高值化利用;
+高碳含量( 热值＞
+6300 kJ/kg) 的煤矸石通常用于燃烧发电和供热。
+图2
+煤矸石综合利用
+Fig. 2
+Comprehensive utilization fields of coal gangue
+2. 1
+燃烧发电
+煤矸石与一定比例的煤或煤泥混合发电是目前其
+最有效的综合利用方式之一，这样既可以节约资源，
+又可以减少污染物排放以及废弃物的占地面积，降低
+水土流失的安全隐患。热值较高( ≥6300 kJ/kg) 的煤
+矸石可直接用作燃料，而热值较低( ＜6300 kJ/kg) 的
+煤矸石在掺入一定比例的高热值物质后，混合燃烧
+产生的热量可用于发电
+［30］。我国煤矸石发电的历史
+始于20 世纪70 年代，四川永荣矿务局和江西萍乡
+矿务局首先开展煤矸石发电的工业化试验。1975
+年，四川永荣矿务局10 t/h的煤矸石发电沸腾锅炉试
+验成功，开创了我国煤矸石发电的历史。“十五”
+以来，我国重点开发大型循环流化床供热锅炉，我
+国煤矸石发电技术有了较大提高
+［15］。2013 年超临界
+60 万kW循环流化床发电技术在四川白马得到成功
+应用，随着循环流化床技术水平的不断提升，大幅
+提高了煤矸石的消耗量，节约了煤炭资源，并且减
+少了燃烧过程中有害气体的排放。煤矸石的热值较
+低，灰分含量高，并且有毒元素的含量与灰分产量
+呈正相关。在利用煤矸石进行发电时，需要额外的
+设备来处理灰渣和烟气排放问题，这导致其经济效
+益不佳。此外，燃烧可以有效利用煤矸石中的可燃
+成分，但燃烧后会产生二次固体废物，因此仍需考
+虑如何解决其污染问题，并且其硬度较大，容易磨
+损锅炉，造成停炉，因此煤矸石发电技术仍需进一
+步研究和改进。
+2. 2
+充填开采
+随着煤炭资源大规模开发，地下空间利用加剧，
+导致地表沉降、建筑裂缝及采空区地质异常等环境问
+题，严重威胁矿区生态与安全，充填开采技术在解决
+此类问题方面表现出显著优势。煤矿充填开采技术是
+指随着回采工作面的不断推进，使用充填材料对采空
+区进行充填，防止出现地表沉陷等地质灾害，从而提
+高矿山整体安全性以及资源利用率的一种开采工
+艺
+［31］。煤矸石、石灰岩、砂岩、炉渣、矿渣等固体
+废弃物是常用的充填材料
+［32，33］。目前我国充填法采煤
+主要有矸石干式充填技术、覆岩离层注浆充填技术、
+冒落矸石空隙注浆充填技术、( 似) 膏体充填技术、
+( 超) 高水充填技术、“采选充+X”技术
+［34］。
+1
+1
+1
+2024 年第10 期
+煤
+炭
+工
+程
+专家论坛
+覆岩离层分区隔离注浆充填技术是一种创新的
+采煤策略，旨在通过地面调配的浆体材料，利用钻
+孔技术填补煤炭开采后上覆岩层因不同步沉降而产
+生的空隙
+［35］。此技术通过人工手段恢复岩层间的紧
+密接触，并结合特定的煤柱布局，有效控制地表沉
+降，保护地面建筑。其基本原理在于，将预先设计
+好的注浆材料，通过地面钻孔精确注入由关键层分
+隔形成的离层空间内，形成高压支撑体。这些支撑
+体与预设的永久煤柱协同工作，构成一个稳定的承
+载结构，有效减轻因采煤导致的地表下沉问
+题
+［36，37］。该技术的特点包括:
+首先，使用细粒料作
+为充填材料，制备系统简便，但对浆体的流动性有
+较高要求;
+其次，钻孔施工的技术挑战大，需精确
+控制钻孔间距、速度、深度及终孔时间，以匹配离
+层空间的形成;
+第三，对关键层离层位置的精确识
+别和可注性评估，以及注浆时机、压力、保压时间
+和煤柱尺寸等参数的精准设定，均提出了高要求;
+第四，该技术实现了采煤与充填作业的空间隔离，
+互不影响，提升了长壁工作面的开采效率;
+最后，
+尽管该技术提升了资源回收率，但仍需保留部分永
+久煤柱作为支撑。综上所述，覆岩离层分区隔离注
+浆充填技术尤其适用于具备关键层条件的矿井。其
+详细的充填工艺流程如图3 所示。
+图3
+覆岩离层分区隔离注浆充填工艺流程
+［35］
+Fig. 3
+Schematic diagram of isolation grouting and filling
+process of overburden off－layer zones
+超高水材料充填技术利用由铝土矿为主要成分的
+A 料与同样成分的B 料，分别配水后形成单浆液，再
+按照1∶1的体积比例即时混合并注入待充填区域。混
+合后的浆液在特定时间内凝固，形成高强度充填体，
+有效抑制岩层移动和地表沉降。此技术的实施流程包
+括在采煤作业完成后，利用超高水充填支架系统迅速
+封闭充填空间，随后将预制的超高水材料浆体泵入该
+空间，待其凝固后稳定岩层，实现地表沉陷的控制，
+确保煤炭资源的安全开采
+［38，39］。超高水材料充填技术
+的核心优势在于: 首先，系统构建迅速，占地面积
+小，便于井下直接建站进行充填作业; 其次，充填材
+料具备极高的含水率( 最高可达体积比的97%) ，制备
+流程简便，流动性强，适合长距离输送而不易沉淀;
+再者，由两种材料混合而成的浆体凝结迅速，初凝强
+度高，能有效固化水分，提供出色的抗阻性能，且终
+凝周期短; 然而，值得注意的是，该材料在特定条件
+下( 如承载过大) 可能会出现“渗汗析水”现象，需
+在设计时加以考虑。超高水充填开采技术为矿井遗留
+资源的开采提供了解决方案，尤其适用于新采区大范
+围建筑物下的压煤充填开采。其详细的工艺流程如图
+4 所示。
+图4
+高水充填工艺流程
+［35］
+Fig. 4
+Schematic of high water filling process
+近年来，随着技术的不断进步和对资源利用效
+率的提高要求，煤矿采选充一体化技术逐渐得到推
+广应用。这一模式通过整合采矿、选煤和充填等环
+节，提高了资源回收率，有效降低了环境影响和生
+产成本。现代煤矿企业在采选充一体化方面实现了
+设备智能化、管理精细化，并且注重安全和环保措
+施，以应对资源枯竭和生态保护的双重挑战。张吉
+雄等
+［40］提出“采选充+X” 技术，实现少矸开采、
+煤矸分选与矸石充填一体化，其中煤矸分选可在浅
+槽重介、动筛跳汰、TDS 光电等分选技术中优选;
+矸石充填可在固体、膏体、胶结等充填技术中优选;
+目前已形成“采选充+控” “采选充+留” “采选充+
+抽”“采选充+防” “采选充+保”等多种技术形式，
+在井下进行煤炭开采、煤矸分选、矸石就地充填的
+同时，一并实现与工程需求所对应的地表沉陷控制、
+坚硬顶板控制、采场矿压控制、生态环境保护、资
+源高效回收、伴生资源共采、顶板灾害防治、隔水
+岩层控制、矿区固废处理及矿井产能提升等多重目
+标，井下“采选充+X”生产系统如图5 所示。
+近年来许多学者在煤矸石充填材料的性能方面
+进行了大量的研究。QI 等
+［41］以煤矸石和粉煤灰为原
+2
+1
+1
+专家论坛
+煤
+炭
+工
+程
+2024 年第10 期
+图5
+井下“采选充+X”生产系统
+［40］
+Fig. 5
+Schematic diagram of production system
+in mining－dressing－backfilling and X technology
+料，制备了一种新型膏体充填材料，在高粉煤灰掺
+量条件下仍表现出良好的强度性能。PAN 等
+［42］研究
+了粉煤灰掺量和养护温度对改性镁渣胶结煤基固废
+充填材料力学性能、孔特征和微观结构的影响，研
+究结果发现粉煤灰掺量增加对充填材料火山灰活性、
+力学性能和孔结构均有促进作用。膏体充填材料作
+为一种高固含的固液混合材料，表现出典型的非牛
+顿流体特性
+［43］，其流变特性受到多种因素的影响，
+主要包括其内部组成的物化性质，如固体含量、颗
+粒级配和水化作用等，以及外部作用，如温度和剪
+切应力等。刘音等
+［44］探讨了煤矸石作为大粒径骨
+料，在充填膏体材料中的不同占比对其整体性能的
+影响。研究结果表明，当煤矸石骨料的粒径范围选
+定在15～25 mm之间，且其占比达到总骨料的15%
+时，充填膏体材料展现出了最优异的性能表现。
+在回填过程中，如果煤矸石中的重金属成分和
+硫化物未经处理，后期可能会通过地下水浸泡等多
+种途径渗出，对土壤和人体健康构成潜在威胁。埋
+于地下的煤矸石会逐渐进入厌氧状态，在水分、温
+度和营养等有利条件下，厌氧微生物会繁殖。这些
+微生物能够降解煤矸石，其化学反应中溶质的降解
+作用也可能对地下水产生不利影响。
+2. 3
+建筑材料
+煤矸石经高温煅烧后具有一定的火山灰活性，
+用碱性物质可以激发其潜在活性，可以用来制作大
+掺量煤矸石水泥。刘超群等
+［45］系统分析了活化煤矸
+石掺量对水泥胶砂力学性能等影响，探讨了活化煤
+矸石在加速水泥水化反应及优化微观结构方面的潜
+在机制，发现活化煤矸石中丰富的活性硅铝成分对
+二次水化反应的显著促进作用，且水化产物可以有
+效填充水泥基体孔隙，提升材料的致密性和强度。
+煤矸石的掺入对水泥体系的多方面性能产生显著影
+响。郑大鹏等
+［46］通过分析自燃煤矸石的物理特性，
+探究其对水泥复合体系需水量的影响。结果表明，
+自燃煤矸石的高孔隙率与粗糙表面显著增加需水量;
+复掺质量比5%硅灰于含30%自燃煤矸石的水泥体系
+中，显著降低了约9. 8%的标准稠度需水量。
+此外，煤矸石的主要矿物成分是黏土矿物，制
+备建筑用砖是煤矸石又一颇具潜力的方案，典型的
+工艺流程如图6 所示。郝贠洪等
+［47］以内蒙古中部煤
+矸石、铁尾矿及页岩为原料，通过正交实验优化配
+比与烧结条件，分析其对烧结砖性能的影响。优化
+后配比( 7 ∶8 ∶5) 与烧结条件( 850 ℃，7 h) 显著提升
+烧结砖力学性能，降低吸水率，满足环保要求。金
+彪等
+［48］以煤矸石、页岩和污泥为原料制备烧结砖，
+结果显示在10%污泥、40%煤矸石和50%页岩的原
+料配比下，经1050 ℃焙烧6 h，可制备出强度达到
+MU15 等级的烧结砖，固废利用率最高可达70%。
+李珠等
+［49］以煤矸石、黏土为主要原料，以膨胀珍珠
+岩为造孔剂，在煤矸石与黏土的质量比为7∶3，烧结
+温度为1050 ℃，膨胀珍珠岩掺量为80%，保温时间
+为30 min时，所制得的烧结透水砖劈裂抗拉强度为
+3. 75 MPa，透水系数为0. 355×10
+－2 cm/s。在建筑材
+料领域，煤矸石的应用技术已相对成熟，产品种类
+丰富，应用范围广泛，相应的技术规范也较为完善。
+需要综合考虑其经济效益，包括附加值、市场容量
+以及运输半径等因素。此外，在煤矸石的破碎和筛
+分过程中容易产生大量粉尘，可能对环境造成污染，
+因此在应用时需采取措施以避免环境污染问题。
+图6
+烧结砖的制备工艺流程
+［47］
+Fig. 6
+Flow chart for the preparation of sintered bricks
+2. 4
+农业应用
+煤矸石中含有有机炭质以及其他微量元素如锌、
+钼和铜等，可用于肥料和土壤改良剂的制备。煤矸
+石作为肥料加入土壤中可以增加土壤透气性等理化
+性质，防止土壤板结，同时能够增强土壤对养分的
+固定作用以及对土壤重金属离子进行吸附，防止土
+壤污染。孙洪宾
+［50］利用煤矸石和秸秆制备含硅有机
+复合肥，实验以检测硅的转化率为主要的工艺指标，
+3
+1
+1
+2024 年第10 期
+煤
+炭
+工
+程
+专家论坛
+同时检测秸秆的水解率和秸秆中硅的转化率，最终
+得到一种经济高效的复合肥料。刘甜
+［51］利用煤矸石
+制备沸石分子筛，其性质为硅酸盐材料，结果表明
+该材料能够改善土壤性质，减轻毒性。其多孔结构
+可以减少营养素浸出，缓释特性提升水效，降低硝
+酸盐污染风险。刘帆俞等
+［52］系统阐述了煤矸石在土
+壤化利用与土壤改良剂制备方面的研究现状，煤矸
+石可直接与土壤复配或将煤矸石改性制肥再对土壤
+进行修复与改良。通过改性处理，煤矸石的表面特
+性和孔隙结构得以优化，使其能够有效吸附和固定
+土壤中的重金属离子和有机污染物，从而减少这些
+有害物质的生物有效性和迁移性。CHEN 等
+［53］利用
+Fe2SO4·7H2O 和H2O2 处理煤矸石，再添加5% 的
+CaO 在800 ℃焙烧2 h得到改性煤矸石并用于除去土
+壤中的As 和Cd，其中有效态As 和Cd 分别降低了
+17. 94% ～29. 81%和14. 22% ～30. 41%。改性后煤矸
+石对砷的修复机理包括吸附、氧化、络合和络合沉
+淀/共沉淀，As( III) /As( V) 通过静电吸附在改性煤
+矸石表面，并与改性煤矸石的铁氧化物和氢氧化物
+图7
+煤矸石基磁性多孔材料修复砷和镉共污染土壤的
+潜在机制
+［53］
+Fig. 7
+Schematic illustration of potential mechanisms for
+remediation of arsenic and cadmium co－contaminated soil
+by coal gangue－based magnetic porous material
+结合形成稳定的络合物和沉淀物/共沉淀物，如图7
+所示。同时，部分As( Ⅲ) 被Fe( Ⅲ) 和—OH氧化形
+成As( V) ，改性煤矸石对Cd 的修复机理包括吸附、
+离子交换、络合和沉淀等。改性煤矸石对镉的修复
+机制包括吸附、离子交换、络合和沉淀。镉通过吸
+附和离子交换的方式富集到改性煤矸石的表面，并
+与Si—OH和—OH结合形成更稳定的不溶性沉淀。此
+外，改性煤矸石还可以通过提高土壤中硫酸盐还原
+基因( dsrA) 的丰度，促进硫酸盐还原过程。硫化物
+生成后，会与砷( As) 和镉( Cd) 形成沉淀，从而降低
+土壤中As 和Cd 的可用性。尽管一些研究表明，煤
+矸石用作土壤肥料时，砷( As) 、铈( Ce) 等元素的浸
+出量低于国家标准，但这些试验仅为短期研究。随
+着时间的推移，金属元素的浸出量可能会逐渐增加。
+当植被受到重金属胁迫时，植物的各种生理生化过
+程可能会发生紊乱，导致产量下降，且农作物中的
+重金属含量也会随着土壤中重金属含量的升高而增
+加，长期食用会对人体健康产生危害。同时，农业
+应用方向的综合利用可以消耗大量煤矸石，但考虑
+到运输成本问题，这种方法仅适用于矿区及其周边
+地区。
+2. 5
+提纯回收
+煤矸石内含丰富的有价元素种类，涵盖铝、硅、
+铁等常见元素以及稀有的镓、锂、钛、锗等，是一
+种极具潜力的多元化矿产资源。吴海滨等
+［54］研究表
+明，通过对煤矸石进行3 h水浴酸浸处理，其中氧化
+铝高效溶出，溶出率超过80%。并制备出了具有高
+纯度( Al2O3 质量分数为10. 3%) 和适宜盐基度
+( 65. 6%) 的聚氯化铝产品。朱晓波等
+［55］提出活化焙
+烧与联合浸出技术，以煤矸石为起始原料，通过预
+焙烧、酸浸、碱焙烧、水浸及陈化等步骤，成功制
+备出纯度超过99. 5%的高品质白炭黑，实现了硅元
+素的高效溶出( 溶出率达95%) 。众多研究结果表
+明，通过焙烧活化处理，煤矸石中的稀土元素溶出
+性更高，更易于被提取和利用。聂天成
+［56］以内蒙古
+准格尔煤矸石为对象，研究焙烧活化过程中稀土元
+素赋存状态转变及其对浸出的影响。研究发现稀土
+元素主要赋存于硅酸盐、铝硅酸盐态，焙烧促进向
+金属氧化物态转变，但高温下再转化。优化条件下，
+600 ℃焙烧显著提升稀土浸出率至近100%。田爱杰
+等
+［57］采用正交实验法优化煤矸石镓提取工艺，通过
+高温酸性浸出技术，系统探讨了酸的浓度、灼烧及
+酸浸的温度与时间等关键参数对镓提取率的影响，
+并成功确定了最优工艺条件( 酸浓6 mol/L，灼烧
+600 ℃/0. 5 h，酸浸100 ℃/6 h) ，实现了镓提取率
+超过95%的显著效果，为煤矸石中镓的高效提取提
+供了实验依据和有效方案。这些回收利用技术的消
+耗量较低，市场需求有限，产量依赖于生产工艺水
+平，对设备和技术的要求较高。有价元素回收后的
+固体废物还需要考虑其二次处置和利用。
+3
+尾煤资源化利用研究进展
+浮选尾煤作为煤炭洗选过程中所产出的细粒固
+4
+1
+1
+专家论坛
+煤
+炭
+工
+程
+2024 年第10 期
+体废弃物，含有大量细小的煤粒与多元矿物质组分。
+尾煤的灰分高、总硫含量适中，低位发热量相对较
+低。目前对于尾煤的高值化应用主要涉及以下领域:
+尾煤吸附材料的改性制备、尾煤充填材料的合成获
+取、尾煤土壤改良剂的生成转化等。
+3. 1
+尾煤吸附材料
+近年来，研究者们致力于将浮选尾煤转化为高
+价值的吸附材料，以实现资源的回收和环境污染的
+治理。李雅涛等
+［58］以浮选尾煤为原料物，通过热活
+化－碱激发制备了尾煤基地质聚合物材料( TGP) ，考
+察了热活化温度对TGP 吸附Pb( Ⅱ) 容量的影响，
+提出关于制备所得的TGP 吸附过程。实验结果表
+明: 800 ℃热活化后的TGP 对Pb( Ⅱ) 吸附效果最
+佳，吸附量达228. 57 mg /g，远高于原尾煤吸附量
+64. 48 mg /g; 且制备的尾煤基地质聚合物材料性能
+稳定，经六次使用后对离子吸附量均可保持在80%
+以上。李瑞等
+［59］同样以浮选尾煤为原料，通过焙烧
+法将浮选尾煤进行隔氧惰性氛围焙烧处理，所获尾煤
+基吸附材料对Cr( Ⅵ) 表现出较好的吸附活性。研究发
+现，当焙烧温度800 ℃、反应时间3 h、反应温度
+45 ℃、溶液pH 值为3、吸附剂投放量为
+1. 5 g/200 mL、初始Cr( Ⅵ) 浓度为20 mg/L 的条件
+下，制备所得尾煤基吸附剂对比未改性浮尾使水中Cr
+( Ⅵ) 去除率从67%提高至99%，吸附改性效果较为显
+著。基于上述研究，为了避免空气对尾煤基材料制备
+过程的影响，并明确多金属离子条件下竞争吸附效应
+对目标重金属离子去除效率的作用机制，何梓豪
+等
+［60］采用氮气焙烧联合Na2CO3 改性的方法制备得到
+焙烧－Na2CO3 改性尾煤( CNTC) ，确定了针对该材料
+制备使用的最佳工艺条件，对水体中所蕴含的Cu
+2+、
+Pb
+2+表现出较好吸附选择性，其中对50 mg/L Cu
+2+ 和
+200 mg/L Pb
+2+的去除率均达到98%以上，其关于金属
+离子吸附过程原理如图8 所示。KONDＲATENKO
+等
+［61］将浮尾置于电等离子体反应器中，通过热活化
+反应获得具有高度发达多孔结构的有机矿物吸附剂。
+凭借对工业废水使用制备所得吸附剂进行浊度对比分
+析可知，经由吸附剂处理的废水浊度降低效果显著，
+吸附选择性较好。XUE 等
+［62］在不同活化温度和时间
+条件下，探索了CO2 活化法制备多孔尾煤基材料对亚
+甲基蓝的吸附性能效果。借助全自动比表面及孔隙度
+分析仪( BET) 研究了不同活化方法对所制备材料孔结
+构及其比表面积之间的差异性特征，通过对比不同活
+化状态下孔结构的比表面积7. 8、17. 7、62. 3、
+99. 5 m
+2 /g，最终探究得出吸附材料最佳的制备条件。
+在对尾煤基材料进行缓慢活化过程中，其内部孔隙得
+到充分发展，当活化温度为800 ℃、活化时间为33 h
+时，材料吸附量达到最大为48. 8 mg/g。
+图8
+TC 改性过程及CNTC 吸附Cu( II) 、Pb( II) 的机理
+［60］
+Fig. 8
+Modification process of TC and adsorption
+mechanism of Cu( II) and Pb( II) by CNTC
+基于上述研究，浮选尾煤凭借其自身来源广泛、
+价格低廉等特点在我国可持续发展建设过程中展现
+出极大的利用价值。它不仅使水体环境治理过程中
+重金属离子的归置消解问题得到解决，同时也为其
+他有机污染物的回收富集提供了新的思路与利用途
+径。然而，现阶段以尾煤基为材料来源，用于制备
+高值吸附材料的研究应用同样也面临着诸多问题与
+挑战。一方面，尾煤材料的吸附性能不稳定，易受
+外界环境条件的影响而发生变化( 例如pH 值、温度
+等) ，致使其无法在复杂多变的水体环境中持续维持
+高效的处理性能与吸附能力，由此限制了其在大规
+模推广过程中的应用范围。另一方面，尾煤中所赋
+存的杂质较多且某些物质可能附带毒性，处理不当
+不仅会增加后续处理环节的复杂性，而且还可能会
+对周围环境造成二次污染。
+3. 2
+尾煤充填材料
+浮选尾煤基充填材料是一种经济有效的充填材
+料，有助于控制矿山固废和改善矿区生态环境，对
+保障我国能源安全与固废规模化利用具有十分重大
+的现实意义。LI 等
+［23］通过采用Box－Behnken 响应面
+法研究了浮选尾矿特性对填充材料力学性能和水化
+机理的影响，并借助其团队自主改进的工艺矿物学
+自动测试系统( BPMA) 分析得到浮选尾煤中的硅和
+铝元素以不同的形式大量存在，如图9 所示，
+CFTFM 存在大量水化硅酸钙( C－S－H) 和高岭石，为
+胶凝系统提供了丰富的硅和铝来源。其结果表明由
+水泥、煤矸石、浮选尾矿按一定比例掺配所制煤炭
+浮选尾矿充填材料( CFTFM) 是一种复杂的非均匀三
+相系统，在与水均匀混合时经过一系列物理和化学
+变化，能够产生不同形状的水化产物，最佳单轴抗
+5
+1
+1
+2024 年第10 期
+煤
+炭
+工
+程
+专家论坛
+压强度可达7. 02 MPa，适用于煤炭综采充填协同开
+采技术，可有效降低矸石提升能耗和洗选过程中的
+浪费，降低充填成本，并在一定程度上有助于实现
+煤基固体废弃物的无害化、资源化和规模化处置。
+浮选尾煤具有良好的火山灰活性，经处理后按一定
+比例掺入水泥可制备廉价高效的尾煤胶凝材料。
+图9 CFTFM BPMA 分析图
+［23］
+Fig. 9
+CFTFM BPMA diagram
+为优化充填材料中胶凝材料成本和性能之间的
+平衡关系，樊玉萍等
+［22］利用浮选尾煤以替代部分水
+泥制备得到胶凝材料，通过研究其火山灰性质和水
+化动力过程变化特征并结合SEM－EDS 对水化产物
+的微观形貌进行特征分析，发现当经800 ℃煅烧3 h
+后，添加固体硅酸钠激发剂( 硅酸钠质量占比6%) ，
+能够使浮选尾煤火山灰活性激发处于最佳释放状态，
+活性指数Ka 为18. 85%，且表现出较快的水化速率，
+进而提出了其水化过程模型( 图10) ，将新胶凝材料
+水化过程分为吸附－溶解期、水化期和凝结硬化期，
+并解释了各组分在不同时期贡献的作用。
+图10
+水化机制模型示意
+［22］
+Fig. 10
+Schematic diagram of the hydration mechanism model
+尾煤作为矿山固体废弃物的来源之一，通过将
+其与其他脉石矿物进行协同改性后所得尾煤充填材
+料能够提供良好的力学性能，增强填充结构稳定性
+与可靠性。尾煤充填材料合成技术的实施应用，不
+仅实现了矿山废物的多组态循环利用，而且还为我
+国固体废弃物的大宗利用拓展了崭新途径。尽管尾
+煤在充填材料的制备应用方面具备一定潜力，但由
+于尾煤材料自身吸附性较强、脆性较大，其是否能
+在封闭岩土矿层中稳定、连续的保持自身结构特性
+仍是目前面临的较大挑战。今后应当通过寻找并调
+配出适合尾煤充填材料制备的最佳组分配比与掺配
+物结构属性，以期使尾煤充填材料在矿山修复与保
+护中实现大规模的推广与应用。
+3. 3
+尾煤土壤改良剂
+尾煤含有丰富的有机质和植物生长所需的多种
+矿物养分，基于其特殊的物化性质可用于制备农业
+肥料和土壤改良剂。陈友良等
+［63］用尾煤的有机成分
+采用空气氧化后的煤泥提取腐植酸，研究结果表明，
+在一定的氧化温度和时间下能显著提高煤泥中腐植
+酸含量，通过设置的碱浸酸提参数，可实现再生腐
+植酸的提取。李正秋等
+［64］将尾煤和硫酸钾复合肥混
+合制备缓释肥料，两种材料在水浴搅拌和陈化处理
+后的复合肥能有效的提高，氮、磷、钾元素与煤泥
+表面间的物理相互作用力，使营养元素达到了缓释
+效果。武俊英等
+［65］以尾煤作基肥，探究不同尾煤添
+加量对燕麦生长的影响，结果表明施用尾煤
+15 t/hm
+2时可增加砂壤土的容重10. 48%，提高土壤
+保水性能，并保持土壤养分含量，有利于土壤培肥，
+该土壤下种植的燕麦干草产量和籽粒产量均得到提
+高。随着采煤机械化比例增加和选煤技术的不断提
+高，尾煤灰分不断增加，高灰分尾煤的综合利用成
+为尾煤综合利用的新问题。TIAN 等
+［66］结合高灰尾
+煤特性，采用一步水热法制备了富含有效硅、有效
+钾和有效钙元素的高灰煤泥基硅肥( CSF) 。通过使
+用其团队自主改进的电感耦合等离子体质谱仪
+( ICP－MS) 确定碳酸盐结合形式( CA) 、铁－氧化锰结
+合状态( OX) 、有机结合状态( OＲ) 、残余形式
+( ＲS) ，并测定了Si、Pb、K、Ca 离子浓度，同时借
+助扫描电子显微镜与能谱分析( SEM－EDS) 观察其表
+面形貌的变化，结果表明以托贝莫来石和钾硅酸铝
+盐为主要成分的CSF 能够中和土壤酸性，比表面积
+增加了1. 47 倍，具有复杂的介孔结构，对重金属具
+有很强的吸附能力，特别是Pb;
+并显著增加土壤中
+有效硅、速效钾和交换性钙含量，降低土壤铅的生
+物活性。此外，白菜幼苗种植试验显示，CSF 能够
+促进植物生长，生物量增加了2% ～37%，缓释植物
+生长所须的多元营养元素，并能有效抑制其对铅元
+素的吸收( 减少19. 22% ～3426%) 。CSF 具有为植被
+提供矿物养分和钝化土壤中铅的双重潜力( 图11) 。
+6
+1
+1
+专家论坛
+煤
+炭
+工
+程
+2024 年第10 期
+图11
+CSF 对土壤中铅元素的多元改性机制
+［66］
+Fig. 11
+Multifaceted modification mechanism of CSF on elemental lead in soil
+尾煤作为土壤改良剂在农业和环保领域展现出
+一定的应用潜力，其所面临的挑战与机遇并存。作
+为工业废弃物，尾煤的转化利用不仅减少了环境污
+染，还有效降低了资源浪费。将其制备加工成为土
+壤改良剂，能够显著改善土壤结构与物理性质，增
+加土壤通气性同时并有效维系土壤水分的保持能力，
+这对于促进植物生长和提高作物产量至关重要。同
+时，尾煤中含有一定量的有机质和微量元素，这些
+成分有助于提高土壤肥力，进一步促进作物的健康
+生长。此外作为一种经济环保型的改良剂，尾煤价
+格相对低廉，降低农业生产成本的同时能够创造重
+大的经济价值。然而，尾煤作为土壤改良剂同时也
+存在些许弊端。一方面，其内部重金属与其他有害
+物质的赋存问题，是现阶段尾煤基土壤改良剂合成
+制备过程中一个不可忽视的隐患。若尾煤处理不当，
+可能导致土壤污染，从而影响作物安全和人类健康。
+其次，尾煤的吸水性较强，可能导致土壤层过湿现
+象，这对植物根系的生长易产生负面影响，甚至可
+能引起根部腐烂。另一方面，尾煤的改良效果可能
+受外界环境条件的影响，表现出不稳定性，这使得
+其在不同土壤类型和气候条件下的应用效果难以预
+测。此外，虽然尾煤本身成本较低，但其处理和改
+良效果提升的技术可能需要额外投入，增加了整体
+成本。最后，现阶段公众对尾煤作为改良剂应用的
+接受程度较低，可能影响其在实际应用中的推广。
+综上所述，尾煤作为土壤改良剂具有资源再利用、
+改善土壤结构和成本低廉等优势，但同时也面临着
+重金属污染、吸水性强和社会接受度低等挑战。在
+实际应用中，需要综合考虑其优缺点，并通过技术
+改进和科学管理来最大化其潜力。
+4
+选煤固废资源化利用面临的问题
+针对煤矸石而言:
+随着国家政策不断推动固体
+废弃物的综合利用，煤矸石的利用技术日趋多样化。
+然而，现有处理方法仍难以满足大规模应用的需求。
+首先，在建筑材料、矿山回填和发电等高消费潜力
+行业中，当地经济条件和产业布局限制了废弃物在
+产地的需求，而需求旺盛的地区又不生产废弃物。
+这种地理和经济上的不匹配导致了煤矸石利用效率
+的降低。其次，尽管许多技术在理论上可行，但由
+于应用成本较高，以及运输半径和市场容量的限制，
+经济可行性受到影响，难以广泛推广。技术的经济
+性是其实际应用的关键，然而高昂的成本使得企业
+在选择这些技术时犹豫不决。此外，一些理论上可
+行的技术尚不成熟，缺乏大规模示范和实际应用评
+价，仍需时间验证。这些技术障碍使煤矸石的利用
+面临严峻挑战。与发达国家相比，中国的煤矸石利
+用率较低，且利用方式单一。目前，煤矸石主要用
+7
+1
+1
+2024 年第10 期
+煤
+炭
+工
+程
+专家论坛
+于矿山回填、建材生产和发电，但在高附加值化学
+品中的应用仍然有限。在筛选和破碎过程中产生的
+粉尘，以及化学反应和活化过程中产生的废液、残
+渣和有害气体，可能引发二次环境污染。煤矸石酸
+浸出液中含有多种复杂成分的金属离子，使得单一
+金属离子的分离提取成为技术难题和研究重点。此
+外，不同区域条件下煤矸石的矿物成分和含量各异，
+导致现有资源利用方法缺乏普适性。
+针对尾煤而言:
+在技术层面，尾煤有用成分往
+往含量较低、颗粒粒度细、煤粒表面通常附有较多
+的黏土类矿物、存在较多的亲水性官能团，有价组
+分回收难度大;
+此外，依靠现有技术制备所得尾煤
+材料的性能均一性较差、效果不稳定。针对尾煤吸
+附材料，其吸附性能受到多种因素影响，如水质、
+温度、pH 值等。这使得尾煤在不同环境条件下的应
+用效果不一致，难以形成稳定的吸附性能标准。针
+对尾煤充填材料，尾煤在长期使用过程中可能面临
+强度和耐久性不足的问题。特别是在受潮、受压等
+环境中，尾煤的性能可能显著下降，这对其作为充
+填材料的可行性产生影响。针对尾煤土壤改良剂，
+尾煤在不同土壤类型和气候条件下的改良效果可能
+存在显著差异，甚至可能在某些情况下对土壤的改
+良效果不如传统肥料。这种不确定性给农民带来了
+风险，使他们在选择土壤改良剂时更倾向于传统方
+法。因此，在实际应用中，需要针对不同应用环境
+条件下进行专门的适配研究，以确保尾煤基合成材
+料效果能够达到预期。在环境层面，尾煤中可能含
+有微量重金属元素和放射性元素及其他有害成分，
+例如铅、砷、镉等。在使用尾煤作为吸附、土壤改
+良材料时，若其处理不当，这些有害物质可能会在
+环境中释放，对水体和土壤等造成污染损伤。并且
+尾煤多功能材料在加工利用过程中产生的有害气体
+和废水等对空气质量和水资源也会造成一定污染。
+上述问题在尾煤处理和改性过程中必须加以重视，
+确保其在吸附、改性过程中的安全性与可靠性;
+在
+经济层面，尾煤资源化利用经济效益相对较低，部
+分企业缺乏综合利用浮选尾煤的动力，且浮选尾煤
+综合利用技术的研发和推广需要的资金投入相对不
+足，限制了新技术的研发和应用。尽管尾煤本身价
+格低廉，但其在加工和处理过程中所需的技术和设
+备投资相对较高，这使得尾煤作为高值化材料应用
+的经济性受到一定限制。在技术尚未成熟的情况下，
+处理成本往往难以接受，限制了其广泛应用。在市
+场接受方面，现阶段公众对尾煤的认知和接受程度
+相对较低，尤其是在工程建设与农业改造过程中，
+许多人对尾煤的安全性和环保性持怀疑态度，这可
+能会影响其在农业和建筑等领域的应用推广。此外，
+尾煤作为高值化材料的应用尚缺乏统一的标准和技
+术规范，这使得不同厂商在产品质量和性能上存在
+较大差异，进一步影响了市场的接受度和推广。尾
+煤在吸附材料、充填材料和土壤改良剂等方面的应
+用具有广阔前景，但同样也面临重重挑战。解决这
+些问题需要从多个方面入手，包括强化尾煤的处理
+技术、建立标准化的应用规范、进行环境监测和风
+险评估、推动社会宣传和教育等。此外，政策支持
+和资金投入也是推动尾煤综合利用的重要因素。相
+信通过多方面的持续努力，尾煤的综合利用有望在
+资源循环利用和环保方面发挥更大作用。
+5
+结语及展望
+煤炭洗选加工过程所产生的煤矸石和尾煤等固
+废，若未经适当处理，将对环境生态系统造成严重
+破坏，引发重大污染问题。同时，固废中含有的硅、
+铝等有价资源的浪费现象亦不容忽视，这些资源若
+得不到有效回收利用，将导致资源浪费和环境负荷
+增加。针对选煤固废的资源化利用，需要在多个领
+域展开技术创新和工业应用，包括但不限于燃烧发
+电、充填开采、建筑材料、高值材料和土壤改良等。
+通过实现这些领域的技术突破，可以促进资源的可
+持续利用，同时有效保护生态环境，符合当前煤炭
+资源清洁高效利用的发展趋势。尽管相关技术在过
+去几十年取得了迅速发展和明显优势，但仍存在一
+些挑战和不足，包括技术成本、资源回收率、废物
+处理效率等方面的问题，这些不足限制了选煤固废
+资源化利用的进一步发展。未来选煤固废资源化综
+合利用应着重开展以下研究，进一步实现选煤固废
+高效、安全、环保、分级梯级利用。
+1)
+充填开采技术: 充填开采具有大宗消纳选煤
+固废的潜力，未来应着重优化充填材料性能，研发高
+孔隙充填材料，赋予充填材料二氧化碳封存等更多功
+能，最终实现“近零生态损伤、近零冲击地压及负碳
+开采”; 同时，需优化充填材料输送能力、引入智能
+化和数字化技术，助力煤炭绿色开采转型发展。
+2)
+建筑材料: 随着可持续发展理念的深入以及
+对建筑材料性能要求的不断提高，未来选煤固废应
+着重于制造轻质建筑材料、保温材料和绿色材料等，
+8
+1
+1
+专家论坛
+煤
+炭
+工
+程
+2024 年第10 期
+在降低材料成本的同时，提高耐久性、强度和环境
+适应性; 同时，可以利用其他工业固废作为激发剂，
+制备绿色低碳建筑材料，达到“以废治废”的效果。
+3)
+土壤改良: 选煤固废在土壤改良方面的应用
+也将不断扩大。随着对农业可持续发展规划的实施
+推进，未来应致力于探索新工艺，活化选煤固废，
+促养分释放并改性原料，实现供肥、减害、土壤改
+良多重效益;
+同时，重视选煤固废复合肥效果，开
+发全养分肥，实现速效长效增效，精准控释，集供
+肥、促生、抗病于一体。
+4)
+高值材料: 炭化技术也将成为未来重点研究
+方向。应致力于通过新型处理技术，将选煤固废转
+化为活性炭和其他碳材料，用于水处理、空气净化
+和催化剂等领域。
+参考文献( Ｒeferences) :
+［1］
+郭
+娟，崔荣国，周起忠，等．2022 年中国矿产资源形势回
+顾与展望［J］．中国矿业，2023，32( 1) : 1－6．
+GUO Juan，CUI Ｒongguo，ZHOU Qizhong，et al．Outlook and
+overview of mineral resources situation of China in 2022 ［J］．
+China Mining Magazine，2023，32( 1) : 1－6．
+［2］
+ANDＲEOLA A，ＲOSINI D N，CAMPOS M L，et al．Ferns and
+lycophytes in coal mining waste and tailing landfills ［J］．
+Environmental Science and Pollution Ｒesearch，2022，29( 22) :
+32415－32427．
+［3］
+刘
+博，刘墨祥，陈晓平．用废弃煤矸石制备高比表面积的
+SiO2－Al2O3 二元复合气凝胶［J］．化工学报，2017，68
+( 5) : 2096－2104．
+LIU Bo，LIU Moxiang，CHEN Xiaoping．Preparation of SiO2 －
+Al2O3 composite aerogel with high specific surface area by sol－gel
+method from coal gangue ［J］．CIESC Journal，2017，68( 5) :
+2096－2104．
+［4］
+《关于“十四五” 大宗固体废弃物综合利用的指导意见》
+［J］．黄金科学技术，2021，29( 2) : 286．
+Guidance on the comprehensive use of bulk solid waste in the 14th
+Five－Year Plan．［J］．Gold Science and Technology，2021，29
+( 2) : 286．
+［5］
+李雅迪．我国煤矸石综合利用现状与展望［J］．煤炭经济研
+究，2024，44( 4) : 127－133．
+LI Yadi．
+Current situation and prospects of coal gangue’s
+comprehensive utilization ［J］．Coal Economic Ｒesearch，2024，
+44( 4) : 127－133．
+［6］
+KOSSOFF D，DUBBIN W E，ALFＲEDSSON M，et al．Mine
+tailings dams: Characteristics，failure，environmental impacts，and
+remediation ［J］．Applied geochemistry，2014，51: 229－245．
+［7］
+ZHANG Y，ZHANG Y，SHI X，et
+al．
+Co －spontaneous
+combustion of
+coal
+and
+gangue:
+Thermal
+behavior，kinetic
+characteristics and interaction mechanism ［J］．Fuel，2022，
+315: 123275．
+［8］
+范晓平，刘
+京，康
+哲，等．煤矸石综合利用与矿山生态修复
+的战略思考［J］．环境卫生工程，2023，31( 1) : 8－15．
+FAN Xiaoping，LIU Jing，KANG Zhe，et al．Strategic Thinking
+of Comprehensive Utilization of Coal Gangue and Ecological
+Ｒestoration of Mines ［J］．Environmental Sanitation Engineering，
+2023，31( 1) : 8－15．
+［9］
+王
+艳，左
+震，文
+波，等．煤矸石粗集料理化性质和形
+状特征对混凝土强度的影响［J］．矿业科学学报，2022，7
+( 5) : 554－564．
+WANG
+Yan，ZUO
+Zhen，WEN
+Bo，et
+al．
+Influence
+of
+physicochemical properties and
+shape
+characteristics
+of
+coal
+gangue coarse aggregate on concrete strength ［J］．Journal of
+Mining Science and Technology，2022，7( 5) : 554－564．
+［10］
+张军宇，吕
+超，罗颖初，等．煤矸石资源化利用研究现状
+与展望［J］．化工矿物与加工，2024，53( 9) : 40－49．
+ZHANG Junyu，LYU Chao，LUO Yingchu，et al．Current status
+and prospects of research on the resource utilization of coal gangue
+［J］．Industrial Minerals and Processing，2024，53 ( 9 ) :
+40
+－49．
+［11］
+TAHA Y，BENZAAZOUA M，HAKKOU Ｒ，et al．Coal mine
+wastes recycling for coal recovery and eco －friendly bricks
+production ［J］．Minerals Engineering，2017，107: 123－138．
+［12］
+张华林，赵梦飞，江晓亮，等．煤矸石改性方法及其资源环
+境利用研究进展［J］．化学学报，2024，82( 5) : 527－540．
+ZHANG Hualin，ZHAO Mengfei，JIANG Xiaoliang，et
+al．
+Ｒesearch Progress of Coal Gangue Modification Method and Its
+Ｒesource and Environment Utilization ［J］．Acta Chimica Sinica，
+2024，82( 5) : 527－540．
+［13］
+孟凡会，戴露霏，姚隆帆，等．煤矸石基高强度泡沫陶瓷的
+制备与性能［J］．硅酸盐学报，2024，52( 9) : 2959－2968．
+MENG Fanhui，DAI Lufei，YAO Longfan，et al．Preparation
+and properties of gangue－based high－strength foam ceramics ［J］．
+Journal of the Chinese Ceramic Society，2024，52 ( 9) :
+2959
+－2968．
+［14］
+GAO S，ZHANG S，GUO L．Application of coal gangue as a
+coarse aggregate in green concrete production:
+A review ［J］．
+Materials，2021，14( 22) : 6803．
+［15］
+郭彦霞，张圆圆，程芳琴．煤矸石综合利用的产业化及其展
+望［J］．化工学报，2014，65( 7) : 2443－2453．
+GUO Yanxia，ZHANG Yuanyuan，CHENG Fangqin．Industrial
+development and prospect about comprehensive utilization of coal
+gangue ［J］．CIESC Journal，2014，65( 7) : 2443－2453．
+［16］
+聂天成．焙烧活化对煤矸石中稀土元素的赋存及浸出影响研
+究［D］．徐州: 中国矿业大学，2021．
+［17］
+TONG W，YING W，JUN W．Ｒesearch on potential fertilization
+of coal gangue in the Weibei coalfield，China ［J］．Acta
+Geologica Sinica－English Edition，2008，82( 3) : 717－721．
+［18］
+王丽萍，李
+超，常
+宁，等．煤矸石中有价元素回收技术
+研究进展［J］．无机盐工业，2023，55( 7) : 10－17．
+WANG Liping，LI Chao，CHANG Ning，et al．Ｒesearch progress of
+recovery technology of valuable elements from coal gangue ［J］．
+Inorganic Chemicals Industry，2023，55( 7) : 10－17．
+［19］
+邓明瑞．高灰浮选尾煤制备高岭土工艺试验研究［J］．选煤
+技术，2023，51( 2) : 47－53．
+DENG Mingrui．Experimental study of the technological process
+for recovery of kaolin from flotation tailings ［J］．Coal Preparation
+Technology，2023，51( 2) : 47－53．
+［20］
+冯泽宇，陈茹霞．焙烧改性浮选尾煤负载纳米Fe3O4 去除水中
+Pb(Ⅱ) 的研究［J］．实验技术与管理，2023，40( 8) : 77－83．
+FENG Zeyu，CHEN Ｒuxia．Study on the removal of Pb ( Ⅱ)
+9
+1
+1
+2024 年第10 期
+煤
+炭
+工
+程
+专家论坛
+from water by roasting modified flotation tailings loaded with nano
+Fe3O4 ［J］．Experimental Technology and Management，2023，
+40( 8) : 77－83．
+［21］
+付元鹏．浮选尾煤中矿物质及镓元素富集规律的研究［D］．
+太原: 太原理工大学，2017．
+［22］
+樊玉萍，李德浩，董宪姝，等．碱激发尾煤充填材料水化动
+力过程与水化机制［J］．中国矿业大学学报，2024，53( 1) :
+186－197．
+FAN Yuping，LI Dehao，DONG Xianshu，et al．Hydration
+dynamic process and hydration mechanism of alkali excited
+flotation tailings filling material ［J］．Journal of China University
+of Mining and Technology，2024，53( 1) : 186－197．
+［23］
+LI D，FAN Y，DONG X，et al．Mechanical Properties and
+Hydration Mechanism of Coal Flotation Tailing Cemented Filling
+Materials ［J］．Minerals，2023，13( 3) : 389．
+［24］
+THOMAS J，HAJDUKOVA J，MALIKOVA P，et al．The study
+of the interaction between flotation tailings and flocculants in
+separation process of coal ［J］．Inzynieria Mineralna，2014，15
+( 1) : 259－268．
+［25］
+陈琬滢．浮选尾煤中高岭石的浮选规律研究［D］．太原:
+太
+原理工大学，2022．
+［26］
+马新涛，王凤其，万光显．浮选尾煤的特性分析与利用途径
+探讨［J］．煤炭加工与综合利用，2022( 10) : 47－52．
+MA
+Xintao，WANG
+Fengqi，WAN
+Guangxian．
+Characteristic
+analysis and application evaluation of coal flotation tailing ［J］．Coal
+Processing and Comprehensive Utilization，2022( 10) : 47－52．
+［27］
+徐培杰，朱毅菲，曹永丹，等．煤矸石资源高值化利用研究
+进展［J］．环境工程学报，2023，17( 10) : 3137－3147．
+XU Peijie，ZHU Yifei，CAO Yongdan，et al．Ｒesearch progress of
+high－value utilization of coal gangue resources ［J］．Chinese Journal
+of Environmental Engineering，2023，17( 10) : 3137－3147．
+［28］
+李
+鹏，夏元鹏，张立魁，等．煤矸石综合利用产业政策和
+发展方向［J］．陕西地质，2021，39( 2) : 96－101．
+LI Peng，XIA Yuanpeng，ZHANG Likui，et al．Industrial policy
+and development direction of the comprehensive utilization of coal
+gangue ［J］．Geology of Shaanxi，2021，39( 2) : 96－101．
+［29］
+青
+方．国外煤矸石处理及其经济效益［J］．河北煤炭，
+1990( 4) : 53－55．
+QING Fang．Foreign coal gangue treatment and its economic
+benefits ［J］．Hebei Coal，1990( 4) : 53－55．
+［30］
+LIU H，XU Q，WANG Q，et al．Prediction of the elastic
+modulus of concrete with spontaneous－combustion and rock coal
+gangue aggregates ［J］．Structures，2020: 774－785．
+［31］
+高美科．煤矿充填开采技术现状及未来发展探讨［J］．能源
+与节能，2024( 6) : 1－5．
+GAO Meike．Current Status and Future Development of Coal Mine
+Filling Mining Technology ［J］．Energy and Energy Conservation，
+2024( 6) : 1－5．
+［32］
+张建中，王云搏，杨军辉，等．邢东矿充填开采智能化技术
+及工程实践［J］．工矿自动化，2023，49( 3) : 142－148．
+ZHANG Jianzhong，WANG
+Yunbo，YANG
+Junhui，et
+al．
+Intelligent technology and engineering practice of backfilling
+mining in Xingdong Mine ［J］．Journal of Mine Automation，
+2023，49( 3) : 142－148．
+［33］
+王双明，刘
+浪，朱梦博，等．“双碳”目标下煤炭绿色低
+碳发展新思路［J］．煤炭学报，2024，49( 1) : 152－171．
+WANG Shuangming，LIU Lang，ZHU Mengbo，et al．New way
+for green and low－carbon development of coal industry under the
+target of“daul－carbon”
+［J］．Journal of China Coal Society，
+2024，49( 1) : 152－171．
+［34］
+杨
+科，魏
+祯，赵新元，等．黄河流域煤电基地固废井下
+绿色充填开采理论与技术［J］．煤炭学报，2021，46( S2) :
+925－935．
+YANG Ke，WEI Zhen，ZHAO Xinyuan，et al．Theory and
+technology of green filling of solid waste in underground mine at
+coal power base of Yellow Ｒiver Basin ［J］．Journal of China Coal
+Society，2021，46( S2) : 925－935．
+［35］
+孙希奎．矿山绿色充填开采发展现状及展望［J］．煤炭科学
+技术，2020，48( 9) : 48－55．
+SUN Xikui．Present situation and prospect of green backfill
+mining in mines ［J］．Coal Science and Technology，2020，48
+( 9) : 48－55．
+［36］
+许家林，钱鸣高，金宏伟．岩层移动离层演化规律及其应用
+研究［J］．岩土工程学报，2004( 5) : 632－636．
+XU Jialin，QIAN Minggao，JIN Hongwei．Study and application
+of bed separation distribution and development in the process of
+strata
+movement ［J ］．
+Chinese
+Journal
+of
+Geotechnical
+Engineering，2004( 5) : 632－636．
+［37］
+缪协兴，巨
+峰，黄艳利，等．充填采煤理论与技术的新进展及
+展望［J］．中国矿业大学学报，2015，44( 3) : 391－399．
+MIAO
+Xiexing，JU
+Feng，HUANG
+Yanli，et
+al．
+New
+development and
+prospect
+of
+backfilling
+mining
+theory
+and
+technology ［J］．Journal of China University of Mining and
+Technology，2015，44( 3) : 391－399．
+［38］
+冯光明，贾凯军，尚宝宝．超高水充填材料在采矿工程中的
+应用与展望［J］．煤炭科学技术，2015，43( 1) : 5－9．
+FENG Guangming，JIA Kaijun，SHANG Baobao．Application
+and prospect of super －high －water packing material in mining
+engineering ［J］．Coal Science and Technology，2015，43( 1) :
+5－9．
+［39］
+赵
+雨．安居矿巨厚火成岩下超高水材料充填开采技术研究
+［D］．徐州: 中国矿业大学，2018．
+［40］
+张吉雄，张
+强，周
+楠，等．煤基固废充填开采技术研究
+进展与展望［J］．煤炭学报，2022，47( 12) : 4167－4181．
+ZHANG Jixiong，ZHANG Qiang，ZHOU Nan，et al．Ｒesearch
+progress and prospect of coal based solid waste backfilling mining
+technology ［J］．Journal of China Coal Society，2022，47( 12) :
+4167－4181．
+［41］
+SUN Q，TIAN S，SUN Q，et al．Preparation and microstructure
+of fly ash geopolymer paste backfill material ［J］．Journal of
+Cleaner Production，2019，225: 376－390．
+［42］
+YANG P，LIU L，SUO Y，et al．Mechanical properties，pore
+characteristics and microstructure of modified magnesium slag
+cemented coal－based solid waste backfill materials:
+Affected by
+fly ash addition and curing temperature ［J］．Process Safety and
+Environmental Protection，2023，176: 1007－1020．
+［43］
+YANG K，ZHAO X，WEI Z，et al．Development overview of
+paste backfill technology in China’s coal mines:
+A review ［J］．
+Environmental Science and Pollution Ｒesearch，2021: 1－13．
+［44］
+刘
+音，李金平，路
+瑶，等．煤矸石大粒径粗骨料比例对
+充填膏体性能影响的试验研究［J］．煤矿开采，2016，21
+( 5) : 1－3．
+LIU Yin，LI Jinping，LU Yao，et al．Experimental Studying of
+Coal Gangue Large Particle Size Coarse Aggregate Ｒatio to Filling
+0
+2
+1
+专家论坛
+煤
+炭
+工
+程
+2024 年第10 期
+Paste Property ［J］．Journal of Mining And Strata Control
+Engineering，2016，21( 5) : 1－3．
+［45］
+刘超群，朱泽文，张友华，等．活化煤矸石水泥水化机理与
+性能研究［J］．硅酸盐通报，2023，42( 10) : 3660－3670．
+LIU Chaoqun，ZHU Zewen，ZHANG Youhua，et al．Hydration
+Mechanism and Properties of Activated Coal Gangue Cement ［J］．
+Bulletin of the Chinese Ceramic Society，2023，42( 10) :
+3660
+－3670．
+［46］
+郑大鹏，王栋民，李端乐，等．矿物掺合料对煤矸石水泥复
+合体系需水性的影响［J］．硅酸盐通报，2015，34 ( 9) :
+2656－2661．
+ZHENG Dapeng，WANG Dongmin，LI Duanle，et al．Impact of
+Mineral Admixtures to Water Demand of Coal Gangue －cement
+［J］．Bulletin of the Chinese Ceramic Society，2015，34( 9) :
+2656－2661．
+［47］
+郝贠洪，王韫辉，李
+京，等．利用煤矸石、铁尾矿制备固
+废烧结砖［J/OL］．矿产综合利用，1 －10 ［2024 －06－15］．
+http:
+/ /kns．
+cnki. net/kcms/detail/51. 1251. TD. 20231113. 1037. 006．
+html．
+HAO Yunhong，WANG Yunhui，LI Jing，et al．Preparation of
+Solid Waste Sintered Brick from Coal Gangue and Iron Tailings
+［J/OL］．Multipurpose Utilization of Mineral Ｒesources: 1 －10
+［2024 －06 －15］．http:
+/ /kns. cnki. net/kcms/detail/51. 1251．
+TD. 20231113. 1037. 006. html．
+［48］
+金
+彪，赵
+亮，汪
+潇，等．利用煤矸石、页岩、污泥制
+备烧结砖的研究［J］．非金属矿，2021，44( 5) : 39－41．
+JIN Biao，ZHAO Liang，WANG Xiao，et al．Preparation of
+Sintered Brick with Sludge，Shale and Gangue ［J］．Non －
+Metallic Mines，2021，44( 5) : 39－41．
+［49］
+李
+珠，刘家乐，刘
+鹏，等．煤矸石烧结透水砖的试验研
+究［J］．新型建筑材料，2018，45( 4) : 21－23．
+LI Zhu，LIU Jiale，LIU Peng，et al．Experimental study on
+sintered water permeable brick for coal gangue sintering ［J］．
+New Building Materials，2018，45( 4) : 21－23．
+［50］
+孙洪宾．利用煤矸石/粉煤灰和作物秸秆研制含硅有机复合
+肥［D］．青岛: 山东科技大学，2008．
+［51］
+刘
+甜．煤矸石基LTA 材料对水体重金属吸附和土壤改良的
+研究［D］．西安: 陕西科技大学，2023．
+［52］
+刘帆俞，宋慧平，吴海滨，等．煤矸石土壤化利用与土壤改良剂
+研究进展［J］．矿产保护与利用，2023，43( 6) : 14－26．
+LIU Fanyu，SONG Huiping，WU Haibin，et al．
+Ｒesearch
+Progress on the Utilization of Coal Gangue for Soil Ｒemediation
+and as Soil Amendment Agents ［J］．Conservation and Utilization
+of Mineral Ｒesources，2023，43( 6) : 14－26．
+［53］
+CHEN M，ZHOU Y，SUN Y，et al．Coal gangue －based
+magnetic porous material for simultaneous remediation of arsenic
+and cadmium in contaminated soils: Performance and mechanisms
+［J］．Chemosphere，2023，338: 139380．
+［54］
+吴海滨，薛芳斌，郭彦霞，等．煤矸石制备聚合氯化铝工艺
+［J］．洁净煤技术，2018，24( 4) : 141－145．
+WU Haibin，XUE Fangbin，GUO Yanxia，et al．Technology of
+the preparation of polyaluminium chloride from coal gangue ［J］．
+Clean Coal Technology，2018，24( 4) : 141－145．
+［55］
+朱晓波，巩文辉，李
+望，等．活化焙烧－联合浸出法制备
+白炭黑实验研究［J］．矿产综合利用，2021( 6) : 29－33．
+ZHU Xiaobo，GONG Wenhui，LI Wang，et al．Experiment on
+Preparation of White Carbon by Activated Ｒoasting and Combined
+Leaching ［J］．Multipurpose Utilization of Mineral Ｒesources，
+2021( 6) : 29－33．
+［56］
+聂天成．焙烧活化对煤矸石中稀土元素的赋存及浸出影响研
+究［D］．徐州: 中国矿业大学，2021．
+［57］
+田爱杰，田爱民，孔令靓，等．正交实验法研究煤矸石中镓
+的提取工艺条件［J］．中国锰业，2016，34( 6) : 96－99．
+TIAN Aijie，TIAN Aimin，KONG Lingliang，et al．Production
+Skill of Gallium in Gangue of Orthogonal Experiment ［J］．China
+Manganese Industry，2016，34( 6) : 96－99．
+［58］
+李雅涛，樊玉萍，董宪姝，等．热活化－碱激发法制备尾煤
+基地质聚合物及吸附Pb( Ⅱ) 试验研究［J］．煤炭科学技术，
+2022，50( 8) : 277－284．
+LI Yatao，FAN Yuping，DONG Xianshu，et al．Preparation of
+geopolymer based
+on
+tail
+coal
+by
+thermal
+activation
+alkali
+activation and its adsorption on Pb( Ⅱ)
+［J］．Coal Science and
+Technology，2022，50( 8) : 277－284．
+［59］
+李
+瑞，董宪姝，李宏亮，等．焙烧改性的浮选尾煤对水中
+Cr( Ⅵ) 吸附研究［J］．矿产综合利用，2021( 2) : 63－69．
+LI Ｒui，DONG Xianshu，LI Hongliang，et al．Effect of Ｒoasting
+Modified Flotation Tail coal on Cr( Ⅵ) Adsorption in water ［J］．
+Multipurpose Utilization of Mineral Ｒesources，2021 ( 2 ) :
+63
+－69．
+［60］
+何梓豪．热活化联合Na2CO3 改性浮选尾煤对Pb2+、Cu2+ 吸
+附行为研究［D］．太原: 太原理工大学，2021．
+［61］
+KONDＲATENKO A S，BUYANTUEV S L．On the issue of
+wastewater treatment with an organomineral sorbent obtained by
+electroplasmic processing of coal flotation tailings ［C］/ /IOP
+Conference
+Series:
+Earth
+and
+Environmental
+Science:
+IOP
+Publishing，2022: 12036．
+［62］
+XUE H，FAN Y，DONG X，et al．Preparation of porosity －
+adjustable porous adsorbent materials derived from coal solid waste
+［J］．Colloids and Surfaces A:
+Physicochemical and Engineering
+Aspects，2024，693: 134047．
+［63］
+陈友良，王水利，杜美利，等．煤泥氧化制备腐植酸及抽提
+工艺研究［J］．煤炭技术，2016，35( 9) : 292－294．
+CHEN Youliang，WANG Shuili，DU Meili，et al．Preparation and
+Extraction Technology of Humic Acid from Coal Slime by Thermal
+Oxidation ［J］．Coal Technology，2016，35( 9) : 292－294．
+［64］
+李正秋，黄
+欢，崔艳杰，等．利用煤泥研制具有肥效的生
+态缓释材料［J］．应用化工，2011，40( 11) : 1929－1931．
+LI Zhengqiu，HUANG Huan，CUI Yanjie，et al．Preparation of an
+ecological －releasing material with fertilizer efficiency using slime
+［J］．Applied Chemical Industry，2011，40( 11) : 1929－1931．
+［65］
+武俊英，赵宝平，刘景辉，等．尾煤泥施用的重金属安全性
+及其对土壤结构和燕麦生长的影响［J］．麦类作物学报，
+2017，37( 3) : 414－419．
+WU Junying，ZHAO Baoping，LIU Jinghui，et al．Heavy Metals
+Security of Coal Tailing Application and Its Effect on the Soil
+Structure and Oats Growth ［J］．Journal of Triticeae Crops，
+2017，37( 3) : 414－419．
+［66］
+TIAN Y，DONG X，FAN Y，et al．Performance of coal slime－
+based silicon fertilizer in simulating lead －contaminated soil:
+heavy metal solidification and multi－nutrient release characteristics
+［J］．Journal of Hazardous Materials，2024: 135453．
+( 责任编辑
+杨蛟洋)
+1
+2
+1
+2024 年第10 期
+煤
+炭
+工
+程
+专家论坛

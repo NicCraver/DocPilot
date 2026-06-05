@@ -25,6 +25,8 @@ export const TOOL_IDS = toolIdsJson as readonly [
   "move_file",
   "text_to_pdf",
   "convert_to_markdown",
+  "format_docx_batch",
+  "format_docx_text",
 ];
 
 export type ToolId = (typeof TOOL_IDS)[number];

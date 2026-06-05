@@ -1,0 +1,599 @@
+{
+  "passed": true,
+  "total": 90,
+  "failed": [],
+  "scenarios": {
+    "文本模式": {
+      "passed": 7,
+      "total": 7,
+      "failed": []
+    },
+    "基础": {
+      "passed": 16,
+      "total": 16,
+      "failed": []
+    },
+    "复杂": {
+      "passed": 18,
+      "total": 18,
+      "failed": []
+    },
+    "自定义配置": {
+      "passed": 14,
+      "total": 14,
+      "failed": []
+    },
+    "启发式": {
+      "passed": 7,
+      "total": 7,
+      "failed": []
+    },
+    "公文长文": {
+      "passed": 7,
+      "total": 7,
+      "failed": []
+    },
+    "中文路径": {
+      "passed": 9,
+      "total": 9,
+      "failed": []
+    },
+    "批量": {
+      "passed": 6,
+      "total": 6,
+      "failed": []
+    },
+    "表格禁用": {
+      "passed": 4,
+      "total": 4,
+      "failed": []
+    },
+    "原地备份": {
+      "passed": 2,
+      "total": 2,
+      "failed": []
+    }
+  },
+  "checks": [
+    {
+      "scenario": "文本模式",
+      "name": "文本模式成功",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "文本模式",
+      "name": "文本模式识别一级标题",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "文本模式",
+      "name": "MD二级标题字体",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "文本模式",
+      "name": "MD二级标题不加粗",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "文本模式",
+      "name": "文本模式表题居中",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "文本模式",
+      "name": "文本模式附件格式化",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "文本模式",
+      "name": "TXT合并连续空行",
+      "ok": true,
+      "detail": "空段落数 1"
+    },
+    {
+      "scenario": "基础",
+      "name": "排版成功",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "基础",
+      "name": "页脚 PAGE 字段",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "基础",
+      "name": "页码字体",
+      "ok": true,
+      "detail": "实际 宋体"
+    },
+    {
+      "scenario": "基础",
+      "name": "页码字号",
+      "ok": true,
+      "detail": "期望 14pt，实际 14.0pt"
+    },
+    {
+      "scenario": "基础",
+      "name": "左边距",
+      "ok": true,
+      "detail": "实际 3.1697083333333333cm"
+    },
+    {
+      "scenario": "基础",
+      "name": "题目标题字体",
+      "ok": true,
+      "detail": "方正小标宋简体"
+    },
+    {
+      "scenario": "基础",
+      "name": "题目标题字号",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "基础",
+      "name": "题目标题居中",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "基础",
+      "name": "正文字体",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "基础",
+      "name": "正文行距",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "基础",
+      "name": "正文 ascii 字体",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "基础",
+      "name": "副标题字体",
+      "ok": true,
+      "detail": "楷体_GB2312"
+    },
+    {
+      "scenario": "基础",
+      "name": "二级标题字体",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "基础",
+      "name": "二级标题不加粗",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "基础",
+      "name": "表格边框",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "基础",
+      "name": "表格行距(磅)",
+      "ok": true,
+      "detail": "期望 22pt，实际 22.0pt"
+    },
+    {
+      "scenario": "复杂",
+      "name": "排版成功",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "复杂",
+      "name": "页脚 PAGE 字段",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "复杂",
+      "name": "页码字体",
+      "ok": true,
+      "detail": "实际 宋体"
+    },
+    {
+      "scenario": "复杂",
+      "name": "页码字号",
+      "ok": true,
+      "detail": "期望 14pt，实际 14.0pt"
+    },
+    {
+      "scenario": "复杂",
+      "name": "左边距",
+      "ok": true,
+      "detail": "实际 3.1697083333333333cm"
+    },
+    {
+      "scenario": "复杂",
+      "name": "启发式一级标题字体",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "复杂",
+      "name": "启发式一级标题加粗",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "复杂",
+      "name": "启发式一级大纲级别",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "复杂",
+      "name": "三级标题按正文字体",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "复杂",
+      "name": "三级标题大纲级别",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "复杂",
+      "name": "混排段落全部 run 字体",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "复杂",
+      "name": "混排保留加粗",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "复杂",
+      "name": "混排 ascii 字体",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "复杂",
+      "name": "空格图题识别",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "复杂",
+      "name": "文档含两张表",
+      "ok": true,
+      "detail": "实际 2 张"
+    },
+    {
+      "scenario": "复杂",
+      "name": "第二表数字单元格字号",
+      "ok": true,
+      "detail": "12.0pt"
+    },
+    {
+      "scenario": "复杂",
+      "name": "第二表边框",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "复杂",
+      "name": "表格行高",
+      "ok": true,
+      "detail": "0.7002638888888889cm"
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "排版成功",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "页脚 PAGE 字段",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "页码字体",
+      "ok": true,
+      "detail": "实际 宋体"
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "页码字号",
+      "ok": true,
+      "detail": "期望 10.5pt，实际 10.5pt"
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "左边距",
+      "ok": true,
+      "detail": "实际 2.7992916666666665cm"
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "正文左缩进",
+      "ok": true,
+      "detail": "0.7408333333333333cm"
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "正文右缩进",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "自定义正文行距",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "附件字体",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "附件加粗",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "附件字号",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "空格附件识别并加粗",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "表题无额外缩进",
+      "ok": true,
+      "detail": "0cm"
+    },
+    {
+      "scenario": "自定义配置",
+      "name": "加粗边框 1pt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "启发式",
+      "name": "排版成功",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "启发式",
+      "name": "纯文本一级标题",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "启发式",
+      "name": "纯文本一级加粗",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "启发式",
+      "name": "纯文本二级标题",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "启发式",
+      "name": "纯文本二级不加粗",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "启发式",
+      "name": "纯文本正文",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "启发式",
+      "name": "纯文本正文字号",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "公文长文",
+      "name": "排版成功",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "公文长文",
+      "name": "长文五张表",
+      "ok": true,
+      "detail": "实际 5"
+    },
+    {
+      "scenario": "公文长文",
+      "name": "长文章节数",
+      "ok": true,
+      "detail": "实际 24 段"
+    },
+    {
+      "scenario": "公文长文",
+      "name": "第六章启发式一级",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "公文长文",
+      "name": "第六章加粗",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "公文长文",
+      "name": "长文附件加粗",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "公文长文",
+      "name": "末表字号",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "中文路径",
+      "name": "排版成功",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "中文路径",
+      "name": "输入含书名号",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "中文路径",
+      "name": "路径含中文目录",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "中文路径",
+      "name": "中文路径输出可读",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "中文路径",
+      "name": "输出文件名含书名号",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "中文路径",
+      "name": "报告标题字体",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "中文路径",
+      "name": "报告标题字号",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "中文路径",
+      "name": "正文行距",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "中文路径",
+      "name": "投资表边框",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "批量",
+      "name": "批量脚本返回2条",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "批量",
+      "name": "批量输出数量",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "scenario": "批量",
+      "name": "批量文件存在 年度报告.docx",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "批量",
+      "name": "批量文件存在 工作方案.docx",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "批量",
+      "name": "批量文件A内容完整",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "批量",
+      "name": "批量文件B标题已排版",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "表格禁用",
+      "name": "排版成功",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "表格禁用",
+      "name": "禁用后保留 Arial",
+      "ok": true,
+      "detail": "实际 Arial"
+    },
+    {
+      "scenario": "表格禁用",
+      "name": "禁用后保留 18pt",
+      "ok": true,
+      "detail": "实际 18.0pt"
+    },
+    {
+      "scenario": "表格禁用",
+      "name": "禁用后无边框定义",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scenario": "原地备份",
+      "name": "原地备份文件",
+      "ok": true,
+      "detail": "/Users/nic/.config/superpowers/worktrees/DocPilot/feature-word-batch-typeset/scripts/word-typeset-test-data/原地备份-工作稿.docx.bak"
+    },
+    {
+      "scenario": "原地备份",
+      "name": "原地文件仍可读",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

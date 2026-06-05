@@ -28,8 +28,16 @@ const INTENT_RULES: { pattern: RegExp; toolIds: string[] }[] = [
     toolIds: ["compress_image", "get_image_info"],
   },
   {
-    pattern: /markdown|转\s*md|\.md\b|word|docx|pptx|xlsx|markitdown|文档.*文本/i,
+    pattern: /排版|格式(化|调整)|typeset|统一.*样式/i,
+    toolIds: ["format_docx_batch", "format_docx_text", "get_file_info"],
+  },
+  {
+    pattern: /markdown|转\s*md|\.md\b|pptx|xlsx|markitdown/i,
     toolIds: ["convert_to_markdown", "get_file_info"],
+  },
+  {
+    pattern: /word|docx/i,
+    toolIds: ["format_docx_batch", "convert_to_markdown", "get_file_info"],
   },
 ];
 

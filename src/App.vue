@@ -4,6 +4,7 @@ import ToolsHome from "./components/tools/ToolsHome.vue";
 import AgentChat, { type AgentUiLayout } from "./components/agent/AgentChat.vue";
 import AgentCraftDemo from "./components/agent/layouts/AgentCraftDemo.vue";
 import ProviderSettings from "./components/settings/ProviderSettings.vue";
+import WordTypeset from "./components/word-typeset/WordTypeset.vue";
 import AppNavItem from "./components/ui/AppNavItem.vue";
 import AppBadge from "./components/ui/AppBadge.vue";
 
@@ -13,6 +14,7 @@ type Tab =
   | "agent-inspector"
   | "agent-craft"
   | "tools"
+  | "word-typeset"
   | "settings";
 const tab = ref<Tab>("agent-classic");
 
@@ -28,6 +30,7 @@ const agentLayout = computed((): AgentUiLayout => {
 });
 
 const isAgentTab = computed(() => tab.value.startsWith("agent-"));
+const isFullWidthTab = computed(() => isAgentTab.value || tab.value === "word-typeset");
 
 const tabMeta = computed(() => {
   switch (tab.value) {
@@ -44,6 +47,8 @@ const tabMeta = computed(() => {
       };
     case "tools":
       return { title: "PDF 工具箱", desc: "本地批量处理与格式转换" };
+    case "word-typeset":
+      return { title: "Word 批量排版", desc: "批量统一页边距、标题、正文与表格样式" };
     case "settings":
       return { title: "系统设置", desc: "配置大模型 API 连接" };
   }
@@ -126,6 +131,16 @@ const tabMeta = computed(() => {
           </template>
         </AppNavItem>
 
+        <AppNavItem
+          :active="tab === 'word-typeset'"
+          label="Word 批量排版"
+          @click="tab = 'word-typeset'"
+        >
+          <template #icon>
+            <span class="i-lucide-file-type w-5 h-5" />
+          </template>
+        </AppNavItem>
+
         <AppNavItem :active="tab === 'settings'" label="系统设置" @click="tab = 'settings'">
           <template #icon>
             <span class="i-lucide-settings w-5 h-5" />
@@ -167,9 +182,9 @@ const tabMeta = computed(() => {
       <div class="flex-1 overflow-hidden flex flex-col min-h-0">
         <div
           class="flex-1 min-h-0 px-8 py-6 flex flex-col"
-          :class="isAgentTab ? 'overflow-hidden' : 'overflow-y-auto'"
+          :class="isFullWidthTab ? 'overflow-hidden' : 'overflow-y-auto'"
         >
-          <p v-if="!isAgentTab" class="text-sm text-[var(--dp-text-secondary)] mb-5 max-w-3xl">
+          <p v-if="!isFullWidthTab" class="text-sm text-[var(--dp-text-secondary)] mb-5 max-w-3xl">
             {{ tabMeta.desc }}
           </p>
 
@@ -177,7 +192,7 @@ const tabMeta = computed(() => {
             <div
               :key="tab"
               :class="
-                isAgentTab
+                isFullWidthTab
                   ? 'flex-1 min-h-0 min-w-0 flex flex-col w-full max-w-none'
                   : 'h-full max-w-6xl mx-auto w-full'
               "
@@ -185,6 +200,7 @@ const tabMeta = computed(() => {
               <AgentCraftDemo v-if="tab === 'agent-craft'" />
               <AgentChat v-else-if="isAgentTab" :layout="agentLayout" />
               <ToolsHome v-else-if="tab === 'tools'" />
+              <WordTypeset v-else-if="tab === 'word-typeset'" />
               <ProviderSettings v-else />
             </div>
           </Transition>

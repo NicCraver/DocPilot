@@ -28,4 +28,6 @@ export const toolViews = {
   convert_to_markdown: defineAsyncComponent(
     () => import("./convert-to-markdown/ConvertToMarkdown.vue"),
   ),
+  format_docx_batch: defineAsyncComponent(() => import("./format-docx-batch/FormatDocxBatch.vue")),
+  format_docx_text: defineAsyncComponent(() => import("./format-docx-text/FormatDocxText.vue")),
 } satisfies Record<ToolId, Component>;

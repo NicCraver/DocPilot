@@ -5,6 +5,7 @@ mod image_tools;
 mod markitdown_tools;
 mod pdf_tools;
 mod text_tools;
+mod word_typeset_tools;
 
 pub use file_tools::{ComputeHash, CopyFile, GetFileInfo, MoveFile};
 pub use image_tools::{
@@ -16,3 +17,4 @@ pub use pdf_tools::{
 };
 pub use markitdown_tools::ConvertToMarkdown;
 pub use text_tools::TextToPdf;
+pub use word_typeset_tools::{FormatDocxBatch, FormatDocxText};

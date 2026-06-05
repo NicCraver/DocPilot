@@ -3,8 +3,8 @@ use crate::tools::{
     extra::{
         AddBlankPages, ComputeHash, CompressImage, ConvertImage, CopyFile, CropImage, DeletePages,
         DuplicatePage, ExtractPages, GetFileInfo, GetImageInfo, GetPdfInfo, ImagesToPdf,
-        ConvertToMarkdown, MergeImages, MoveFile, ReorderPages, ResizeImage, RotateImage,
-        RotatePdf, TextToPdf,
+        ConvertToMarkdown, FormatDocxBatch, FormatDocxText, MergeImages, MoveFile, ReorderPages,
+        ResizeImage, RotateImage, RotatePdf, TextToPdf,
     },
     merge_pdf::MergePdf,
     split_pdf::SplitPdf,
@@ -38,6 +38,8 @@ pub fn build_registry() -> ToolRegistry {
     reg.register(Box::new(CopyFile));
     reg.register(Box::new(MoveFile));
     reg.register(Box::new(ConvertToMarkdown));
+    reg.register(Box::new(FormatDocxBatch));
+    reg.register(Box::new(FormatDocxText));
     reg
 }
 
@@ -92,6 +94,86 @@ pub fn path_exists(path: String) -> bool {
     std::path::Path::new(&path).exists()
 }
 
+#[tauri::command]
+pub fn typeset_read_text_file(path: String) -> Result<String, String> {
+    std::fs::read_to_string(&path).map_err(|e| format!("读取配置失败: {e}"))
+}
+
+#[tauri::command]
+pub fn typeset_write_text_file(path: String, content: String) -> Result<(), String> {
+    let p = std::path::Path::new(&path);
+    if let Some(parent) = p.parent() {
+        std::fs::create_dir_all(parent).map_err(|e| format!("创建目录失败: {e}"))?;
+    }
+    std::fs::write(p, content).map_err(|e| format!("写入配置失败: {e}"))
+}
+
+#[tauri::command]
+pub fn list_docx_in_dir(dir: String, recursive: bool) -> Result<Vec<String>, String> {
+    let root = std::path::Path::new(&dir);
+    if !root.is_dir() {
+        return Err(format!("不是有效目录: {dir}"));
+    }
+
+    let mut paths = Vec::new();
+    collect_docx(root, recursive, &mut paths)?;
+    paths.sort();
+    Ok(paths)
+}
+
+fn collect_docx(dir: &std::path::Path, recursive: bool, out: &mut Vec<String>) -> Result<(), String> {
+    let entries = std::fs::read_dir(dir).map_err(|e| format!("无法读取目录: {e}"))?;
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_file() {
+            if path
+                .extension()
+                .and_then(|s| s.to_str())
+                .map(|s| s.eq_ignore_ascii_case("docx"))
+                .unwrap_or(false)
+            {
+                out.push(path.to_string_lossy().into_owned());
+            }
+        } else if recursive && path.is_dir() {
+            collect_docx(&path, true, out)?;
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn format_docx_batch(
+    input_paths: Vec<String>,
+    config: serde_json::Value,
+    in_place: bool,
+) -> Result<crate::tools::word_typeset_util::TypesetBatchResult, String> {
+    if input_paths.is_empty() {
+        return Err("文件列表为空".into());
+    }
+    let payload = serde_json::json!({
+        "mode": "batch",
+        "input_paths": input_paths,
+        "config": config,
+        "in_place": in_place,
+    });
+    crate::tools::word_typeset_util::run_word_typeset(payload)
+}
+
+#[tauri::command]
+pub async fn format_docx_text(
+    text: String,
+    output_path: String,
+    config: serde_json::Value,
+) -> Result<crate::tools::word_typeset_util::TypesetBatchResult, String> {
+    let payload = serde_json::json!({
+        "mode": "text",
+        "text": text,
+        "output_path": output_path,
+        "config": config,
+    });
+    crate::tools::word_typeset_util::run_word_typeset(payload)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -131,6 +213,6 @@ mod tests {
         expected.sort();
 
         assert_eq!(ids, expected);
-        assert_eq!(ids.len(), 24);
+        assert_eq!(ids.len(), 26);
     }
 }

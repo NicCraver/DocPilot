@@ -16,7 +16,12 @@ pub fn run() {
             commands::list_tools,
             commands::run_tool,
             commands::list_files_in_dir,
+            commands::list_docx_in_dir,
             commands::path_exists,
+            commands::typeset_read_text_file,
+            commands::typeset_write_text_file,
+            commands::format_docx_batch,
+            commands::format_docx_text,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

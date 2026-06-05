@@ -22,5 +22,7 @@
   "copy_file",
   "move_file",
   "text_to_pdf",
-  "convert_to_markdown"
+  "convert_to_markdown",
+  "format_docx_batch",
+  "format_docx_text"
 ]

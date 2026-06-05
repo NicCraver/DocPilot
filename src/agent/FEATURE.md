@@ -2,7 +2,7 @@
 
 ## 现状 (Status)
 
-已实现：`list_tools` 动态注册全部 **24** 个 AI SDK tools、streamText 多步编排（`consumeStream` + `stepCountIs(8)`）、**`provider.chat`** 兼容智谱/Ollama、按用户意图筛选工具子集、路径上下文注入 system（对齐 VercelAISDK demo）、Provider 可配置（store 持久化）、对话 UI + 工具调用卡片、`requires_confirmation` 确认（dialog ask）；`jsonSchemaToZod` 支持 array 类型。
+已实现：`list_tools` 动态注册全部 **26** 个 AI SDK tools、streamText 多步编排（`consumeStream` + `stepCountIs(8)`）、**`provider.chat`** 兼容智谱/Ollama、按用户意图筛选工具子集、路径上下文注入 system（对齐 VercelAISDK demo）、Provider 可配置（store 持久化）、对话 UI + 工具调用卡片、`requires_confirmation` 确认（dialog ask）；`jsonSchemaToZod` 支持 array 类型。
 **文件附件**：发送前可添加本地文件/文件夹（文件夹一层展开为 pdf/图片路径列表），路径块注入模型消息；工具执行前对缺失/无效的 `input_path` / `input_paths` / `path` / `src` 弹出系统文件选择器。
 对话界面与工具调用卡片已全面美化，包含：
 
@@ -33,6 +33,7 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 ## 变更日志 (Changelog)
 
 - 2026-06-05: `agentChatSession.ts` 单例会话，供三种 Agent UI 布局共用。
+- 2026-06-05: 新增 `format_docx_batch` / `format_docx_text` Word 排版工具与意图筛选。
 - 2026-06-04: 集成 `convert_to_markdown`（MarkItDown）；意图筛选与 system prompt 支持转 MD。
 
 - 2026-06-04: 执行过程与任务结果分离；`buildAgentTools` / `resolveToolArgs` 上报 `AgentActivity`。

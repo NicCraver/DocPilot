@@ -20,6 +20,9 @@ cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
 step "本地 CI：Rust 单元测试"
 cargo test --manifest-path src-tauri/Cargo.toml
 
+step "本地 CI：Word 排版格式自动化测试"
+pnpm run word-typeset:test
+
 step "本地 CI：校验 ts-rs 生成物已提交"
 git diff --exit-code packages/shared-types/src/generated/
 
