@@ -11,6 +11,7 @@
     "icons:build": "node scripts/prepare-app-icon.mjs && tauri icon src-tauri/app-icon.png -o src-tauri/icons && node scripts/prepare-app-icon.mjs --icns-only",
     "markitdown:install": "node scripts/ensure-markitdown.mjs",
     "build:sidecar": "node scripts/run-build-sidecar.mjs",
+    "dmg:background": "node scripts/generate-dmg-background.mjs",
     "tauri:build": "pnpm run build && pnpm run build:sidecar && node scripts/tauri-release-build.mjs",
     "tauri:build:dev": "pnpm run build && npx tauri build"
   },

@@ -36,7 +36,7 @@ jobs:
           cache: pnpm
       - uses: dtolnay/rust-toolchain@stable
       - name: 安装系统依赖（OCR / 打包）
-        run: brew install poppler tesseract dylibbundler python@3.11
+        run: brew install poppler tesseract dylibbundler python@3.11 create-dmg
       - run: pnpm install --frozen-lockfile
       - name: 构建 Tauri 安装包
         run: pnpm run tauri:build

@@ -15,4 +15,11 @@ const configs = [
 
 const args = ["tauri", "build", ...configs.flatMap((c) => ["--config", c])];
 const r = spawnSync("npx", args, { cwd: root, stdio: "inherit", shell: true, env: { ...process.env, CI: process.env.CI || "true" } });
-process.exit(r.status ?? 1);
+if ((r.status ?? 1) !== 0) process.exit(r.status ?? 1);
+
+if (process.platform === "darwin") {
+  const post = spawnSync("node", ["scripts/postprocess-dmg.mjs"], { cwd: root, stdio: "inherit" });
+  process.exit(post.status ?? 1);
+}
+
+process.exit(0);
