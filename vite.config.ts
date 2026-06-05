@@ -9,7 +9,7 @@ const host = process.env.TAURI_DEV_HOST;
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  plugins: [vue(), UnoCSS()],
+  plugins: [vue(), UnoCSS({ configFile: path.resolve(rootDir, "uno.config.ts") })],
   resolve: {
     alias: {
       "@docpilot/shared-types": path.resolve(rootDir, "packages/shared-types/src/index.ts"),
