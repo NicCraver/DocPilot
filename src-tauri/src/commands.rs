@@ -11,6 +11,7 @@ use crate::tools::{
     ToolInput, ToolOutput, ToolRegistry, ToolSchema,
 };
 use tauri::State;
+use tauri::Manager;
 
 pub fn build_registry() -> ToolRegistry {
     let mut reg = ToolRegistry::new();
@@ -199,6 +200,90 @@ pub async fn format_docx_text(
         "config": config,
     });
     crate::tools::word_typeset_util::run_word_typeset(payload)
+}
+
+fn smart_doc_library_dir(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
+    let base = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("无法解析应用数据目录: {e}"))?;
+    let dir = base.join("smart-doc-library");
+    std::fs::create_dir_all(&dir).map_err(|e| format!("无法创建模板库目录: {e}"))?;
+    Ok(dir)
+}
+
+#[tauri::command]
+pub async fn smart_doc_learn_template(
+    app: tauri::AppHandle,
+    docx_path: String,
+    name: Option<String>,
+    description: Option<String>,
+) -> Result<crate::tools::word_smart_doc_util::TemplateMeta, String> {
+    let dir = smart_doc_library_dir(&app)?;
+    crate::tools::word_smart_doc_util::learn_template(&dir, &docx_path, name, description)
+}
+
+#[tauri::command]
+pub async fn smart_doc_list_templates(
+    app: tauri::AppHandle,
+) -> Result<Vec<crate::tools::word_smart_doc_util::TemplateMeta>, String> {
+    let dir = smart_doc_library_dir(&app)?;
+    crate::tools::word_smart_doc_util::list_templates(&dir)
+}
+
+#[tauri::command]
+pub async fn smart_doc_rename_template(
+    app: tauri::AppHandle,
+    id: String,
+    name: String,
+) -> Result<(), String> {
+    let dir = smart_doc_library_dir(&app)?;
+    crate::tools::word_smart_doc_util::rename_template(&dir, &id, &name)
+}
+
+#[tauri::command]
+pub async fn smart_doc_delete_template(app: tauri::AppHandle, id: String) -> Result<(), String> {
+    let dir = smart_doc_library_dir(&app)?;
+    crate::tools::word_smart_doc_util::delete_template(&dir, &id)
+}
+
+#[tauri::command]
+pub async fn smart_doc_get_profile(
+    app: tauri::AppHandle,
+    id: String,
+) -> Result<serde_json::Value, String> {
+    let dir = smart_doc_library_dir(&app)?;
+    crate::tools::word_smart_doc_util::read_profile(&dir, &id)
+}
+
+#[tauri::command]
+pub async fn smart_doc_update_profile(
+    app: tauri::AppHandle,
+    id: String,
+    profile: serde_json::Value,
+) -> Result<(), String> {
+    let dir = smart_doc_library_dir(&app)?;
+    crate::tools::word_smart_doc_util::update_profile(&dir, &id, profile)
+}
+
+#[allow(clippy::too_many_arguments)]
+#[tauri::command]
+pub async fn smart_doc_generate(
+    app: tauri::AppHandle,
+    id: String,
+    output_path: String,
+    content_kind: String,
+    content_path: Option<String>,
+    content_text: Option<String>,
+    sections: Option<serde_json::Value>,
+    reporter: Option<String>,
+    report_date: Option<String>,
+) -> Result<crate::tools::word_smart_doc_util::FillResult, String> {
+    let dir = smart_doc_library_dir(&app)?;
+    crate::tools::word_smart_doc_util::generate(
+        &dir, &id, &output_path, &content_kind, content_path, content_text, sections, reporter,
+        report_date,
+    )
 }
 
 #[cfg(test)]

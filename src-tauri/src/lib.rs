@@ -23,6 +23,13 @@ pub fn run() {
             commands::format_docx_batch,
             commands::format_docx_text,
             commands::generate_word_from_template,
+            commands::smart_doc_learn_template,
+            commands::smart_doc_list_templates,
+            commands::smart_doc_rename_template,
+            commands::smart_doc_delete_template,
+            commands::smart_doc_get_profile,
+            commands::smart_doc_update_profile,
+            commands::smart_doc_generate,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
