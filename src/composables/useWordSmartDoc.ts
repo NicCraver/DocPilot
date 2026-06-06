@@ -85,6 +85,30 @@ export function useWordSmartDoc() {
     await loadProfile(id);
   }
 
+  async function updateProfile(profile: SmartDocProfile) {
+    if (!currentId.value) {
+      error.value = "请先选择模板";
+      return;
+    }
+    loading.value = true;
+    error.value = null;
+    try {
+      const nextProfile = JSON.parse(JSON.stringify(profile)) as SmartDocProfile;
+      await invoke("smart_doc_update_profile", { id: currentId.value, profile: nextProfile });
+      currentProfile.value = nextProfile;
+      generatedSections.value = null;
+      templates.value = templates.value.map((t) =>
+        t.id === currentId.value ? { ...t, section_count: nextProfile.structure.length } : t,
+      );
+      appendLog("模板 profile 已保存");
+    } catch (e) {
+      error.value = String(e);
+      appendLog(`保存 profile 失败: ${String(e)}`);
+    } finally {
+      loading.value = false;
+    }
+  }
+
   async function learnTemplate() {
     const path = await open({ multiple: false, filters: DOCX_FILTERS });
     if (typeof path !== "string") return;
@@ -222,6 +246,7 @@ export function useWordSmartDoc() {
     fileBasename,
     refreshTemplates,
     selectTemplate,
+    updateProfile,
     learnTemplate,
     renameTemplate,
     deleteTemplate,

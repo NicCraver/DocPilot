@@ -224,9 +224,25 @@ pub fn read_profile(library_dir: &Path, id: &str) -> Result<serde_json::Value, S
 }
 
 pub fn update_profile(library_dir: &Path, id: &str, profile: serde_json::Value) -> Result<(), String> {
-    let path = safe_template_dir(library_dir, id)?.join("profile.json");
+    let dir = safe_template_dir(library_dir, id)?;
+    let section_count = profile
+        .get("structure")
+        .and_then(|v| v.as_array())
+        .map(|items| items.len() as u32);
+    let path = dir.join("profile.json");
     fs::write(&path, serde_json::to_string_pretty(&profile).unwrap_or_default())
-        .map_err(|e| format!("写 profile 失败: {e}"))
+        .map_err(|e| format!("写 profile 失败: {e}"))?;
+    if let Some(section_count) = section_count {
+        let meta_path = dir.join("meta.json");
+        if meta_path.is_file() {
+            let raw = fs::read_to_string(&meta_path).map_err(|e| format!("读 meta 失败: {e}"))?;
+            let mut meta: serde_json::Value = serde_json::from_str(&raw).unwrap_or_default();
+            meta["section_count"] = serde_json::json!(section_count);
+            fs::write(&meta_path, serde_json::to_string_pretty(&meta).unwrap_or_default())
+                .map_err(|e| format!("写 meta 失败: {e}"))?;
+        }
+    }
+    Ok(())
 }
 
 #[allow(clippy::too_many_arguments)]

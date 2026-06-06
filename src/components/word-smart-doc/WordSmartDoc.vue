@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import AppButton from "../ui/AppButton.vue";
+import SmartDocProfileEditor from "./SmartDocProfileEditor.vue";
 import { useWordSmartDoc } from "../../composables/useWordSmartDoc";
 import { useProviderSettings } from "../../composables/useProviderSettings";
+import type { SmartDocProfile } from "../../lib/smartDocTypes";
 
 type Pane = "library" | "learn" | "generate";
 const pane = ref<Pane>("library");
@@ -28,6 +30,10 @@ async function onDelete(id: string, name: string) {
 async function onSelectAndGenerate(id: string) {
   await sd.selectTemplate(id);
   pane.value = "generate";
+}
+
+async function onSaveProfile(profile: SmartDocProfile) {
+  await sd.updateProfile(profile);
 }
 </script>
 
@@ -57,31 +63,50 @@ async function onSelectAndGenerate(id: string) {
           <p class="mt-3">还没有模板，去「学习新模板」上传一份 Word 吧。</p>
           <AppButton class="mt-4" @click="pane = 'learn'">学习新模板</AppButton>
         </div>
-        <div v-else class="grid grid-cols-2 lg:grid-cols-3 gap-4">
-          <div
-            v-for="t in sd.templates.value"
-            :key="t.id"
-            class="rounded-xl border p-4 flex flex-col gap-2 transition"
-            :class="
-              sd.currentId.value === t.id
-                ? 'border-[var(--dp-primary)] ring-1 ring-[var(--dp-primary)]'
-                : 'border-[var(--dp-border)]'
-            "
-          >
-            <div class="flex items-center gap-2">
-              <span class="i-lucide-file-text w-5 h-5 text-[var(--dp-primary)]" />
-              <span class="font-semibold truncate flex-1">{{ t.name }}</span>
-            </div>
-            <p class="text-xs text-[var(--dp-text-muted)]">{{ t.section_count }} 个章节</p>
-            <div class="flex gap-2 mt-auto pt-2">
-              <AppButton size="sm" @click="onSelectAndGenerate(t.id)">使用</AppButton>
-              <AppButton size="sm" variant="ghost" @click="onRename(t.id, t.name)"
-                >重命名</AppButton
-              >
-              <AppButton size="sm" variant="ghost" @click="onDelete(t.id, t.name)">删除</AppButton>
+        <template v-else>
+          <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            <div
+              v-for="t in sd.templates.value"
+              :key="t.id"
+              class="rounded-xl border p-4 flex flex-col gap-2 transition"
+              :class="
+                sd.currentId.value === t.id
+                  ? 'border-[var(--dp-primary)] ring-1 ring-[var(--dp-primary)]'
+                  : 'border-[var(--dp-border)]'
+              "
+            >
+              <div class="flex items-center gap-2">
+                <span class="i-lucide-file-text w-5 h-5 text-[var(--dp-primary)]" />
+                <span class="font-semibold truncate flex-1">{{ t.name }}</span>
+              </div>
+              <p class="text-xs text-[var(--dp-text-muted)]">{{ t.section_count }} 个章节</p>
+              <div class="flex flex-wrap gap-2 mt-auto pt-2">
+                <AppButton size="sm" variant="secondary" @click="sd.selectTemplate(t.id)">
+                  <span class="i-lucide-settings-2 w-4 h-4" aria-hidden="true" />
+                  编辑
+                </AppButton>
+                <AppButton size="sm" @click="onSelectAndGenerate(t.id)">
+                  <span class="i-lucide-file-output w-4 h-4" aria-hidden="true" />
+                  使用
+                </AppButton>
+                <AppButton size="sm" variant="ghost" @click="onRename(t.id, t.name)"
+                  >重命名</AppButton
+                >
+                <AppButton size="sm" variant="ghost" @click="onDelete(t.id, t.name)"
+                  >删除</AppButton
+                >
+              </div>
             </div>
           </div>
-        </div>
+
+          <SmartDocProfileEditor
+            v-if="sd.currentProfile.value"
+            :profile="sd.currentProfile.value"
+            :template-name="sd.currentTemplate.value?.name"
+            :saving="sd.loading.value"
+            @save="onSaveProfile"
+          />
+        </template>
       </section>
 
       <section v-else-if="pane === 'learn'" class="max-w-xl space-y-4">
@@ -91,21 +116,13 @@ async function onSelectAndGenerate(id: string) {
         <AppButton :loading="sd.loading.value" @click="sd.learnTemplate()">
           选择 Word 并学习
         </AppButton>
-        <div
+        <SmartDocProfileEditor
           v-if="sd.currentProfile.value && sd.currentTemplate.value"
-          class="rounded-xl border border-[var(--dp-border)] p-4"
-        >
-          <p class="font-semibold mb-2">已学习：{{ sd.currentTemplate.value.name }}</p>
-          <ul class="text-sm space-y-1">
-            <li
-              v-for="s in sd.currentProfile.value.structure"
-              :key="s.key"
-              class="text-[var(--dp-text-secondary)]"
-            >
-              <span class="text-[var(--dp-text-muted)]">L{{ s.level }}</span> · {{ s.title }}
-            </li>
-          </ul>
-        </div>
+          :profile="sd.currentProfile.value"
+          :template-name="sd.currentTemplate.value.name"
+          :saving="sd.loading.value"
+          @save="onSaveProfile"
+        />
       </section>
 
       <section v-else class="space-y-4">

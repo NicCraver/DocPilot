@@ -2,7 +2,7 @@
 
 ## 现状 (Status)
 
-全新独立模块（`WordSmartDoc.vue` + `useWordSmartDoc()`）：学习任意 docx 提取骨架+样式 profile+章节结构存入模板库（app data `smart-doc-library/<id>/`），三段 Tab（模板库 / 学习新模板 / 生成文档）。生成支持两条路径：现成内容自适应排版、LLM 按章节结构生成内容；产出与模板版式一致的 docx。缩略图用 LibreOffice headless 渲染，缺失时降级；模板删除确认使用 Tauri dialog `ask`，避免 WebView 原生 confirm 权限问题。
+全新独立模块（`WordSmartDoc.vue` + `useWordSmartDoc()`）：学习任意 docx 提取骨架+样式 profile+章节结构存入模板库（app data `smart-doc-library/<id>/`），三段 Tab（模板库 / 学习新模板 / 生成文档）。生成支持两条路径：现成内容自适应排版、LLM 按章节结构生成内容；产出与模板版式一致的 docx。缩略图用 LibreOffice headless 渲染，缺失时降级；模板删除确认使用 Tauri dialog `ask`，避免 WebView 原生 confirm 权限问题。模板库与学习完成页提供 profile 编辑表单，可调整章节结构与标题/正文样式并写回模板。
 
 后端：`scripts/word-smart-doc-learn.py`（学习）、`scripts/word-smart-doc-fill.py`（灌入），经 `word_smart_doc_util.rs` 调用；Tauri 命令 `smart_doc_learn_template` / `smart_doc_list_templates` / `smart_doc_rename_template` / `smart_doc_delete_template` / `smart_doc_get_profile` / `smart_doc_update_profile` / `smart_doc_generate`。LLM 走 `src/agent/smartDocGenerate.ts`（Vercel AI SDK）。
 
@@ -16,7 +16,7 @@
 
 ## 接口契约 (Interface)
 
-- 前端：`useWordSmartDoc()` — 模板列表、当前模板/profile、学习/生成/列出/删除/重命名、LLM 生成
+- 前端：`useWordSmartDoc()` — 模板列表、当前模板/profile、学习/生成/列出/删除/重命名、profile 更新、LLM 生成
 - Tauri：见上 7 个命令
 - Python CLI：`word-smart-doc-learn.py '<json>'`（{docx_path,dest_dir}）；`word-smart-doc-fill.py '<json>'`（{template_dir,output_path,content_kind,...}）
 
@@ -27,9 +27,11 @@
 - 2026-06-06: 修复正文样式学习：优先从占位段落的段落样式（如「正文」）沿 basedOn 链解析小四/宋体，避免误读 Normal 四号；新增 realistic-body-style 回归用例。
 - 2026-06-06: 新增 `word-smart-doc:e2e` 端到端脚本（学习→sections 灌入→正文字号校验）。
 - 2026-06-06: 删除模板确认从 `window.confirm` 改为 Tauri dialog `ask`（`deleteTemplateWithConfirm`），补充 composable 回归测试。
+- 2026-06-06: 补全 profile 编辑 UI（章节增删改/排序、标题与正文样式调整），保存时调用 `smart_doc_update_profile` 并同步模板章节数。
+- 2026-06-06: 修复 profile 编辑器克隆 Vue 响应式 props 时的 `DataCloneError`。
 
 ## 待办 / 风险 (TODO / Risks)
 
 - LibreOffice 体积大，发布包是否内置待定；缺失降级文本占位。
 - 章节模糊匹配在结构差异大的模板上可能误匹配，已有「按顺序续写文末」兜底。
-- profile UI 微调当前仅展示结构，编辑写回 `smart_doc_update_profile` 待补全表单。
+- profile 修改后缩略图不自动重渲染，当前仍沿用学习模板时生成的首页预览。

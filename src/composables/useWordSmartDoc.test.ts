@@ -105,4 +105,45 @@ describe("useWordSmartDoc", () => {
     );
     expect(invokeMock).toHaveBeenCalledWith("smart_doc_delete_template", { id: "t1" });
   });
+
+  it("保存 profile 后同步当前 profile 与模板章节数", async () => {
+    invokeMock.mockReset();
+    invokeMock.mockImplementation((cmd: string) => {
+      if (cmd === "smart_doc_list_templates")
+        return Promise.resolve([
+          { id: "t1", name: "模板A", description: "", section_count: 1, has_thumbnail: false },
+        ]);
+      if (cmd === "smart_doc_get_profile")
+        return Promise.resolve({
+          version: 1,
+          styles: { body: { size_pt: 12 } },
+          structure: [{ key: "auto_1", title: "前言", level: 1 }],
+          meta_fields: [],
+        });
+      if (cmd === "smart_doc_update_profile") return Promise.resolve(undefined);
+      return Promise.resolve(undefined);
+    });
+
+    const sd = useWordSmartDoc();
+    await sd.refreshTemplates();
+    const nextProfile = {
+      version: 1,
+      styles: { body: { size_pt: 14 } },
+      structure: [
+        { key: "auto_1", title: "前言", level: 1 },
+        { key: "ui_1", title: "复盘", level: 1 },
+      ],
+      meta_fields: [],
+    };
+
+    await sd.updateProfile(nextProfile);
+
+    expect(invokeMock).toHaveBeenCalledWith("smart_doc_update_profile", {
+      id: "t1",
+      profile: nextProfile,
+    });
+    expect(sd.currentProfile.value).toEqual(nextProfile);
+    expect(sd.currentTemplate.value?.section_count).toBe(2);
+    expect(sd.logs.value.at(-1)).toBe("模板 profile 已保存");
+  });
 });
