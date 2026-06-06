@@ -13,6 +13,8 @@
     "word-typeset:install": "node scripts/ensure-word-typeset.mjs",
     "word-smart-doc:install": "node scripts/ensure-word-typeset.mjs && node scripts/ensure-libreoffice.mjs",
     "word-smart-doc:make-fixtures": "node -e \"const{spawnSync}=require('node:child_process');const p=process.platform==='win32'?'.venv/Scripts/python.exe':'.venv/bin/python3';process.exit(spawnSync(p,['scripts/word-smart-doc-test-data/make-fixtures.py'],{stdio:'inherit'}).status||0)\"",
+    "word-smart-doc:learn-test": "node scripts/run-word-smart-doc-learn-test.mjs",
+    "word-smart-doc:adaptive-test": "node scripts/run-word-smart-doc-adaptive-test.mjs",
     "word-template:test": "node scripts/run-word-template-test.mjs",
     "word-typeset:test": "node scripts/run-word-typeset-tests.mjs",
     "word-typeset:gov-report": "node scripts/run-government-report-test.mjs",
