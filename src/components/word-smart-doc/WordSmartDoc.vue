@@ -22,9 +22,7 @@ async function onRename(id: string, current: string) {
 }
 
 async function onDelete(id: string, name: string) {
-  if (window.confirm(`确定删除模板「${name}」？此操作不可恢复。`)) {
-    await sd.deleteTemplate(id);
-  }
+  await sd.deleteTemplateWithConfirm(id, name);
 }
 
 async function onSelectAndGenerate(id: string) {

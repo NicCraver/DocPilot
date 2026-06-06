@@ -1,4 +1,4 @@
-import { ref, watch } from "vue";
+import { ref, toRaw, watch } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import {
@@ -26,6 +26,10 @@ interface TypesetBatchResult {
 const DOCX_FILTERS = [{ name: "Word 文档", extensions: ["docx"] }];
 const SAVE_DEBOUNCE_MS = 400;
 
+function cloneConfigSnapshot(config: WordTypesetConfig): WordTypesetConfig {
+  return structuredClone(toRaw(config));
+}
+
 export function useWordTypeset() {
   const mode = ref<TypesetMode>("files");
   const files = ref<string[]>([]);
@@ -51,7 +55,7 @@ export function useWordTypeset() {
     await updateWordTypesetCache({
       activePresetId: activePresetId.value,
       presetId: activePresetId.value,
-      presetConfig: structuredClone(config.value),
+      presetConfig: cloneConfigSnapshot(config.value),
     });
   }
 
@@ -72,7 +76,7 @@ export function useWordTypeset() {
     if (id === activePresetId.value) return;
 
     const prevId = activePresetId.value;
-    const prevConfig = structuredClone(config.value);
+    const prevConfig = cloneConfigSnapshot(config.value);
     const label = WORD_TYPESET_PRESETS.find((p) => p.id === id)?.label ?? id;
 
     // 先更新界面，避免缓存读写失败时切换无反馈
@@ -113,7 +117,7 @@ export function useWordTypeset() {
   async function saveAsGovernmentDefault() {
     await updateWordTypesetCache({
       presetId: "government",
-      presetConfig: structuredClone(config.value),
+      presetConfig: cloneConfigSnapshot(config.value),
     });
     if (activePresetId.value === "government") {
       appendLog("已将当前配置保存为默认政府格式");

@@ -4,7 +4,7 @@
 
 已实现独立 UI 模块（`WordTypeset.vue`），对齐 DocPilot 设计令牌与 `AppButton` 组件：左侧分段切换（文件批量 / 输入文本）、文件列表（文件名+路径、空状态、计数徽章）、`AppButton` 主操作、可折叠运行日志；右侧配置区带**政府格式 / 论文格式**预设切换（Tauri Store 自动缓存）、分区卡片与 Lucide 图标标题、统一表单控件焦点环，底部导入/导出 JSON 与「存为政府默认」操作栏。
 
-配置缓存：`src/lib/wordTypesetStore.ts`（`word-typeset-config.json`），修改表单 debounce 自动写入当前预设；切换预设时加载对应缓存。
+配置缓存：`src/lib/wordTypesetStore.ts`（`word-typeset-config.json`），修改表单 debounce 自动写入当前预设；切换预设时加载对应缓存。保存/切换预设前会对 Vue 响应式配置解包后克隆，避免 WebView `DataCloneError`。
 
 预设：`governmentWordTypesetConfig()` 机关公文；`thesisWordTypesetConfig()` 学位论文（黑体标题、宋体小四正文、首行缩进 0.74cm）。
 
@@ -31,6 +31,7 @@
 ## 变更日志 (Changelog)
 
 - 2026-06-05: 新增 `word-typeset:coal-paper-full`：从《煤炭工程》PDF 双栏提取正文，按字号识别章节并注入数字标题，生成复杂测试 docx 并校验双栏/页眉/上标/图表。
+- 2026-06-06: 修复预设保存/切换时直接 `structuredClone` Vue 响应式配置导致的 `DataCloneError`，新增 composable 回归测试。
 - 2026-06-05: 期刊论文补全：页眉（题名页/正文页）、doi、after_front_matter 双栏、引文上标、英文表题、引言双栏节。
 - 2026-06-05: 新增「期刊论文」预设（双栏、摘要悬挂缩进、数字编号标题、三线表）；样例对齐用户提供的《煤炭工程》PDF 结构。
 - 2026-06-05: 修复政府/论文预设切换不生效：消除 initFromCache 竞态、切换时先更新内存状态再写缓存。

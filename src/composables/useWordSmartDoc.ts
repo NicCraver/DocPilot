@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import { invoke } from "@tauri-apps/api/core";
-import { open, save } from "@tauri-apps/plugin-dialog";
+import { ask, open, save } from "@tauri-apps/plugin-dialog";
 import type {
   AdaptiveInput,
   SmartDocContentMode,
@@ -119,6 +119,14 @@ export function useWordSmartDoc() {
     await refreshTemplates();
   }
 
+  async function deleteTemplateWithConfirm(id: string, name: string) {
+    const ok = await ask(`确定删除模板「${name}」？此操作不可恢复。`, {
+      title: "删除模板",
+      kind: "warning",
+    });
+    if (ok) await deleteTemplate(id);
+  }
+
   async function pickContentFile() {
     const path = await open({ multiple: false, filters: CONTENT_FILTERS });
     if (typeof path !== "string") return;
@@ -217,6 +225,7 @@ export function useWordSmartDoc() {
     learnTemplate,
     renameTemplate,
     deleteTemplate,
+    deleteTemplateWithConfirm,
     pickContentFile,
     runLlmGenerate,
     generate,

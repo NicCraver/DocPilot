@@ -1,4 +1,4 @@
-import { ref, onUnmounted } from "vue";
+import { getCurrentInstance, onUnmounted, ref } from "vue";
 import type { AgentLogEntry } from "../agent/agentLog";
 import { subscribeAgentLog } from "../agent/agentLog";
 
@@ -9,7 +9,9 @@ export function useAgentLog() {
     entries.value.push(entry);
   });
 
-  onUnmounted(unsubscribe);
+  if (getCurrentInstance()) {
+    onUnmounted(unsubscribe);
+  }
 
   function clear() {
     entries.value = [];

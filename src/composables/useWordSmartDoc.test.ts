@@ -1,14 +1,15 @@
 import { describe, it, expect, vi } from "vitest";
 
-const { invokeMock, openMock, saveMock, generateSectionsMock } = vi.hoisted(() => ({
+const { invokeMock, openMock, saveMock, askMock, generateSectionsMock } = vi.hoisted(() => ({
   invokeMock: vi.fn(),
   openMock: vi.fn(),
   saveMock: vi.fn(),
+  askMock: vi.fn(),
   generateSectionsMock: vi.fn(),
 }));
 
 vi.mock("@tauri-apps/api/core", () => ({ invoke: invokeMock }));
-vi.mock("@tauri-apps/plugin-dialog", () => ({ open: openMock, save: saveMock }));
+vi.mock("@tauri-apps/plugin-dialog", () => ({ open: openMock, save: saveMock, ask: askMock }));
 vi.mock("../lib/smartDocStore", () => ({
   loadCurrentTemplateId: vi.fn().mockResolvedValue(null),
   saveCurrentTemplateId: vi.fn().mockResolvedValue(undefined),
@@ -80,5 +81,28 @@ describe("useWordSmartDoc", () => {
       expect.objectContaining({ contentKind: "sections", sections: { auto_1: ["正文一段。"] } }),
     );
     expect(sd.lastOutputPath.value).toBe("/tmp/o.docx");
+  });
+
+  it("删除模板前使用 Tauri ask 确认，确认后再删除", async () => {
+    invokeMock.mockReset();
+    askMock.mockResolvedValue(true);
+    invokeMock.mockImplementation((cmd: string) => {
+      if (cmd === "smart_doc_list_templates")
+        return Promise.resolve([
+          { id: "t1", name: "模板A", description: "", section_count: 1, has_thumbnail: false },
+        ]);
+      if (cmd === "smart_doc_delete_template") return Promise.resolve(undefined);
+      return Promise.resolve(undefined);
+    });
+
+    const sd = useWordSmartDoc();
+    await sd.refreshTemplates();
+    await sd.deleteTemplateWithConfirm("t1", "模板A");
+
+    expect(askMock).toHaveBeenCalledWith(
+      "确定删除模板「模板A」？此操作不可恢复。",
+      expect.objectContaining({ title: "删除模板", kind: "warning" }),
+    );
+    expect(invokeMock).toHaveBeenCalledWith("smart_doc_delete_template", { id: "t1" });
   });
 });

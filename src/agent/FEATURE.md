@@ -14,7 +14,7 @@
 - 助理单轮消息含 `activities[]`（执行过程）与 `content`（最终任务结果）；见 `agent/activities.ts`。
 - 助理「任务结果」由 **markstream-vue** 渲染（见 `components/agent/AgentMarkdown.vue`）。
 - **右侧操作日志**（`AgentLogPanel`，经典布局）/ **编排检视器**（Inspector 布局合并 activities + 日志）：按时间记录用户发送、模型步骤、工具执行等。
-- **Craft Agent UI**：`App.vue`「Craft Demo」→ `AgentCraftDemo`，数据层 `agentChatSession` 单例；`buildAgentTools` 支持 `confirmAll`（Ask 模式逐工具确认）。
+- **Craft Agent UI**：`App.vue`「Craft Demo」→ `AgentCraftDemo`，数据层 `agentChatSession` 单例；`buildAgentTools` 支持 `confirmAll`（Ask 模式逐工具确认）。`useAgentLog` 同时支持组件内订阅自动清理与会话单例场景，避免组件外调用触发生命周期警告。
 
 ## 设计意图 (Intent)
 
@@ -33,6 +33,7 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 ## 变更日志 (Changelog)
 
 - 2026-06-06: Craft UI 接入 Agent；`buildAgentTools` 增加 `confirmAll`；`useCraftAgentChat` 映射 activities → turn card；`App.vue` 侧边栏简化为 Craft Demo 单入口。
+- 2026-06-06: 修复 `useAgentLog` 在 `agentChatSession` 单例中组件外调用时触发 Vue `onUnmounted` 警告，并补充回归测试。
 - 2026-06-05: 新增 `format_docx_batch` / `format_docx_text` Word 排版工具与意图筛选。
 - 2026-06-05: `agentChatSession.ts` 单例会话，供 Agent UI 布局共用。
 - 2026-06-04: 集成 `convert_to_markdown`（MarkItDown）；意图筛选与 system prompt 支持转 MD。

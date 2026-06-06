@@ -2,7 +2,7 @@
 
 ## 现状 (Status)
 
-全新独立模块（`WordSmartDoc.vue` + `useWordSmartDoc()`）：学习任意 docx 提取骨架+样式 profile+章节结构存入模板库（app data `smart-doc-library/<id>/`），三段 Tab（模板库 / 学习新模板 / 生成文档）。生成支持两条路径：现成内容自适应排版、LLM 按章节结构生成内容；产出与模板版式一致的 docx。缩略图用 LibreOffice headless 渲染，缺失时降级。
+全新独立模块（`WordSmartDoc.vue` + `useWordSmartDoc()`）：学习任意 docx 提取骨架+样式 profile+章节结构存入模板库（app data `smart-doc-library/<id>/`），三段 Tab（模板库 / 学习新模板 / 生成文档）。生成支持两条路径：现成内容自适应排版、LLM 按章节结构生成内容；产出与模板版式一致的 docx。缩略图用 LibreOffice headless 渲染，缺失时降级；模板删除确认使用 Tauri dialog `ask`，避免 WebView 原生 confirm 权限问题。
 
 后端：`scripts/word-smart-doc-learn.py`（学习）、`scripts/word-smart-doc-fill.py`（灌入），经 `word_smart_doc_util.rs` 调用；Tauri 命令 `smart_doc_learn_template` / `smart_doc_list_templates` / `smart_doc_rename_template` / `smart_doc_delete_template` / `smart_doc_get_profile` / `smart_doc_update_profile` / `smart_doc_generate`。LLM 走 `src/agent/smartDocGenerate.ts`（Vercel AI SDK）。
 
@@ -26,6 +26,7 @@
 - 2026-06-06: 学习引擎从 Normal 样式读取正文字号/字体，占位段不参与正文采样；灌入时挂接 Normal 段落样式；新增 `word-smart-doc:style-test` 自动化格式断言。
 - 2026-06-06: 修复正文样式学习：优先从占位段落的段落样式（如「正文」）沿 basedOn 链解析小四/宋体，避免误读 Normal 四号；新增 realistic-body-style 回归用例。
 - 2026-06-06: 新增 `word-smart-doc:e2e` 端到端脚本（学习→sections 灌入→正文字号校验）。
+- 2026-06-06: 删除模板确认从 `window.confirm` 改为 Tauri dialog `ask`（`deleteTemplateWithConfirm`），补充 composable 回归测试。
 
 ## 待办 / 风险 (TODO / Risks)
 
