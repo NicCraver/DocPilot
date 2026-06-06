@@ -4,13 +4,16 @@ import ToolsHome from "./components/tools/ToolsHome.vue";
 import AgentCraftDemo from "./components/agent/layouts/AgentCraftDemo.vue";
 import ProviderSettings from "./components/settings/ProviderSettings.vue";
 import WordTypeset from "./components/word-typeset/WordTypeset.vue";
+import WordTemplateFill from "./components/word-template-fill/WordTemplateFill.vue";
 import AppNavItem from "./components/ui/AppNavItem.vue";
 import AppBadge from "./components/ui/AppBadge.vue";
 
-type Tab = "agent" | "tools" | "word-typeset" | "settings";
+type Tab = "agent" | "tools" | "word-typeset" | "word-template" | "settings";
 const tab = ref<Tab>("agent");
 
-const isFullWidthTab = computed(() => tab.value === "agent" || tab.value === "word-typeset");
+const isFullWidthTab = computed(
+  () => tab.value === "agent" || tab.value === "word-typeset" || tab.value === "word-template",
+);
 
 const tabMeta = computed(() => {
   switch (tab.value) {
@@ -23,6 +26,8 @@ const tabMeta = computed(() => {
       return { title: "PDF 工具箱", desc: "本地批量处理与格式转换" };
     case "word-typeset":
       return { title: "Word 批量排版", desc: "批量统一页边距、标题、正文与表格样式" };
+    case "word-template":
+      return { title: "Word 模板生成", desc: "按模板版式套打 Word / 文本 / Markdown 内容" };
     case "settings":
       return { title: "系统设置", desc: "配置大模型 API 连接" };
   }
@@ -85,6 +90,16 @@ const tabMeta = computed(() => {
           </template>
         </AppNavItem>
 
+        <AppNavItem
+          :active="tab === 'word-template'"
+          label="Word 模板生成"
+          @click="tab = 'word-template'"
+        >
+          <template #icon>
+            <span class="i-lucide-file-output w-5 h-5" />
+          </template>
+        </AppNavItem>
+
         <AppNavItem :active="tab === 'settings'" label="系统设置" @click="tab = 'settings'">
           <template #icon>
             <span class="i-lucide-settings w-5 h-5" />
@@ -144,6 +159,7 @@ const tabMeta = computed(() => {
               <AgentCraftDemo v-if="tab === 'agent'" />
               <ToolsHome v-else-if="tab === 'tools'" />
               <WordTypeset v-else-if="tab === 'word-typeset'" />
+              <WordTemplateFill v-else-if="tab === 'word-template'" />
               <ProviderSettings v-else />
             </div>
           </Transition>

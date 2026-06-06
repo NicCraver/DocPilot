@@ -160,6 +160,33 @@ pub async fn format_docx_batch(
 }
 
 #[tauri::command]
+pub async fn generate_word_from_template(
+    template_path: String,
+    output_path: String,
+    content_path: Option<String>,
+    content_text: Option<String>,
+    content_kind: Option<String>,
+    reporter: Option<String>,
+    report_date: Option<String>,
+) -> Result<crate::tools::word_typeset_util::TypesetBatchResult, String> {
+    if content_path.as_ref().is_none_or(|p| p.trim().is_empty())
+        && content_text.as_ref().is_none_or(|t| t.trim().is_empty())
+    {
+        return Err("请上传内容文件或输入文本".into());
+    }
+    let payload = serde_json::json!({
+        "template_path": template_path,
+        "output_path": output_path,
+        "content_path": content_path,
+        "content_text": content_text,
+        "content_kind": content_kind.unwrap_or_else(|| "text".into()),
+        "reporter": reporter,
+        "report_date": report_date,
+    });
+    crate::tools::word_template_util::run_word_template_fill(payload)
+}
+
+#[tauri::command]
 pub async fn format_docx_text(
     text: String,
     output_path: String,

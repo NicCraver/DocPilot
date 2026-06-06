@@ -2,6 +2,7 @@ pub mod compress_pdf;
 pub mod extra;
 pub mod file_util;
 pub mod markitdown_util;
+pub mod word_template_util;
 pub mod word_typeset_util;
 pub mod image_util;
 pub mod merge_pdf;

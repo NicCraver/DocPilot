@@ -22,6 +22,7 @@ pub fn run() {
             commands::typeset_write_text_file,
             commands::format_docx_batch,
             commands::format_docx_text,
+            commands::generate_word_from_template,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
