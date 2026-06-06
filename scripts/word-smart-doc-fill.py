@@ -10,10 +10,17 @@ from pathlib import Path
 from typing import Any
 
 from docx import Document
-from docx.enum.text import WD_LINE_SPACING
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_LINE_SPACING
 from docx.oxml import OxmlElement
 from docx.shared import Pt, RGBColor
 from docx.text.paragraph import Paragraph
+
+ALIGN_MAP = {
+    "left": WD_ALIGN_PARAGRAPH.LEFT,
+    "center": WD_ALIGN_PARAGRAPH.CENTER,
+    "right": WD_ALIGN_PARAGRAPH.RIGHT,
+    "justify": WD_ALIGN_PARAGRAPH.JUSTIFY,
+}
 
 NS = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 GUIDE_KEYWORDS = ("填写指南", "请点击", "扫描二维码", "feishu.cn", "格式刷", "使用时")
@@ -62,6 +69,9 @@ def apply_body_style(para: Paragraph, style: dict[str, Any]) -> None:
     size_pt = style.get("size_pt", 12)
     if indent_chars:
         pf.first_line_indent = Pt(size_pt * indent_chars)
+    align = style.get("align")
+    if align in ALIGN_MAP:
+        para.alignment = ALIGN_MAP[align]
     for run in para.runs:
         if style.get("font_ea"):
             set_east_asia(run, style["font_ea"])
@@ -69,6 +79,14 @@ def apply_body_style(para: Paragraph, style: dict[str, Any]) -> None:
         run.font.color.rgb = RGBColor(0, 0, 0)
         run.italic = False
         run.bold = bool(style.get("bold", False))
+
+
+def set_paragraph_text(para: Paragraph, text: str, style: dict[str, Any]) -> None:
+    """清空段落原有 runs，写入新文本并套用样式，保持字体字号行距一致。"""
+    for r in list(para.runs):
+        r._r.getparent().remove(r._r)
+    para.add_run(text)
+    apply_body_style(para, style)
 
 
 def insert_after(anchor: Paragraph, text: str) -> Paragraph:
@@ -158,7 +176,12 @@ def fill(payload: dict) -> dict[str, Any]:
     logs: list[str] = []
     tdir = Path(payload["template_dir"])
     original = tdir / "original.docx"
-    profile = json.loads((tdir / "profile.json").read_text(encoding="utf-8"))
+    profile_path = tdir / "profile.json"
+    if not original.is_file():
+        raise FileNotFoundError(f"模板骨架缺失: {original}")
+    if not profile_path.is_file():
+        raise FileNotFoundError(f"模板 profile 缺失: {profile_path}")
+    profile = json.loads(profile_path.read_text(encoding="utf-8"))
     structure = profile.get("structure", [])
     styles = profile.get("styles", {})
     body_style = styles.get("body", {"size_pt": 12, "first_line_indent_chars": 2, "line_spacing": 1.5})
@@ -195,27 +218,39 @@ def fill(payload: dict) -> dict[str, Any]:
         filled.add(key)
         logs.append(f"已填入章节「{para.text.strip()[:30]}」{len(parts)} 段")
 
-    leftover = [(s["key"], sections.get(s["key"], [])) for s in structure
-                if s["key"] not in filled and sections.get(s["key"])]
-    if leftover:
-        for key, parts in leftover:
-            doc.add_paragraph(next((s["title"] for s in structure if s["key"] == key), key))
+    if not structure:
+        appended = 0
+        for parts in sections.values():
             for part in parts:
-                p = doc.add_paragraph(part)
-                apply_body_style(p, body_style)
-        logs.append(f"{len(leftover)} 个未匹配章节已续写到文末")
+                if part:
+                    p = doc.add_paragraph(part)
+                    apply_body_style(p, body_style)
+                    appended += 1
+        if appended:
+            logs.append(f"模板无章节结构，内容已整体追加到文末（{appended} 段）")
+    else:
+        leftover = [(s["key"], sections.get(s["key"], [])) for s in structure
+                    if s["key"] not in filled and sections.get(s["key"])]
+        if leftover:
+            for key, parts in leftover:
+                doc.add_paragraph(next((s["title"] for s in structure if s["key"] == key), key))
+                for part in parts:
+                    p = doc.add_paragraph(part)
+                    apply_body_style(p, body_style)
+            logs.append(f"{len(leftover)} 个未匹配章节已续写到文末")
 
+    done_meta: set[str] = set()
     for para in list(doc.paragraphs):
         t = para.text.strip()
-        if t.startswith("汇报人") and reporter:
-            for r in list(para.runs):
-                r._r.getparent().remove(r._r)
-            para.add_run(f"汇报人：{reporter}")
+        if len(t) >= 20:
+            continue
+        if reporter and "reporter" not in done_meta and re.match(r"^汇报人[：:]", t):
+            set_paragraph_text(para, f"汇报人：{reporter}", body_style)
+            done_meta.add("reporter")
             logs.append(f"已填写汇报人：{reporter}")
-        elif t.startswith("日期") and report_date:
-            for r in list(para.runs):
-                r._r.getparent().remove(r._r)
-            para.add_run(f"日期：{report_date}")
+        elif report_date and "date" not in done_meta and re.match(r"^日期[：:]", t):
+            set_paragraph_text(para, f"日期：{report_date}", body_style)
+            done_meta.add("date")
             logs.append(f"已填写日期：{report_date}")
 
     doc.save(str(out))
@@ -228,6 +263,13 @@ def main() -> None:
         print(json.dumps({"ok": False, "error": "缺少 JSON 参数"}, ensure_ascii=False)); sys.exit(1)
     try:
         payload = json.loads(sys.argv[1])
+    except json.JSONDecodeError as e:
+        print(json.dumps({"ok": False, "error": f"JSON 解析失败: {e}"}, ensure_ascii=False)); sys.exit(1)
+    if not payload.get("template_dir"):
+        print(json.dumps({"ok": False, "error": "template_dir 必填"}, ensure_ascii=False)); sys.exit(1)
+    if not payload.get("output_path"):
+        print(json.dumps({"ok": False, "error": "output_path 必填"}, ensure_ascii=False)); sys.exit(1)
+    try:
         print(json.dumps(fill(payload), ensure_ascii=False))
     except Exception as e:  # noqa: BLE001
         print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False)); sys.exit(1)
