@@ -123,13 +123,30 @@ fn gen_id() -> String {
     format!("tpl-{ts}-{rand}")
 }
 
+/// 校验模板 id 合法（防止路径穿越），并返回其在库内的目录。
+fn safe_template_dir(library_dir: &Path, id: &str) -> Result<PathBuf, String> {
+    if id.is_empty()
+        || id.contains("..")
+        || id.contains('/')
+        || id.contains('\\')
+        || id.contains('\0')
+    {
+        return Err(format!("非法模板 id: {id}"));
+    }
+    Ok(library_dir.join(id))
+}
+
 pub fn learn_template(library_dir: &Path, docx_path: &str, name: Option<String>, description: Option<String>) -> Result<TemplateMeta, String> {
     let id = gen_id();
     let dest = library_dir.join(&id);
     let v = run_python("word-smart-doc-learn.py", serde_json::json!({
         "docx_path": docx_path,
         "dest_dir": dest.to_string_lossy(),
-    }))?;
+    }))
+    .inspect_err(|_| {
+        // 学习失败时清理可能产生的半成品目录，避免遗留孤儿条目
+        let _ = fs::remove_dir_all(&dest);
+    })?;
     let meta_v = v.get("meta").cloned().unwrap_or_default();
     let mut meta: TemplateMeta = serde_json::from_value(serde_json::json!({
         "id": id,
@@ -183,7 +200,7 @@ pub fn list_templates(library_dir: &Path) -> Result<Vec<TemplateMeta>, String> {
 }
 
 pub fn rename_template(library_dir: &Path, id: &str, name: &str) -> Result<(), String> {
-    let dir = library_dir.join(id);
+    let dir = safe_template_dir(library_dir, id)?;
     let meta_path = dir.join("meta.json");
     let raw = fs::read_to_string(&meta_path).map_err(|e| format!("读 meta 失败: {e}"))?;
     let mut v: serde_json::Value = serde_json::from_str(&raw).map_err(|e| format!("解析 meta 失败: {e}"))?;
@@ -193,7 +210,7 @@ pub fn rename_template(library_dir: &Path, id: &str, name: &str) -> Result<(), S
 }
 
 pub fn delete_template(library_dir: &Path, id: &str) -> Result<(), String> {
-    let dir = library_dir.join(id);
+    let dir = safe_template_dir(library_dir, id)?;
     if dir.exists() {
         fs::remove_dir_all(&dir).map_err(|e| format!("删除失败: {e}"))?;
     }
@@ -201,13 +218,13 @@ pub fn delete_template(library_dir: &Path, id: &str) -> Result<(), String> {
 }
 
 pub fn read_profile(library_dir: &Path, id: &str) -> Result<serde_json::Value, String> {
-    let path = library_dir.join(id).join("profile.json");
+    let path = safe_template_dir(library_dir, id)?.join("profile.json");
     let raw = fs::read_to_string(&path).map_err(|e| format!("读 profile 失败: {e}"))?;
     serde_json::from_str(&raw).map_err(|e| format!("解析 profile 失败: {e}"))
 }
 
 pub fn update_profile(library_dir: &Path, id: &str, profile: serde_json::Value) -> Result<(), String> {
-    let path = library_dir.join(id).join("profile.json");
+    let path = safe_template_dir(library_dir, id)?.join("profile.json");
     fs::write(&path, serde_json::to_string_pretty(&profile).unwrap_or_default())
         .map_err(|e| format!("写 profile 失败: {e}"))
 }
@@ -224,7 +241,7 @@ pub fn generate(
     reporter: Option<String>,
     report_date: Option<String>,
 ) -> Result<FillResult, String> {
-    let template_dir = library_dir.join(id);
+    let template_dir = safe_template_dir(library_dir, id)?;
     if !template_dir.join("original.docx").is_file() {
         return Err("模板不存在或已损坏".into());
     }
