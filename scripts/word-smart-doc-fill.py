@@ -49,7 +49,11 @@ def paragraph_is_guide(para: Paragraph) -> bool:
 
 def is_placeholder(para: Paragraph) -> bool:
     text = para.text.strip()
-    return text in {"（此处填写正文）", "（此处填写内容）"} or paragraph_is_guide(para)
+    if text in {"（此处填写正文）", "（此处填写内容）", "此处填写正文", "此处填写内容"}:
+        return True
+    if "此处填写" in text and len(text) <= 30:
+        return True
+    return paragraph_is_guide(para)
 
 
 def set_east_asia(run, font: str) -> None:
@@ -61,7 +65,13 @@ def set_east_asia(run, font: str) -> None:
     rfonts.set(f"{NS}eastAsia", font)
 
 
-def apply_body_style(para: Paragraph, style: dict[str, Any]) -> None:
+def apply_body_style(para: Paragraph, style: dict[str, Any], doc: Document | None = None) -> None:
+    if doc is not None:
+        style_name = style.get("style_name", "Normal")
+        try:
+            para.style = doc.styles[style_name]
+        except KeyError:
+            para.style = doc.styles["Normal"]
     pf = para.paragraph_format
     pf.line_spacing_rule = WD_LINE_SPACING.MULTIPLE
     pf.line_spacing = style.get("line_spacing", 1.5)
@@ -81,12 +91,12 @@ def apply_body_style(para: Paragraph, style: dict[str, Any]) -> None:
         run.bold = bool(style.get("bold", False))
 
 
-def set_paragraph_text(para: Paragraph, text: str, style: dict[str, Any]) -> None:
+def set_paragraph_text(para: Paragraph, text: str, style: dict[str, Any], doc: Document | None = None) -> None:
     """清空段落原有 runs，写入新文本并套用样式，保持字体字号行距一致。"""
     for r in list(para.runs):
         r._r.getparent().remove(r._r)
     para.add_run(text)
-    apply_body_style(para, style)
+    apply_body_style(para, style, doc)
 
 
 def insert_after(anchor: Paragraph, text: str) -> Paragraph:
@@ -213,7 +223,7 @@ def fill(payload: dict) -> dict[str, Any]:
         anchor = para
         for part in parts:
             np = insert_after(anchor, part)
-            apply_body_style(np, body_style)
+            apply_body_style(np, body_style, doc)
             anchor = np
         filled.add(key)
         logs.append(f"已填入章节「{para.text.strip()[:30]}」{len(parts)} 段")
@@ -224,7 +234,7 @@ def fill(payload: dict) -> dict[str, Any]:
             for part in parts:
                 if part:
                     p = doc.add_paragraph(part)
-                    apply_body_style(p, body_style)
+                    apply_body_style(p, body_style, doc)
                     appended += 1
         if appended:
             logs.append(f"模板无章节结构，内容已整体追加到文末（{appended} 段）")
@@ -236,7 +246,7 @@ def fill(payload: dict) -> dict[str, Any]:
                 doc.add_paragraph(next((s["title"] for s in structure if s["key"] == key), key))
                 for part in parts:
                     p = doc.add_paragraph(part)
-                    apply_body_style(p, body_style)
+                    apply_body_style(p, body_style, doc)
             logs.append(f"{len(leftover)} 个未匹配章节已续写到文末")
 
     done_meta: set[str] = set()
@@ -245,11 +255,11 @@ def fill(payload: dict) -> dict[str, Any]:
         if len(t) >= 20:
             continue
         if reporter and "reporter" not in done_meta and re.match(r"^汇报人[：:]", t):
-            set_paragraph_text(para, f"汇报人：{reporter}", body_style)
+            set_paragraph_text(para, f"汇报人：{reporter}", body_style, doc)
             done_meta.add("reporter")
             logs.append(f"已填写汇报人：{reporter}")
         elif report_date and "date" not in done_meta and re.match(r"^日期[：:]", t):
-            set_paragraph_text(para, f"日期：{report_date}", body_style)
+            set_paragraph_text(para, f"日期：{report_date}", body_style, doc)
             done_meta.add("date")
             logs.append(f"已填写日期：{report_date}")
 

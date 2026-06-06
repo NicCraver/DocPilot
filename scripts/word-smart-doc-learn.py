@@ -60,14 +60,118 @@ def _ea_font(run) -> str | None:
     return ea or run.font.name
 
 
-def _para_size_pt(para) -> float | None:
-    for r in para.runs:
-        if r.font.size:
-            return r.font.size.pt
+def is_body_placeholder(para) -> bool:
+    text = para.text.strip()
+    if text in {"（此处填写正文）", "（此处填写内容）", "此处填写正文", "此处填写内容"}:
+        return True
+    return "此处填写" in text and len(text) <= 30
+
+
+def _style_ea_font(style) -> str | None:
+    if style is None:
+        return None
+    el = style._element
+    rpr = el.find(qn("w:rPr"))
+    if rpr is not None:
+        rfonts = rpr.find(qn("w:rFonts"))
+        if rfonts is not None:
+            ea = rfonts.get(qn("w:eastAsia"))
+            if ea:
+                return ea
+    return style.font.name
+
+
+def _style_size_pt(style) -> float | None:
+    if style is None or style.font.size is None:
+        return None
+    return style.font.size.pt
+
+
+def _resolve_style_props(style) -> tuple[str | None, float | None]:
+    """沿 basedOn 链合并样式，得到有效东亚字体与字号。"""
+    ea: str | None = None
+    sz: float | None = None
+    seen: set[int] = set()
+    cur = style
+    while cur is not None and id(cur) not in seen:
+        seen.add(id(cur))
+        if ea is None:
+            ea = _style_ea_font(cur)
+        if sz is None:
+            sz = _style_size_pt(cur)
+        if ea and sz is not None:
+            break
+        cur = cur.base_style
+    return ea, sz
+
+
+def _body_from_placeholders(doc: Document) -> dict[str, Any] | None:
+    """从占位段落的段落样式推断正文格式（真实模板常 Normal=四号、正文样式=小四）。"""
+    for para in doc.paragraphs:
+        if not is_body_placeholder(para):
+            continue
+        sty = para.style
+        if sty is None:
+            continue
+        ea, sz = _resolve_style_props(sty)
+        if ea is None:
+            ea = _effective_ea_font(para, doc)
+        if sz is None:
+            sz = _effective_size_pt(para, doc)
+        out: dict[str, Any] = {"style_name": sty.name}
+        if ea:
+            out["font_ea"] = ea
+        if sz is not None:
+            out["size_pt"] = round(sz, 1)
+        return out
     return None
 
 
-def _heading_level(para) -> int | None:
+def _effective_size_pt(para, doc: Document) -> float | None:
+    for r in para.runs:
+        if r.font.size:
+            return r.font.size.pt
+    if para.style:
+        sz = _style_size_pt(para.style)
+        if sz is not None:
+            return sz
+    try:
+        return _style_size_pt(doc.styles["Normal"])
+    except KeyError:
+        return None
+
+
+def _effective_ea_font(para, doc: Document) -> str | None:
+    if para.runs:
+        ea = _ea_font(para.runs[0])
+        if ea:
+            return ea
+    if para.style:
+        ea = _style_ea_font(para.style)
+        if ea:
+            return ea
+    try:
+        return _style_ea_font(doc.styles["Normal"])
+    except KeyError:
+        return None
+
+
+def _normal_body_baseline(doc: Document) -> dict[str, Any]:
+    try:
+        normal = doc.styles["Normal"]
+    except KeyError:
+        return {}
+    out: dict[str, Any] = {"style_name": "Normal"}
+    ea = _style_ea_font(normal)
+    if ea:
+        out["font_ea"] = ea
+    sz = _style_size_pt(normal)
+    if sz is not None:
+        out["size_pt"] = round(sz, 1)
+    return out
+
+
+def _heading_level(para, doc: Document) -> int | None:
     """返回标题层级（1..），非标题返回 None。"""
     name = (para.style.name or "").lower() if para.style else ""
     if name.startswith("subtitle"):
@@ -84,7 +188,7 @@ def _heading_level(para) -> int | None:
     # 居中且较大字号的短段落视作文档主标题（level 0），优先于序号/加粗启发式，
     # 避免「2025 年终总结报告」这类以数字开头的主标题被误判为二级标题。
     if _align_name(para) == "center" and len(text) <= 30:
-        size = _para_size_pt(para)
+        size = _effective_size_pt(para, doc)
         if (size and size >= 20) or bold_len:
             return 0
     if CN_NUM_RE.match(text):
@@ -135,15 +239,21 @@ def extract_profile(doc: Document) -> dict[str, Any]:
             continue
         if paragraph_is_guide(para):
             continue
-        sample = (_ea_font(para.runs[0]) if para.runs else None, _para_size_pt(para),
-                  any(r.bold for r in para.runs), _align_name(para))
+        if is_body_placeholder(para):
+            continue
+        sample = (
+            _effective_ea_font(para, doc),
+            _effective_size_pt(para, doc),
+            any(r.bold for r in para.runs),
+            _align_name(para),
+        )
         if "汇报人" in text and len(text) < 20:
             meta_fields.append({"label": "汇报人", "pattern": "汇报人[：:]"})
             continue
         if text.startswith("日期") and len(text) < 20:
             meta_fields.append({"label": "日期", "pattern": "日期[：:]"})
             continue
-        level = _heading_level(para)
+        level = _heading_level(para, doc)
         if level == 0:
             title_s.append(sample)
             continue
@@ -159,7 +269,18 @@ def extract_profile(doc: Document) -> dict[str, Any]:
         styles["title"] = {**_repr_style(title_s), "align": "center"}
     for lvl, samples in heading_s.items():
         styles[f"heading{lvl}"] = _repr_style(samples)
-    styles["body"] = {**_repr_style(body_s), "first_line_indent_chars": 2, "line_spacing": 1.5} if body_s else {"first_line_indent_chars": 2, "line_spacing": 1.5}
+    body_placeholder = _body_from_placeholders(doc)
+    body_base = body_placeholder or _normal_body_baseline(doc)
+    body_repr = _repr_style(body_s)
+    if body_placeholder:
+        for key in ("font_ea", "size_pt", "style_name"):
+            body_repr.pop(key, None)
+    styles["body"] = {
+        **body_base,
+        **body_repr,
+        "first_line_indent_chars": 2,
+        "line_spacing": 1.5,
+    }
 
     seen = set()
     dedup_meta = []

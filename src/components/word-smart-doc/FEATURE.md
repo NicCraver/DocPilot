@@ -6,7 +6,7 @@
 
 后端：`scripts/word-smart-doc-learn.py`（学习）、`scripts/word-smart-doc-fill.py`（灌入），经 `word_smart_doc_util.rs` 调用；Tauri 命令 `smart_doc_learn_template` / `smart_doc_list_templates` / `smart_doc_rename_template` / `smart_doc_delete_template` / `smart_doc_get_profile` / `smart_doc_update_profile` / `smart_doc_generate`。LLM 走 `src/agent/smartDocGenerate.ts`（Vercel AI SDK）。
 
-依赖：`pnpm run word-smart-doc:install`（python-docx + LibreOffice 检测）。测试：`word-smart-doc:learn-test` / `word-smart-doc:adaptive-test`。
+依赖：`pnpm run word-smart-doc:install`（python-docx + LibreOffice 检测）。测试：`word-smart-doc:learn-test` / `word-smart-doc:adaptive-test` / `word-smart-doc:style-test`（格式断言）/ `word-smart-doc:e2e`（学习→模拟 LLM 章节→灌入 docx→校验字号字体，全链路）。
 
 完全新写，不复用、不改动现有 `word-template-fill` / `word-typeset`。
 
@@ -23,6 +23,9 @@
 ## 变更日志 (Changelog)
 
 - 2026-06-06: 初始实现学习引擎、排版灌入、模板库管理、双内容路径与 UI。
+- 2026-06-06: 学习引擎从 Normal 样式读取正文字号/字体，占位段不参与正文采样；灌入时挂接 Normal 段落样式；新增 `word-smart-doc:style-test` 自动化格式断言。
+- 2026-06-06: 修复正文样式学习：优先从占位段落的段落样式（如「正文」）沿 basedOn 链解析小四/宋体，避免误读 Normal 四号；新增 realistic-body-style 回归用例。
+- 2026-06-06: 新增 `word-smart-doc:e2e` 端到端脚本（学习→sections 灌入→正文字号校验）。
 
 ## 待办 / 风险 (TODO / Risks)
 

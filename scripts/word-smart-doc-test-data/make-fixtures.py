@@ -5,8 +5,19 @@ from __future__ import annotations
 from pathlib import Path
 
 from docx import Document
+from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml.ns import qn
 from docx.shared import Pt, RGBColor
+
+def _set_normal_body(doc: Document, font_ea: str, size_pt: float) -> None:
+    """在 Normal 样式上定义正文宋体小四，占位段继承样式、不显式设 run 字号。"""
+    normal = doc.styles["Normal"]
+    normal.font.name = font_ea
+    normal.font.size = Pt(size_pt)
+    rpr = normal._element.get_or_add_rPr()
+    rfonts = rpr.get_or_add_rFonts()
+    rfonts.set(qn("w:eastAsia"), font_ea)
 
 HERE = Path(__file__).resolve().parent
 
@@ -28,6 +39,7 @@ def _heading(doc, text: str, size: int, font_ea: str, bold: bool):
 
 def make_year_end_template():
     doc = Document()
+    _set_normal_body(doc, "宋体", 12)
     title = doc.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r = title.add_run("2025 年终总结报告")
@@ -50,8 +62,30 @@ def make_year_end_template():
     return out
 
 
+def make_realistic_body_style_template():
+    """模拟常见企业模板：Normal=四号 14pt，占位段挂「正文」样式=小四 12pt。"""
+    doc = Document()
+    _set_normal_body(doc, "宋体", 14)
+    body_style = doc.styles.add_style("正文", WD_STYLE_TYPE.PARAGRAPH)
+    body_style.base_style = doc.styles["Normal"]
+    body_style.font.name = "宋体"
+    body_style.font.size = Pt(12)
+    rpr = body_style._element.get_or_add_rPr()
+    rfonts = rpr.get_or_add_rFonts()
+    rfonts.set(qn("w:eastAsia"), "宋体")
+
+    for h in ["前言", "工作成果", "结语"]:
+        _heading(doc, h, 16, "黑体", True)
+        doc.add_paragraph("（此处填写正文）", style="正文")
+
+    out = HERE / "realistic-body-style.docx"
+    doc.save(str(out))
+    return out
+
+
 def make_gov_template():
     doc = Document()
+    _set_normal_body(doc, "仿宋_GB2312", 16)
     title = doc.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     r = title.add_run("关于加强本市数据治理工作的通知")
@@ -94,6 +128,7 @@ def make_content_md():
 def main():
     HERE.mkdir(parents=True, exist_ok=True)
     print("生成:", make_year_end_template())
+    print("生成:", make_realistic_body_style_template())
     print("生成:", make_gov_template())
     print("生成:", make_content_md())
 
