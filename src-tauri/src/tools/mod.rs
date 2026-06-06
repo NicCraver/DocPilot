@@ -4,6 +4,7 @@ pub mod file_util;
 pub mod markitdown_util;
 pub mod word_template_util;
 pub mod word_typeset_util;
+pub mod word_smart_doc_util;
 pub mod image_util;
 pub mod merge_pdf;
 pub mod pdf_lopdf_util;
