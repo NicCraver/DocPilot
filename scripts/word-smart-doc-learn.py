@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from docx import Document
+from docx.oxml.ns import qn
 from docx.shared import RGBColor
 
 SOFFICE_CANDIDATES = [
@@ -18,7 +19,10 @@ SOFFICE_CANDIDATES = [
     "/Applications/LibreOffice.app/Contents/MacOS/soffice",
     "/usr/bin/soffice",
     "/usr/local/bin/soffice",
+    "C:\\Program Files\\LibreOffice\\program\\soffice.exe",
 ]
+
+GUIDE_KEYWORDS = ("填写指南", "请点击", "扫描二维码", "feishu.cn", "格式刷", "使用时")
 
 CN_NUM_RE = re.compile(r"^[（(]?[一二三四五六七八九十]+[)）、.]")
 DIGIT_RE = re.compile(r"^\d+([.\d]*)?[、.\s]")
@@ -40,16 +44,19 @@ def paragraph_is_guide(para) -> bool:
     red = sum(1 for r in para.runs if _run_is_red(r))
     if red and (text.startswith("（") or red >= max(1, len(para.runs) // 2)):
         return True
+    if any(k in text for k in GUIDE_KEYWORDS):
+        return True
     return False
 
 
 def _ea_font(run) -> str | None:
-    rpr = run._element.rPr
-    if rpr is None or rpr.rFonts is None:
+    r_pr = run._element.rPr
+    if r_pr is None:
         return run.font.name
-    ea = rpr.rFonts.get(
-        "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}eastAsia"
-    )
+    rfonts = r_pr.find(qn("w:rFonts"))
+    if rfonts is None:
+        return run.font.name
+    ea = rfonts.get(qn("w:eastAsia"))
     return ea or run.font.name
 
 
@@ -63,6 +70,8 @@ def _para_size_pt(para) -> float | None:
 def _heading_level(para) -> int | None:
     """返回标题层级（1..），非标题返回 None。"""
     name = (para.style.name or "").lower() if para.style else ""
+    if name.startswith("subtitle"):
+        return None  # 副标题不作为主标题，交由后续启发式（实际会落到正文）
     if name.startswith("title"):
         return 0  # 文档主标题
     m = re.match(r"heading\s*(\d+)", name)
@@ -168,7 +177,16 @@ def extract_profile(doc: Document) -> dict[str, Any]:
 
 
 def render_thumbnail(docx_path: Path, dest_dir: Path, logs: list[str]) -> str | None:
-    soffice = next((c for c in SOFFICE_CANDIDATES if c == "soffice" or Path(c).exists()), None)
+    soffice: str | None = None
+    for c in SOFFICE_CANDIDATES:
+        if c == "soffice":
+            found = shutil.which("soffice")
+            if found:
+                soffice = found
+                break
+        elif Path(c).exists():
+            soffice = c
+            break
     if soffice is None:
         logs.append("未检测到 LibreOffice，跳过缩略图")
         return None
@@ -226,7 +244,18 @@ def main() -> None:
         sys.exit(1)
     try:
         payload = json.loads(sys.argv[1])
-        result = learn(payload["docx_path"], payload["dest_dir"])
+    except json.JSONDecodeError as e:
+        print(json.dumps({"ok": False, "error": f"JSON 解析失败: {e}"}, ensure_ascii=False))
+        sys.exit(1)
+
+    docx_path = payload.get("docx_path")
+    dest_dir = payload.get("dest_dir")
+    if not docx_path or not dest_dir:
+        print(json.dumps({"ok": False, "error": "docx_path 与 dest_dir 必填"}, ensure_ascii=False))
+        sys.exit(1)
+
+    try:
+        result = learn(docx_path, dest_dir)
         print(json.dumps(result, ensure_ascii=False))
     except Exception as e:  # noqa: BLE001
         print(json.dumps({"ok": False, "error": str(e)}, ensure_ascii=False))
