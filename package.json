@@ -11,6 +11,7 @@
     "icons:build": "node scripts/prepare-app-icon.mjs && tauri icon src-tauri/app-icon.png -o src-tauri/icons && node scripts/prepare-app-icon.mjs --icns-only",
     "markitdown:install": "node scripts/ensure-markitdown.mjs",
     "word-typeset:install": "node scripts/ensure-word-typeset.mjs",
+    "word-smart-doc:install": "node scripts/ensure-word-typeset.mjs && node scripts/ensure-libreoffice.mjs",
     "word-template:test": "node scripts/run-word-template-test.mjs",
     "word-typeset:test": "node scripts/run-word-typeset-tests.mjs",
     "word-typeset:gov-report": "node scripts/run-government-report-test.mjs",
