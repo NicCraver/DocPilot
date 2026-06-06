@@ -3,7 +3,7 @@
  * Word 模板生成自动化测试（美腾 2025 年终总结样例）
  */
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,9 +11,12 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const venvPy = join(root, ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python3");
 const script = join(root, "scripts", "word-template-fill.py");
 const data = join(root, "scripts", "word-template-test-data");
+const artifacts = join(root, "scripts", "test-artifacts", "word-template");
 const template = join(data, "meiteng-2025-template.docx");
 const content = join(data, "2025-year-end-content.md");
-const output = join(data, "2025-year-end-output.docx");
+const output = join(artifacts, "2025-year-end-output.docx");
+
+mkdirSync(artifacts, { recursive: true });
 
 if (!existsSync(venvPy)) {
   console.error("未找到 .venv，请先执行: pnpm run word-typeset:install");

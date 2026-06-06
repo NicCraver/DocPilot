@@ -9,12 +9,16 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const py = join(root, ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python3");
 const learn = join(root, "scripts", "word-smart-doc-learn.py");
-const data = join(root, "scripts", "word-smart-doc-test-data");
+const makeFixtures = join(root, "scripts", "word-smart-doc-test-data", "make-fixtures.py");
+const artifacts = join(root, "scripts", "test-artifacts", "word-smart-doc");
 
 if (!existsSync(py)) {
   console.error("未找到 .venv，请先执行: pnpm run word-smart-doc:install");
   process.exit(1);
 }
+
+const mk = spawnSync(py, [makeFixtures], { encoding: "utf-8", cwd: root, stdio: "inherit" });
+if (mk.status !== 0) process.exit(mk.status || 1);
 
 function run(docx, expectTitles) {
   const dest = mkdtempSync(join(tmpdir(), "sdlearn-"));
@@ -36,6 +40,6 @@ function run(docx, expectTitles) {
   console.log(`✓ ${docx.split("/").pop()}: ${titles.length} 章节 [${titles.join(" / ")}]`);
 }
 
-run(join(data, "year-end-template.docx"), ["前言", "工作成果", "结语"]);
-run(join(data, "gov-template.docx"), ["总体要求", "主要任务", "保障措施"]);
+run(join(artifacts, "year-end-template.docx"), ["前言", "工作成果", "结语"]);
+run(join(artifacts, "gov-template.docx"), ["总体要求", "主要任务", "保障措施"]);
 console.log("word-smart-doc 学习测试通过。");

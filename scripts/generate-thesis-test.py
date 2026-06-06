@@ -22,10 +22,11 @@ def paragraph_has_inline_drawing(paragraph) -> bool:
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "scripts" / "word-typeset.py"
 DATA = ROOT / "scripts" / "word-typeset-test-data"
+ARTIFACTS = ROOT / "scripts" / "test-artifacts" / "word-typeset"
 ASSETS = DATA / "assets"
 TEXT_SRC = DATA / "学术论文-测试原文.txt"
-DOC_IN = DATA / "学术论文-排版前.docx"
-DOC_OUT = DATA / "学术论文-排版后.docx"
+DOC_IN = ARTIFACTS / "学术论文-排版前.docx"
+DOC_OUT = ARTIFACTS / "学术论文-排版后.docx"
 CHART_PNG = ASSETS / "thesis-framework-chart.png"
 BAR_PNG = ASSETS / "thesis-performance-chart.png"
 

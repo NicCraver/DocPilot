@@ -20,9 +20,10 @@ ROOT = Path(__file__).resolve().parent.parent
 PDF_PATH = Path("/Users/nic/Downloads/选煤固废资源化利用研究进展_1.pdf")
 SCRIPT = ROOT / "scripts" / "word-typeset.py"
 DATA = ROOT / "scripts" / "word-typeset-test-data"
+ARTIFACTS = ROOT / "scripts" / "test-artifacts" / "word-typeset"
 ASSETS = DATA / "assets" / "coal-paper-full"
-DOC_IN = DATA / "选煤固废-复杂论文-排版前.docx"
-DOC_OUT = DATA / "选煤固废-复杂论文-排版后.docx"
+DOC_IN = ARTIFACTS / "选煤固废-复杂论文-排版前.docx"
+DOC_OUT = ARTIFACTS / "选煤固废-复杂论文-排版后.docx"
 
 HEADER_NOISE = re.compile(
     r"^(doi:|第\d+卷|Vol\.|COAL|ENGINEE|煤$|炭$|工$|程$|专家论坛|\d{1,3}$|"

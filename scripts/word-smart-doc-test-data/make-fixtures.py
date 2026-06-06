@@ -20,6 +20,7 @@ def _set_normal_body(doc: Document, font_ea: str, size_pt: float) -> None:
     rfonts.set(qn("w:eastAsia"), font_ea)
 
 HERE = Path(__file__).resolve().parent
+ARTIFACTS = HERE.parent / "test-artifacts" / "word-smart-doc"
 
 
 def _heading(doc, text: str, size: int, font_ea: str, bold: bool):
@@ -57,7 +58,7 @@ def make_year_end_template():
 
     doc.add_paragraph("汇报人：")
     doc.add_paragraph("日期：")
-    out = HERE / "year-end-template.docx"
+    out = ARTIFACTS / "year-end-template.docx"
     doc.save(str(out))
     return out
 
@@ -78,7 +79,7 @@ def make_realistic_body_style_template():
         _heading(doc, h, 16, "黑体", True)
         doc.add_paragraph("（此处填写正文）", style="正文")
 
-    out = HERE / "realistic-body-style.docx"
+    out = ARTIFACTS / "realistic-body-style.docx"
     doc.save(str(out))
     return out
 
@@ -95,7 +96,7 @@ def make_gov_template():
     for h in ["一、总体要求", "二、主要任务", "三、保障措施"]:
         _heading(doc, h, 16, "黑体", False)
         doc.add_paragraph("（此处填写正文）")
-    out = HERE / "gov-template.docx"
+    out = ARTIFACTS / "gov-template.docx"
     doc.save(str(out))
     return out
 
@@ -126,7 +127,7 @@ def make_content_md():
 
 
 def main():
-    HERE.mkdir(parents=True, exist_ok=True)
+    ARTIFACTS.mkdir(parents=True, exist_ok=True)
     print("生成:", make_year_end_template())
     print("生成:", make_realistic_body_style_template())
     print("生成:", make_gov_template())

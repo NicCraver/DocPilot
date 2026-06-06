@@ -10,15 +10,20 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const py = join(root, ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python3");
 const learn = join(root, "scripts", "word-smart-doc-learn.py");
 const fill = join(root, "scripts", "word-smart-doc-fill.py");
+const makeFixtures = join(root, "scripts", "word-smart-doc-test-data", "make-fixtures.py");
 const data = join(root, "scripts", "word-smart-doc-test-data");
+const artifacts = join(root, "scripts", "test-artifacts", "word-smart-doc");
 
 if (!existsSync(py)) {
   console.error("未找到 .venv，请先执行: pnpm run word-smart-doc:install");
   process.exit(1);
 }
 
+let r = spawnSync(py, [makeFixtures], { encoding: "utf-8", cwd: root, stdio: "inherit" });
+if (r.status !== 0) process.exit(r.status || 1);
+
 const dest = mkdtempSync(join(tmpdir(), "sdfill-"));
-let r = spawnSync(py, [learn, JSON.stringify({ docx_path: join(data, "year-end-template.docx"), dest_dir: dest })], { encoding: "utf-8", cwd: root });
+r = spawnSync(py, [learn, JSON.stringify({ docx_path: join(artifacts, "year-end-template.docx"), dest_dir: dest })], { encoding: "utf-8", cwd: root });
 if (r.status !== 0 || !JSON.parse(r.stdout.trim()).ok) { console.error(r.stdout || r.stderr); process.exit(1); }
 
 const output = join(dest, "out.docx");

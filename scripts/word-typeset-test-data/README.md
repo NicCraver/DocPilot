@@ -35,4 +35,6 @@ pnpm run word-typeset:gov-report
 pnpm run word-typeset:test
 ```
 
-报告：`last-test-report.json`
+运行时生成的 docx、`.bak` 与报告写入 `scripts/test-artifacts/word-typeset/`（已 gitignore）。
+
+报告：`scripts/test-artifacts/word-typeset/last-test-report.json`

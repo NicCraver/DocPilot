@@ -18,10 +18,11 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "scripts" / "word-typeset.py"
 DATA = ROOT / "scripts" / "word-typeset-test-data"
+ARTIFACTS = ROOT / "scripts" / "test-artifacts" / "word-typeset"
 ASSETS = DATA / "assets"
 TEXT_SRC = DATA / "期刊论文-测试原文.txt"
-DOC_IN = DATA / "期刊论文-排版前.docx"
-DOC_OUT = DATA / "期刊论文-排版后.docx"
+DOC_IN = ARTIFACTS / "期刊论文-排版前.docx"
+DOC_OUT = ARTIFACTS / "期刊论文-排版后.docx"
 FLOW_PNG = ASSETS / "journal-gangue-flow.png"
 
 

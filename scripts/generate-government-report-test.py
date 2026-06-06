@@ -14,9 +14,10 @@ from docx import Document
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "scripts" / "word-typeset.py"
 DATA = ROOT / "scripts" / "word-typeset-test-data"
+ARTIFACTS = ROOT / "scripts" / "test-artifacts" / "word-typeset"
 TEXT_SRC = DATA / "政府工作报告-测试原文.txt"
-DOC_IN = DATA / "政府工作报告-排版前.docx"
-DOC_OUT = DATA / "政府工作报告-排版后.docx"
+DOC_IN = ARTIFACTS / "政府工作报告-排版前.docx"
+DOC_OUT = ARTIFACTS / "政府工作报告-排版后.docx"
 
 
 def load_module():

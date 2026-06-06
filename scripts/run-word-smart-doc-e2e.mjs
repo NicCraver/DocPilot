@@ -15,7 +15,7 @@ const learn = join(root, "scripts", "word-smart-doc-learn.py");
 const fill = join(root, "scripts", "word-smart-doc-fill.py");
 const styleTest = join(root, "scripts", "test-word-smart-doc.py");
 const makeFixtures = join(root, "scripts", "word-smart-doc-test-data", "make-fixtures.py");
-const data = join(root, "scripts", "word-smart-doc-test-data");
+const artifacts = join(root, "scripts", "test-artifacts", "word-smart-doc");
 
 if (!existsSync(py)) {
   console.error("未找到 .venv，请先执行: pnpm run word-smart-doc:install");
@@ -169,7 +169,7 @@ runPy([makeFixtures], {});
 
 e2eScenario(
   "年终模板(Normal小四)",
-  join(data, "year-end-template.docx"),
+  join(artifacts, "year-end-template.docx"),
   "2025年度工作总结",
   "宋体",
   12,
@@ -178,7 +178,7 @@ e2eScenario(
 
 e2eScenario(
   "正文样式模板(Normal四号+正文小四)",
-  join(data, "realistic-body-style.docx"),
+  join(artifacts, "realistic-body-style.docx"),
   "数据治理专项报告",
   "宋体",
   12,

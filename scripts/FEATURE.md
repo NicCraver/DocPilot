@@ -17,6 +17,7 @@ git push --no-verify       # 紧急跳过本地 CI
 ```
 
 ## 变更日志 (Changelog)
+- 2026-06-06: 新增 `scripts/test-artifacts/` 存放测试运行产物；自动化测试与生成脚本的 docx 输出改写入该目录并加入 `.gitignore`。
 - 2026-06-05: `word-typeset:test` 扩展为 10 场景 82 项；测试 docx 全部改为中文文件名（含书名号路径）。
 - 2026-06-05: 新增本地 CI 与 pre-push 钩子；GitHub 自动 CI 改为手动触发。
 

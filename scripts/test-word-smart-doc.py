@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 LEARN = ROOT / "scripts" / "word-smart-doc-learn.py"
 FILL = ROOT / "scripts" / "word-smart-doc-fill.py"
 DATA = ROOT / "scripts" / "word-smart-doc-test-data"
+ARTIFACTS = ROOT / "scripts" / "test-artifacts" / "word-smart-doc"
 
 FONT_ALIASES: dict[str, set[str]] = {
     "宋体": {"宋体", "SimSun", "simsun", "Songti SC", "STSong"},
@@ -211,7 +212,7 @@ def _assert_body_pipeline(
 
 def scenario_year_end(report: TestReport) -> None:
     name = "年终模板"
-    template = DATA / "year-end-template.docx"
+    template = ARTIFACTS / "year-end-template.docx"
     content = DATA / "year-end-content.md"
     expected_font = "宋体"
     expected_size = 12.0
@@ -233,7 +234,7 @@ def scenario_realistic_body_style(report: TestReport) -> None:
     _assert_body_pipeline(
         report,
         "正文样式模板",
-        DATA / "realistic-body-style.docx",
+        ARTIFACTS / "realistic-body-style.docx",
         DATA / "year-end-content.md",
         "宋体",
         12.0,

@@ -13,3 +13,12 @@ __pycache__/
 .venv/
 build/
 src-tauri/binaries/docpilot-convert-*
+
+# 测试运行产物（见 scripts/test-artifacts/README.md）
+scripts/test-artifacts/*
+!scripts/test-artifacts/README.md
+scripts/word-typeset-test-data/**/*.docx
+scripts/word-typeset-test-data/**/*.bak
+scripts/word-typeset-test-data/last-test-report.json
+scripts/word-smart-doc-test-data/*.docx
+scripts/word-template-test-data/*-output.docx

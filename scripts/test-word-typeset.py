@@ -25,6 +25,7 @@ from docx.shared import Cm, Pt
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "scripts" / "word-typeset.py"
 FIXTURES_DIR = ROOT / "scripts" / "word-typeset-test-data"
+ARTIFACTS_DIR = ROOT / "scripts" / "test-artifacts" / "word-typeset"
 
 # 测试 docx 统一使用中文文件名
 F = {
@@ -859,13 +860,14 @@ def verify_chinese_path(
 
 
 def cleanup_legacy_fixtures() -> None:
-    for name in LEGACY_FILES:
-        p = FIXTURES_DIR / name
-        if p.exists():
-            p.unlink()
-    legacy_batch = FIXTURES_DIR / "batch-run"
-    if legacy_batch.is_dir():
-        shutil.rmtree(legacy_batch, ignore_errors=True)
+    for base in (FIXTURES_DIR, ARTIFACTS_DIR):
+        for name in LEGACY_FILES:
+            p = base / name
+            if p.exists():
+                p.unlink()
+        legacy_batch = base / "batch-run"
+        if legacy_batch.is_dir():
+            shutil.rmtree(legacy_batch, ignore_errors=True)
 
 
 def verify_text_mode(scenario: str, out_dir: Path, config: dict[str, Any], report: TestReport) -> None:
@@ -931,8 +933,8 @@ def verify_text_mode(scenario: str, out_dir: Path, config: dict[str, Any], repor
 
 def run_scenario_basic(report: TestReport, wt) -> None:
     scenario = "基础"
-    inp = FIXTURES_DIR / F["基础_前"]
-    out = FIXTURES_DIR / F["基础_后"]
+    inp = ARTIFACTS_DIR / F["基础_前"]
+    out = ARTIFACTS_DIR / F["基础_后"]
     build_basic_fixture(inp)
     if out.exists():
         out.unlink()
@@ -943,8 +945,8 @@ def run_scenario_basic(report: TestReport, wt) -> None:
 
 def run_scenario_complex(report: TestReport, wt) -> None:
     scenario = "复杂"
-    inp = FIXTURES_DIR / F["复杂_前"]
-    out = FIXTURES_DIR / F["复杂_后"]
+    inp = ARTIFACTS_DIR / F["复杂_前"]
+    out = ARTIFACTS_DIR / F["复杂_后"]
     build_complex_fixture(inp)
     if out.exists():
         out.unlink()
@@ -956,8 +958,8 @@ def run_scenario_complex(report: TestReport, wt) -> None:
 
 def run_scenario_custom(report: TestReport, wt) -> None:
     scenario = "自定义配置"
-    inp = FIXTURES_DIR / F["复杂_前"]
-    out = FIXTURES_DIR / F["自定义_后"]
+    inp = ARTIFACTS_DIR / F["复杂_前"]
+    out = ARTIFACTS_DIR / F["自定义_后"]
     if not inp.is_file():
         build_complex_fixture(inp)
     cfg = custom_config(wt)
@@ -970,8 +972,8 @@ def run_scenario_custom(report: TestReport, wt) -> None:
 
 def run_scenario_heuristic(report: TestReport, wt) -> None:
     scenario = "启发式"
-    inp = FIXTURES_DIR / F["启发_前"]
-    out = FIXTURES_DIR / F["启发_后"]
+    inp = ARTIFACTS_DIR / F["启发_前"]
+    out = ARTIFACTS_DIR / F["启发_后"]
     build_heuristic_fixture(inp)
     cfg = wt.builtin_default_config()
     if out.exists():
@@ -983,7 +985,7 @@ def run_scenario_heuristic(report: TestReport, wt) -> None:
 
 def run_scenario_batch(report: TestReport, wt) -> None:
     scenario = "批量"
-    batch_dir = FIXTURES_DIR / DIR_BATCH
+    batch_dir = ARTIFACTS_DIR / DIR_BATCH
     batch_dir.mkdir(parents=True, exist_ok=True)
     a_in = batch_dir / F["批量_A"]
     b_in = batch_dir / F["批量_B"]
@@ -1015,8 +1017,8 @@ def run_scenario_batch(report: TestReport, wt) -> None:
 
 def run_scenario_table_disabled(report: TestReport, wt) -> None:
     scenario = "表格禁用"
-    inp = FIXTURES_DIR / F["表格禁_原"]
-    out = FIXTURES_DIR / F["表格禁_后"]
+    inp = ARTIFACTS_DIR / F["表格禁_原"]
+    out = ARTIFACTS_DIR / F["表格禁_后"]
     build_table_raw_fixture(inp)
     cfg = wt.builtin_default_config()
     cfg["table"]["enabled"] = False
@@ -1029,8 +1031,8 @@ def run_scenario_table_disabled(report: TestReport, wt) -> None:
 
 def run_scenario_long_document(report: TestReport, wt) -> None:
     scenario = "公文长文"
-    inp = FIXTURES_DIR / F["长文_前"]
-    out = FIXTURES_DIR / F["长文_后"]
+    inp = ARTIFACTS_DIR / F["长文_前"]
+    out = ARTIFACTS_DIR / F["长文_后"]
     build_long_document_fixture(inp)
     cfg = custom_config(wt)
     if out.exists():
@@ -1042,7 +1044,7 @@ def run_scenario_long_document(report: TestReport, wt) -> None:
 
 def run_scenario_chinese_path(report: TestReport, wt) -> None:
     scenario = "中文路径"
-    cn_dir = FIXTURES_DIR / DIR_CN_PATH
+    cn_dir = ARTIFACTS_DIR / DIR_CN_PATH
     inp = cn_dir / F["中文路径_文件"]
     out = cn_dir / F["中文路径_后"]
     build_chinese_path_fixture(inp)
@@ -1058,7 +1060,7 @@ def run_scenario_chinese_path(report: TestReport, wt) -> None:
 
 def run_scenario_inplace(report: TestReport, wt) -> None:
     scenario = "原地备份"
-    work = FIXTURES_DIR / F["原地_稿"]
+    work = ARTIFACTS_DIR / F["原地_稿"]
     bak = work.with_suffix(work.suffix + ".bak")
     build_basic_fixture(work)
     if bak.exists():
@@ -1074,7 +1076,7 @@ def main() -> int:
     report = TestReport()
 
     print("==> Word 批量排版自动化测试（多场景 · 中文文件名）")
-    FIXTURES_DIR.mkdir(parents=True, exist_ok=True)
+    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     cleanup_legacy_fixtures()
 
     scenarios: list[tuple[str, Callable[[], None]]] = [
@@ -1089,7 +1091,7 @@ def main() -> int:
         ("原地备份", lambda: run_scenario_inplace(report, wt)),
     ]
 
-    text_dir = FIXTURES_DIR / "文本模式"
+    text_dir = ARTIFACTS_DIR / "文本模式"
     text_dir.mkdir(parents=True, exist_ok=True)
     verify_text_mode("文本模式", text_dir, wt.builtin_default_config(), report)
 
@@ -1116,7 +1118,7 @@ def main() -> int:
             detail = f" — {c['detail']}" if c["detail"] else ""
             print(f"  ✗ [{c['scenario']}] {c['name']}{detail}")
 
-    result_path = FIXTURES_DIR / "last-test-report.json"
+    result_path = ARTIFACTS_DIR / "last-test-report.json"
     result_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\n报告: {result_path}")
 
