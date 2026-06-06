@@ -1,8 +1,9 @@
-# word-template-library：Word 智能模板库 设计
+# word-smart-doc：Word 智能文档（模板库） 设计
 
 - 日期：2026-06-06
 - 状态：待批准
 - 路线：**混合策略（克隆原 docx 保骨架 + 提取样式 profile 自适应排版）+ 双内容入口（现成内容 / LLM 生成）**
+- 实现约束：**完全新写，不复用、不改动现有任何代码**（`word-template-fill.py`、`word-typeset.py`、`word_template_util.rs` 等均不触碰）；新模块自带独立学习引擎与排版灌入引擎。
 
 ## 1. 背景与问题
 
@@ -17,7 +18,9 @@ DocPilot 已有两个 Word 相关模块：
 2. **没有模板库**：模板是单次上传、立即套打，无法沉淀、列出、复用。
 3. **没有 LLM 生成内容的闭环**：只能套打用户已有的现成内容。
 
-本模块在现有底层能力之上，补齐**「学习任意 docx → 沉淀模板库 → 选模板 → (现成内容自适应排版 / LLM 按章节生成) → 产出 docx」**的完整工作流。
+本模块（命名 `word-smart-doc`）补齐**「学习任意 docx → 沉淀模板库 → 选模板 → (现成内容自适应排版 / LLM 按章节生成) → 产出 docx」**的完整工作流。
+
+> **实现约束**：本模块**完全新写**，不复用、不改动现有 `word-template-fill`、`word-typeset` 的任何代码（Python / Rust / 前端）。提取与灌入逻辑虽借鉴现有思路，但以独立文件实现，确保旧模块零回归风险。
 
 ## 2. 目标与非目标
 
@@ -28,11 +31,11 @@ DocPilot 已有两个 Word 相关模块：
 3. 选定模板后支持两条内容路径：① 粘贴/上传现成内容做自适应排版；② 输入主题/要点由 LLM 按模板章节结构生成正文。
 4. 两条路径统一汇入排版灌入，产出与模板版式一致的 docx。
 5. 提取出的样式 profile 可在 UI 内手动微调。
-6. 复用现有三层架构（前端 Composable + Tauri 命令 + Python 引擎）与现有 Python 能力，不重复造轮子。
+6. 沿用项目现有的三层架构**模式**（前端 Composable + Tauri 命令 + Python 引擎），但所有代码全新独立实现，不复用旧模块代码。
 
 **非目标：**
 
-- 不删除/重构现有 `word-typeset`、`word-template-fill` 模块（本模块为全新独立模块，复用其 Python 能力作底层）。
+- 不删除、不修改、不复用现有 `word-typeset`、`word-template-fill` 模块的任何代码（本模块完全独立新写，旧模块零改动）。
 - 不做云端模板同步（模板库存本地 app data 目录）。
 - 不追求 100% 还原任意复杂排版（复杂文本框/嵌套表格依赖原 docx 骨架兜底，超出 profile 表达能力的部分沿用原样式）。
 
@@ -57,15 +60,15 @@ DocPilot 已有两个 Word 相关模块：
                          产出 .docx
 ```
 
-| 层 | 内容 | 复用/新增 |
+| 层 | 内容 | 说明 |
 |---|---|---|
-| 前端 UI | `WordTemplateLibrary.vue` + `useWordTemplateLibrary()` | 新增，对齐 `WordTypeset.vue` 设计令牌、`AppButton` |
-| LLM 层 | 复用 `src/agent`（Vercel AI SDK）按模板章节结构生成正文 | 复用 |
-| Tauri 命令 | 学习、列出/删除/重命名、生成文档、缩略图 | 新增 `word_template_library_util.rs` |
-| Python 引擎 | ① `word-template-learn.py`（提取骨架+profile）② 基于 profile 的排版灌入（重构现有 `fill_template` 逻辑，去硬编码） | 新增 1 个 + 重构灌入 |
-| 存储 | app data 目录下 `template-library/<id>/` | 新增 |
+| 前端 UI | `WordSmartDoc.vue` + `useWordSmartDoc()` | 全新，对齐 `WordTypeset.vue` 设计令牌、`AppButton`（仅借鉴样式，不改其文件） |
+| LLM 层 | 调用 `src/agent`（Vercel AI SDK）按模板章节结构生成正文 | 通过现有 Agent 能力调用，不改其实现 |
+| Tauri 命令 | 学习、列出/删除/重命名、生成文档、缩略图 | 全新 `word_smart_doc_util.rs` |
+| Python 引擎 | ① `word-smart-doc-learn.py`（提取骨架+profile+缩略图）② `word-smart-doc-fill.py`（基于 profile 的排版灌入） | 两个全新文件，独立实现 |
+| 存储 | app data 目录下 `smart-doc-library/<id>/` | 全新 |
 
-**关键设计决策**：章节结构与样式从「学习模板」时**动态提取**并存入 `profile.json`，生成时按学到的结构匹配，替代现有硬编码 `SECTION_DEFS`，从而适配任意 Word。
+**关键设计决策**：章节结构与样式从「学习模板」时**动态提取**并存入 `profile.json`，生成时按学到的结构匹配（不依赖任何硬编码章节表），从而适配任意 Word。
 
 ## 4. 学习模板：提取范围与 profile 数据结构
 
@@ -97,11 +100,11 @@ DocPilot 已有两个 Word 相关模块：
 }
 ```
 
-### 4.3 提取逻辑（Python，基于 python-docx）
+### 4.3 提取逻辑（Python，基于 python-docx，全新独立实现）
 
-- **样式**：扫描段落，按 Word 内建样式名（Title / Heading 1-N / Normal）+ 字号字体启发式（复用 `word-typeset.py` 已有的中西文字体、字号、行距、缩进识别），归纳 title / heading{n} / body 的代表样式。
-- **结构**：识别标题层级（样式名 + 加粗 + 编号/中文序号「一、（一）」启发式，现有代码已具备），输出有序章节树，每节带 `title`、`level`。
-- **占位/说明**：复用现有 `paragraph_is_guide` / `paragraph_is_red_instruction`，标记"填写说明"段（生成时删除）。
+- **样式**：扫描段落，按 Word 内建样式名（Title / Heading 1-N / Normal）+ 字号字体启发式（中西文字体、字号、行距、缩进识别），归纳 title / heading{n} / body 的代表样式。
+- **结构**：识别标题层级（样式名 + 加粗 + 编号/中文序号「一、（一）」启发式），输出有序章节树，每节带 `title`、`level`。
+- **占位/说明**：自带的红色斜体/说明段识别，标记"填写说明"段（生成时删除）。
 - **元字段**：识别"汇报人/日期"等可填字段（可扩展）。
 
 `profile.json` 让 LLM 生成与自适应排版都能知道每一级标题/正文该用什么样式，且用户可在 UI 微调。
@@ -119,7 +122,7 @@ DocPilot 已有两个 Word 相关模块：
 
 ### 5.2 路径 2：LLM 生成（主题/要点）
 
-用户输入主题 + 要点提示。把 `profile.structure`（章节标题+层级）+ 用户提示喂给 LLM（复用 `src/agent` 的 Vercel AI SDK），按模板章节结构逐节生成正文，输出结构化 JSON（`{章节key: [段落...]}`）。生成结果可在 UI 预览/编辑（markstream-vue 流式渲染），再进入排版。
+用户输入主题 + 要点提示。把 `profile.structure`（章节标题+层级）+ 用户提示喂给 LLM（调用 `src/agent` 的 Vercel AI SDK 能力），按模板章节结构逐节生成正文，输出结构化 JSON（`{章节key: [段落...]}`）。生成结果可在 UI 预览/编辑（markstream-vue 流式渲染），再进入排版。
 
 ### 5.3 统一排版灌入（Python）
 
@@ -127,7 +130,7 @@ DocPilot 已有两个 Word 相关模块：
 
 1. 克隆 `original.docx` 作为骨架。
 2. 删除标记为说明/占位的段落。
-3. 按 profile 样式定义，把每节标题/正文用对应字体字号行距缩进写入对应位置（重构现有 `fill_template`，样式来源从硬编码改为 profile）。
+3. 按 profile 样式定义，把每节标题/正文用对应字体字号行距缩进写入对应位置（全新实现，样式来源为 profile）。
 4. 回填元字段（汇报人/日期等）。
 5. 保存为输出 docx。
 
@@ -142,22 +145,22 @@ DocPilot 已有两个 Word 相关模块：
 app data 目录下：
 
 ```
-template-library/
+smart-doc-library/
   <id>/
     original.docx     # 骨架，保真兜底
     profile.json      # 样式画像 + 章节结构 + 元字段
     meta.json         # 名称、描述、创建时间、章节数等
-    thumbnail.png     # 首页缩略图（预览）
+    thumbnail.png     # 首页缩略图（LibreOffice headless 渲染）
 ```
 
 - `<id>`：创建时生成（时间戳 + 随机短串）。
 - 列表通过扫描目录 + 读 `meta.json` 构建。
 - 重命名改 `meta.json`；删除移除整个 `<id>` 目录。
-- 当前选中模板 id 用 Tauri Store 缓存（沿用 `word-typeset-config.json` 模式）。
+- 当前选中模板 id 用 Tauri Store 缓存（独立 `word-smart-doc-config.json`，不复用现有配置文件）。
 
 ## 7. UI 结构
 
-`WordTemplateLibrary.vue`，对齐 `WordTypeset.vue` 设计令牌、`AppButton`、分区卡片、Lucide 图标、可折叠日志。顶部分段 Tab：`模板库` / `学习新模板` / `生成文档`。
+`WordSmartDoc.vue`，对齐 `WordTypeset.vue` 设计令牌、`AppButton`、分区卡片、Lucide 图标、可折叠日志（仅借鉴样式约定，不修改其文件）。顶部分段 Tab：`模板库` / `学习新模板` / `生成文档`。
 
 - **学习新模板**：选择/拖入 docx → 「学习」→ 调 learn 命令 → 展示提取出的章节树与 profile 摘要（命名、描述）→ 存库。学习后提供「微调 profile」折叠面板（编辑 title/heading/body 字体字号等，写回 `profile.json`）。
 - **模板库**：卡片网格（缩略图 + 名称 + 章节数 + 创建时间），支持选择、重命名、删除、设为当前；空状态引导去学习。
@@ -166,35 +169,44 @@ template-library/
   - 「LLM 生成」：主题 + 要点提示 + 模型按钮；结果 markstream-vue 流式预览、可编辑。
   - 底部「生成 Word」主操作 + 可折叠日志 + 生成后打开/定位文件。
 
-`useWordTemplateLibrary()`：管理模板列表 state、当前选中、学习/生成 invoke、profile 编辑、LLM 调用、配置缓存。
+`useWordSmartDoc()`：管理模板列表 state、当前选中、学习/生成 invoke、profile 编辑、LLM 调用、配置缓存。
 
 ## 8. 接口契约
 
-- **前端**：`useWordTemplateLibrary()` — 模板列表、当前模板、学习/生成/列出/删除/重命名 invoke、profile 编辑、LLM 调用。
-- **Tauri 命令**（`word_template_library_util.rs`）：
-  - `learn_word_template(docx_path, name?, description?) -> TemplateMeta`
-  - `list_word_templates() -> TemplateMeta[]`
-  - `rename_word_template(id, name)`
-  - `delete_word_template(id)`
-  - `update_word_template_profile(id, profile_json)`
-  - `generate_word_from_library(id, content_kind, content_path?|content_text?, sections_json?, reporter?, report_date?, output_path) -> { output, logs }`
-- **Python CLI**：
-  - `word-template-learn.py '<json>'` — 输入 docx 路径与目标目录，输出 profile.json / meta.json / 缩略图。
-  - `word-template-fill.py`（重构）— 灌入逻辑从 profile 读取样式与结构，而非硬编码。
-- **Agent 工具**：`generate_word_from_library`（供 Agent 调用，遵循 shared-types 工具注册）。
+- **前端**：`useWordSmartDoc()` — 模板列表、当前模板、学习/生成/列出/删除/重命名 invoke、profile 编辑、LLM 调用。
+- **Tauri 命令**（全新 `word_smart_doc_util.rs`）：
+  - `smart_doc_learn_template(docx_path, name?, description?) -> TemplateMeta`
+  - `smart_doc_list_templates() -> TemplateMeta[]`
+  - `smart_doc_rename_template(id, name)`
+  - `smart_doc_delete_template(id)`
+  - `smart_doc_update_profile(id, profile_json)`
+  - `smart_doc_generate(id, content_kind, content_path?|content_text?, sections_json?, reporter?, report_date?, output_path) -> { output, logs }`
+- **Python CLI**（全新文件）：
+  - `word-smart-doc-learn.py '<json>'` — 输入 docx 路径与目标目录，输出 profile.json / meta.json / 缩略图。
+  - `word-smart-doc-fill.py '<json>'` — 灌入逻辑从 profile 读取样式与结构。
+- **Agent 工具**：`smart_doc_generate`（供 Agent 调用，遵循 shared-types 工具注册）。
 
 ## 9. 测试方案
 
-沿用 `scripts/run-*.mjs` + `package.json` 脚本约定，复用 `.venv`（python-docx 已在）：
+沿用 `scripts/run-*.mjs` + `package.json` 脚本约定，复用 `.venv`（python-docx 已在）。测试数据为本模块**全新准备**的样例（不依赖 `word-template-test-data/`）：
 
-- `word-template-library:learn-test`：用 `scripts/word-template-test-data/` 美腾模板跑学习，校验章节数、样式（标题字体/正文字号）、说明段识别。
-- `word-template-library:adaptive-test`：学习后用样例 Markdown 走自适应排版，校验输出 docx 章节、字体字号行距、说明段已删除。
-- `word-template-library:llm-test`：LLM 路径用 mock/固定返回（避免真实计费），校验结构化输出正确灌入排版。
-- 新增一份结构不同的模板（如公文）验证"非硬编码、可适配任意模板"。
+- `word-smart-doc:learn-test`：用全新样例模板跑学习，校验章节数、样式（标题字体/正文字号）、说明段识别、缩略图生成。
+- `word-smart-doc:adaptive-test`：学习后用样例 Markdown 走自适应排版，校验输出 docx 章节、字体字号行距、说明段已删除。
+- `word-smart-doc:llm-test`：LLM 路径用 mock/固定返回（避免真实计费），校验结构化输出正确灌入排版。
+- 至少两份结构不同的样例模板（如年终总结 + 公文）验证"非硬编码、可适配任意模板"。
 
-## 10. 待办 / 风险
+## 10. 缩略图方案（LibreOffice headless）
 
-- 缩略图渲染：python-docx 不直接出图，需评估方案（如 LibreOffice headless 转图，或简化为首页文本预览）。先以"首页文本预览"兜底，缩略图作为增强。
+python-docx 不能直接出图，采用 **LibreOffice headless** 渲染缩略图：
+
+1. 学习时调用 `soffice --headless --convert-to pdf`（或 `--convert-to png`）将首页转图，缩放为 `thumbnail.png`。
+2. 检测环境是否安装 LibreOffice（`soffice` / macOS `/Applications/LibreOffice.app`）；未安装时降级为"首页文本预览"占位图并在日志提示，不阻断学习流程。
+3. 开发环境：文档说明安装 LibreOffice；发布包：评估是否随包附带（体积较大），首版可要求用户本机安装，缺失则降级。
+4. 新增安装/检测脚本 `scripts/ensure-libreoffice.mjs`（检测 + 给出安装指引）。
+
+## 11. 待办 / 风险
+
+- LibreOffice 体积较大，发布包是否内置待定；首版缺失时降级为文本预览。
 - LLM 生成质量依赖 prompt 工程，需要按模板结构约束输出格式（结构化 JSON）。
 - 复杂表格/文本框灌入依赖原 docx 骨架，profile 无法表达的部分沿用原样式。
 - 章节模糊匹配在结构差异大的模板上可能误匹配，需提供"按顺序填入"兜底与日志提示。
