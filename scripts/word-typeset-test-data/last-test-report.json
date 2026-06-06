@@ -587,7 +587,7 @@
       "scenario": "原地备份",
       "name": "原地备份文件",
       "ok": true,
-      "detail": "/Users/nic/.config/superpowers/worktrees/DocPilot/feature-word-batch-typeset/scripts/word-typeset-test-data/原地备份-工作稿.docx.bak"
+      "detail": "/Users/nic/NicProjects/DocPilot/scripts/word-typeset-test-data/原地备份-工作稿.docx.bak"
     },
     {
       "scenario": "原地备份",
