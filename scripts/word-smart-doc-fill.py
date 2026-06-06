@@ -133,8 +133,12 @@ def parse_markdown(raw: str, structure: list[dict]) -> tuple[dict[str, list[str]
 
 
 def load_sections(payload: dict, structure: list[dict]) -> tuple[dict[str, list[str]], dict[str, str]]:
-    if payload.get("sections"):
-        return {k: list(v) for k, v in payload["sections"].items()}, {}
+    kind = payload.get("content_kind", "text")
+    if kind == "sections" or payload.get("sections"):
+        sections = payload.get("sections")
+        if not sections:
+            raise ValueError("content_kind=sections 但未提供 sections")
+        return {k: list(v) for k, v in sections.items()}, {}
     text = payload.get("content_text")
     if not text and payload.get("content_path"):
         p = Path(payload["content_path"])
