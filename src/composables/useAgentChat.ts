@@ -5,6 +5,6 @@ export type { ChatMessage };
 
 export function useAgentChat(getSettings: () => ProviderSettings) {
   const { messages, loading, error, logs } = useAgentChatSession();
-  const { send, clear } = useAgentChatActions(getSettings);
-  return { messages, loading, error, logs, send, clear };
+  const { send, clear, stop } = useAgentChatActions(getSettings);
+  return { messages, loading, error, logs, send, clear, stop };
 }

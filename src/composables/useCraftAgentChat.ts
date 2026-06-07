@@ -7,9 +7,19 @@ import { useAgentChatSession, useAgentChatActions, type ChatMessage } from "./ag
 
 export type CraftActivityStatus = "pending" | "running" | "success" | "error";
 export type CraftPermissionMode = "ask" | "auto" | "safe";
+export type CraftTurnPhase = "pending" | "tool_active" | "awaiting" | "streaming" | "complete";
+
+export const CRAFT_PERMISSION_MODE_ORDER: CraftPermissionMode[] = ["safe", "ask", "auto"];
+
+export const CRAFT_PERMISSION_MODE_LABEL: Record<CraftPermissionMode, string> = {
+  safe: "Explore",
+  ask: "Ask",
+  auto: "Execute",
+};
 
 export interface CraftActivity {
   id: string;
+  kind: AgentActivity["kind"];
   toolName: string;
   status: CraftActivityStatus;
   title: string;
@@ -37,6 +47,9 @@ export interface CraftAssistantTurn {
   time: string;
   streaming: boolean;
   complete: boolean;
+  interrupted: boolean;
+  phase: CraftTurnPhase;
+  showThinkingIndicator: boolean;
   expanded: boolean;
 }
 
@@ -56,7 +69,7 @@ const READ_ONLY_TOOLS = new Set([
   "compute_hash",
 ]);
 
-function mapAgentActivity(activity: AgentActivity): CraftActivity {
+export function mapAgentActivityToCraft(activity: AgentActivity): CraftActivity {
   const toolName = activity.toolName ?? activity.kind;
   const input =
     activity.args != null
@@ -88,6 +101,7 @@ function mapAgentActivity(activity: AgentActivity): CraftActivity {
 
   return {
     id: activity.id,
+    kind: activity.kind,
     toolName,
     status: activity.status,
     title: activity.toolName ? toolFriendlyName(activity.toolName) : activity.title,
@@ -98,15 +112,43 @@ function mapAgentActivity(activity: AgentActivity): CraftActivity {
   };
 }
 
-function assistantTitle(msg: ChatMessage, streaming: boolean): string {
-  const running = msg.activities?.find((a) => a.status === "running");
-  if (running) return running.title;
-  if (streaming) return "正在生成回复";
-  if (msg.content.trim()) return "任务完成";
-  return "处理中";
+export function deriveCraftTurnPhase(input: {
+  activities: Pick<CraftActivity, "kind" | "status">[];
+  response: string;
+  streaming: boolean;
+  complete: boolean;
+}): CraftTurnPhase {
+  if (input.complete) return "complete";
+  if (input.streaming && input.response.trim()) return "streaming";
+  if (input.activities.some((a) => a.kind === "tool" && a.status === "running")) {
+    return "tool_active";
+  }
+  if (input.activities.length > 0) return "awaiting";
+  return "pending";
 }
 
-function messagesToTurns(messages: ChatMessage[], loading: boolean): CraftTurn[] {
+export function shouldShowCraftThinkingIndicator(
+  phase: CraftTurnPhase,
+  isBuffering: boolean,
+): boolean {
+  return phase === "pending" || phase === "awaiting" || (phase === "streaming" && isBuffering);
+}
+
+function assistantTitle(
+  msg: ChatMessage,
+  phase: CraftTurnPhase,
+  activities: CraftActivity[],
+): string {
+  const running = activities.find((a) => a.kind === "tool" && a.status === "running");
+  if (running) return running.title;
+  if (msg.interrupted) return "已停止";
+  if (phase === "streaming") return "正在生成回复";
+  if (phase === "awaiting") return "准备回复";
+  if (phase === "complete" && msg.content.trim()) return "任务完成";
+  return "Thinking";
+}
+
+export function messagesToCraftTurns(messages: ChatMessage[], loading: boolean): CraftTurn[] {
   const turns: CraftTurn[] = [];
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
@@ -126,16 +168,28 @@ function messagesToTurns(messages: ChatMessage[], loading: boolean): CraftTurn[]
     const isLast = i === messages.length - 1;
     const streaming = isLast && loading;
     const response = streaming ? (msg.draftContent ?? msg.content) : msg.content;
+    const activities = (msg.activities ?? []).map(mapAgentActivityToCraft);
+    const complete = !streaming;
+    const phase = deriveCraftTurnPhase({
+      activities,
+      response,
+      streaming,
+      complete,
+    });
+    const isBuffering = streaming && !response.trim();
 
     turns.push({
       id: `assistant-${i}`,
       type: "assistant",
-      title: assistantTitle(msg, streaming),
-      activities: (msg.activities ?? []).map(mapAgentActivity),
+      title: assistantTitle(msg, phase, activities),
+      activities,
       response,
       time: "",
       streaming,
-      complete: !streaming && Boolean(msg.content?.trim()),
+      complete,
+      interrupted: Boolean(msg.interrupted),
+      phase,
+      showThinkingIndicator: shouldShowCraftThinkingIndicator(phase, isBuffering),
       expanded: isLast || streaming,
     });
   }
@@ -163,19 +217,25 @@ export function useCraftAgentChat(
     });
   };
 
-  const { send, clear } = useAgentChatActions(getSettings, {
+  const {
+    send,
+    clear,
+    stop: stopSession,
+  } = useAgentChatActions(getSettings, {
     confirmTool,
     confirmAllTools: () => permissionMode.value === "ask",
   });
 
-  const turns = computed(() => messagesToTurns(messages.value, loading.value));
+  const turns = computed(() => messagesToCraftTurns(messages.value, loading.value));
 
   const sessions = computed(() => {
     const firstUser = messages.value.find((m) => m.role === "user");
     const lastAssistant = [...messages.value].reverse().find((m) => m.role === "assistant");
     const preview = loading.value
       ? "正在处理…"
-      : lastAssistant?.content?.slice(0, 40) || "发送消息开始对话";
+      : lastAssistant?.interrupted
+        ? "已停止"
+        : lastAssistant?.content?.slice(0, 40) || "发送消息开始对话";
     return [
       {
         id: "current",
@@ -202,6 +262,11 @@ export function useCraftAgentChat(
     pendingPermission.value = null;
   }
 
+  function stop() {
+    denyPermission();
+    stopSession();
+  }
+
   return {
     messages,
     turns,
@@ -214,5 +279,6 @@ export function useCraftAgentChat(
     pendingPermission,
     denyPermission,
     allowPermission,
+    stop,
   };
 }

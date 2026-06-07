@@ -32,7 +32,8 @@ function createAgentTool(
   return tool({
     description: schema.description,
     inputSchema: jsonSchemaToZod(schema.parameters),
-    execute: async (args) => {
+    execute: async (args, { abortSignal }) => {
+      assertNotAborted(abortSignal);
       let record = args as Record<string, unknown>;
       const actId = createActivityId();
       const label = toolFriendlyName(schema.id);
@@ -51,12 +52,15 @@ function createAgentTool(
       });
       try {
         record = await resolveToolArgs(schema, record, onActivity);
+        assertNotAborted(abortSignal);
         if (schema.requires_confirmation || confirmAll) {
           const ok = await confirm?.(schema.id, record);
+          assertNotAborted(abortSignal);
           if (!ok) {
             throw new Error("用户已取消该工具执行");
           }
         }
+        assertNotAborted(abortSignal);
         onActivity?.({
           id: actId,
           kind: "tool",
@@ -66,6 +70,7 @@ function createAgentTool(
           args: record,
         });
         const output = await runTool(schema.id, record);
+        assertNotAborted(abortSignal);
         const detail = output.message ?? formatActivityResult(output);
         pushAgentLog({
           level: "success",
@@ -106,4 +111,10 @@ function createAgentTool(
       }
     },
   });
+}
+
+function assertNotAborted(signal: AbortSignal | undefined) {
+  if (signal?.aborted) {
+    throw new Error("用户已停止当前任务");
+  }
 }

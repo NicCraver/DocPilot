@@ -28,10 +28,11 @@ export interface RunAgentOptions {
   settings: ProviderSettings;
   onTextDelta?: (text: string) => void;
   onToolCall?: (record: ToolCallRecord) => void;
+  abortSignal?: AbortSignal;
 }
 
 export async function runAgentChat(options: RunAgentOptions): Promise<string> {
-  const { messages, tools, settings, onTextDelta, onToolCall } = options;
+  const { messages, tools, settings, onTextDelta, onToolCall, abortSignal } = options;
 
   const userText = lastUserTextFromMessages(messages);
   const activeTools = selectToolsForUserText(tools, userText);
@@ -46,6 +47,7 @@ export async function runAgentChat(options: RunAgentOptions): Promise<string> {
     messages,
     tools: activeTools,
     stopWhen: stepCountIs(8),
+    abortSignal,
     onStepFinish: ({ toolCalls, toolResults, text, finishReason }) => {
       stepNo += 1;
       if (toolCalls.length) {

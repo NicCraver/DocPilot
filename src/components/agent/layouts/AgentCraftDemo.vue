@@ -4,6 +4,8 @@ import { useProviderSettings } from "../../../composables/useProviderSettings";
 import { useAgentAttachments } from "../../../composables/useAgentAttachments";
 import { attachmentChips } from "../../../agent/attachments";
 import {
+  CRAFT_PERMISSION_MODE_LABEL,
+  CRAFT_PERMISSION_MODE_ORDER,
   useCraftAgentChat,
   type CraftActivity,
   type CraftAssistantTurn,
@@ -11,13 +13,8 @@ import {
 } from "../../../composables/useCraftAgentChat";
 import AgentMarkdown from "../AgentMarkdown.vue";
 
-const modeLabel: Record<CraftPermissionMode, string> = {
-  ask: "Ask",
-  auto: "Auto",
-  safe: "Safe",
-};
-
-const modeOrder: CraftPermissionMode[] = ["ask", "auto", "safe"];
+const modeLabel = CRAFT_PERMISSION_MODE_LABEL;
+const modeOrder = CRAFT_PERMISSION_MODE_ORDER;
 const ACTIVITY_LIST_LIMIT = 5;
 
 const suggestions = [
@@ -36,6 +33,7 @@ const {
   error,
   send,
   clear,
+  stop,
   pendingPermission,
   denyPermission,
   allowPermission,
@@ -58,6 +56,7 @@ const expandedActivityLists = ref<Record<string, boolean>>({});
 const permissionDetailsExpanded = ref(false);
 const selectedActivity = shallowRef<CraftActivity | null>(null);
 const chatScroll = ref<HTMLElement | null>(null);
+const copiedTurnId = ref<string | null>(null);
 
 const elapsedSeconds = ref(0);
 let timerId: number | null = null;
@@ -130,6 +129,14 @@ const runningActivities = computed(() =>
   ),
 );
 
+const activeAssistantTurns = computed(() =>
+  turns.value.filter((turn) => turn.type === "assistant" && turn.phase !== "complete"),
+);
+
+const activeWorkCount = computed(
+  () => runningActivities.value.length || activeAssistantTurns.value.length,
+);
+
 watch(
   () => [turns.value, pendingPermission.value, loading.value],
   () => {
@@ -166,9 +173,7 @@ function blocks(text: string) {
 }
 
 function isTurnActive(turn: CraftAssistantTurn) {
-  return (
-    turn.streaming || turn.activities.some((a) => a.status === "running" || a.status === "pending")
-  );
+  return turn.phase !== "complete";
 }
 
 function isTurnExpanded(turn: CraftAssistantTurn) {
@@ -247,10 +252,7 @@ function onNewChat() {
 }
 
 function stopProcessing() {
-  loading.value = false;
-  if (pendingPermission.value) {
-    denyPermission();
-  }
+  stop();
 }
 
 function cycleMode() {
@@ -286,8 +288,79 @@ function previewText(turn: CraftAssistantTurn) {
   if (running) return running.description || running.title;
   const pending = turn.activities.find((activity) => activity.status === "pending");
   if (pending) return `等待：${pending.title}`;
-  if (turn.streaming) return "正在生成回复";
+  if (turn.phase === "pending") return "Thinking...";
+  if (turn.phase === "awaiting") return "Preparing response...";
+  if (turn.phase === "streaming") return "Writing response...";
+  if (turn.interrupted) return "Stopped";
   return turn.title || "步骤已完成";
+}
+
+function thinkingText(turn: CraftAssistantTurn) {
+  if (turn.phase === "streaming") return "Preparing response...";
+  if (turn.activities.length) return "Preparing response...";
+  return "Thinking...";
+}
+
+function activityStatusLabel(status: CraftActivity["status"]) {
+  switch (status) {
+    case "pending":
+      return "Pending";
+    case "running":
+      return "Running";
+    case "success":
+      return "Completed";
+    case "error":
+      return "Error";
+    default:
+      return status;
+  }
+}
+
+function turnMarkdown(turn: CraftAssistantTurn) {
+  const lines = [`# ${turn.title || "Assistant turn"}`];
+  if (turn.activities.length) {
+    lines.push("", "## Activities");
+    for (const activity of turn.activities) {
+      lines.push(`- ${activityStatusLabel(activity.status)}: ${activity.title}`);
+      if (activity.description && activity.description !== activity.title) {
+        lines.push(`  ${activity.description}`);
+      }
+      if (activity.fileName) {
+        lines.push(`  File: ${activity.fileName}`);
+      }
+    }
+  }
+  if (turn.response.trim()) {
+    lines.push("", "## Response", turn.response.trim());
+  }
+  return lines.join("\n");
+}
+
+async function writeClipboard(text: string) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+  } catch {
+    // Fall back to the selection API in WebViews that gate clipboard writes.
+  }
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+}
+
+async function copyTurn(turn: CraftAssistantTurn) {
+  await writeClipboard(turnMarkdown(turn));
+  copiedTurnId.value = turn.id;
+  window.setTimeout(() => {
+    if (copiedTurnId.value === turn.id) copiedTurnId.value = null;
+  }, 1600);
 }
 
 function activityKind(toolName: string) {
@@ -431,8 +504,8 @@ function getFileTypeAndIcon(fileName: string) {
           <p>{{ activeSession.title }}</p>
           <span>{{ activeSession.preview }}</span>
         </div>
-        <span :class="['craft-pill', runningActivities.length ? 'is-info' : 'is-success']">
-          {{ runningActivities.length ? `${runningActivities.length} 进行中` : "空闲" }}
+        <span :class="['craft-pill', activeWorkCount ? 'is-info' : 'is-success']">
+          {{ activeWorkCount ? `${activeWorkCount} 进行中` : "空闲" }}
         </span>
       </header>
 
@@ -478,7 +551,10 @@ function getFileTypeAndIcon(fileName: string) {
             </div>
 
             <section v-else class="craft-assistant-turn">
-              <div v-if="turn.activities.length" class="craft-turn-card">
+              <div
+                v-if="turn.activities.length || turn.showThinkingIndicator"
+                class="craft-turn-card"
+              >
                 <div class="craft-turn-header">
                   <button class="craft-turn-toggle" type="button" @click="toggleTurn(turn.id)">
                     <span
@@ -492,11 +568,20 @@ function getFileTypeAndIcon(fileName: string) {
                     <span class="craft-step-count">{{ turn.activities.length }}</span>
                     <span class="craft-preview">{{ previewText(turn) }}</span>
                   </button>
-                  <button class="craft-icon-button" type="button" aria-label="Copy turn">
-                    <span class="i-lucide-copy craft-action-icon" aria-hidden="true" />
-                  </button>
-                  <button class="craft-icon-button" type="button" aria-label="Branch turn">
-                    <span class="i-lucide-git-branch craft-action-icon" aria-hidden="true" />
+                  <button
+                    class="craft-icon-button"
+                    type="button"
+                    :aria-label="copiedTurnId === turn.id ? 'Copied turn' : 'Copy turn'"
+                    :title="copiedTurnId === turn.id ? 'Copied' : 'Copy turn'"
+                    @click="copyTurn(turn)"
+                  >
+                    <span
+                      :class="[
+                        copiedTurnId === turn.id ? 'i-lucide-check' : 'i-lucide-copy',
+                        'craft-action-icon',
+                      ]"
+                      aria-hidden="true"
+                    />
                   </button>
                 </div>
 
@@ -545,10 +630,31 @@ function getFileTypeAndIcon(fileName: string) {
                         : `展开其余 ${hiddenActivityCount(turn)} 项`
                     }}
                   </button>
+                  <div v-if="turn.showThinkingIndicator" class="craft-thinking-row">
+                    <span class="craft-status running" aria-hidden="true" />
+                    <span class="craft-thinking-dot" aria-hidden="true" />
+                    <span>{{ thinkingText(turn) }}</span>
+                  </div>
                 </div>
               </div>
 
-              <article v-if="turn.response" class="craft-response">
+              <article
+                v-if="turn.response"
+                :class="['craft-response', turn.interrupted && 'is-interrupted']"
+              >
+                <header class="craft-response-head">
+                  <span>
+                    <span
+                      class="i-lucide-message-square-text craft-action-icon"
+                      aria-hidden="true"
+                    />
+                    Response
+                  </span>
+                  <span v-if="turn.streaming" class="craft-response-state">Streaming</span>
+                  <span v-else-if="turn.interrupted" class="craft-response-state is-stopped">
+                    Stopped
+                  </span>
+                </header>
                 <AgentMarkdown :content="turn.response" :streaming="turn.streaming" />
               </article>
             </section>
@@ -645,7 +751,7 @@ function getFileTypeAndIcon(fileName: string) {
         <div class="craft-running-bar">
           <div class="craft-running-status">
             <span class="i-lucide-grip-vertical w-4 h-4 text-slate-400" />
-            <span class="craft-running-text">疾驰中...</span>
+            <span class="craft-running-text">Working...</span>
             <span class="craft-running-timer">{{ elapsedSeconds }}s</span>
           </div>
           <button
@@ -747,8 +853,8 @@ function getFileTypeAndIcon(fileName: string) {
     <aside class="craft-inspector" aria-label="Craft activity detail">
       <div class="craft-inspector-head">
         <strong>Activity</strong>
-        <span :class="['craft-pill', runningActivities.length ? 'is-info' : 'is-success']">
-          {{ runningActivities.length ? "进行中" : "空闲" }}
+        <span :class="['craft-pill', activeWorkCount ? 'is-info' : 'is-success']">
+          {{ activeWorkCount ? "进行中" : "空闲" }}
         </span>
       </div>
       <div v-if="selectedActivity" class="craft-inspector-body">
@@ -762,7 +868,7 @@ function getFileTypeAndIcon(fileName: string) {
           <div>
             <h3>{{ selectedActivity.title }}</h3>
             <span :class="['craft-status-text', selectedActivity.status]">{{
-              selectedActivity.status
+              activityStatusLabel(selectedActivity.status)
             }}</span>
           </div>
         </div>
@@ -1280,7 +1386,7 @@ function getFileTypeAndIcon(fileName: string) {
 
 .craft-turn-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.25rem;
   min-height: 2.35rem;
@@ -1414,6 +1520,10 @@ function getFileTypeAndIcon(fileName: string) {
   animation: craft-spin 760ms linear infinite;
 }
 
+.craft-status.pending {
+  color: var(--dp-accent);
+}
+
 .craft-status.success {
   color: var(--dp-success);
 }
@@ -1432,6 +1542,25 @@ function getFileTypeAndIcon(fileName: string) {
 
 .craft-status.error {
   color: var(--dp-danger);
+}
+
+.craft-thinking-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 1.9rem;
+  padding: 0.125rem 0.25rem;
+  color: var(--dp-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.craft-thinking-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--dp-primary);
+  animation: craft-pulse 1.1s ease-in-out infinite;
 }
 
 .craft-tool-shell {
@@ -1527,12 +1656,51 @@ function getFileTypeAndIcon(fileName: string) {
 
 .craft-response {
   position: relative;
+  display: grid;
+  gap: 0.6rem;
   width: min(100%, 42rem);
   padding: 0.85rem;
   border: 1px solid var(--dp-border);
   border-radius: var(--dp-radius-lg);
   background: var(--dp-surface);
   box-shadow: var(--dp-shadow-sm);
+}
+
+.craft-response.is-interrupted {
+  border-color: color-mix(in srgb, var(--dp-danger) 24%, var(--dp-border));
+}
+
+.craft-response-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  color: var(--dp-text-muted);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.craft-response-head > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.craft-response-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.35rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--dp-primary-soft);
+  color: var(--dp-primary);
+  font-size: 0.6875rem;
+}
+
+.craft-response-state.is-stopped {
+  background: var(--dp-danger-soft);
+  color: var(--dp-danger);
 }
 
 .craft-response.is-plan {
@@ -1972,6 +2140,19 @@ function getFileTypeAndIcon(fileName: string) {
 @keyframes craft-blink {
   50% {
     opacity: 0;
+  }
+}
+
+@keyframes craft-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.82);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 

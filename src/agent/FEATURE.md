@@ -14,7 +14,7 @@
 - 助理单轮消息含 `activities[]`（执行过程）与 `content`（最终任务结果）；见 `agent/activities.ts`。
 - 助理「任务结果」由 **markstream-vue** 渲染（见 `components/agent/AgentMarkdown.vue`）。
 - **右侧操作日志**（`AgentLogPanel`，经典布局）/ **编排检视器**（Inspector 布局合并 activities + 日志）：按时间记录用户发送、模型步骤、工具执行等。
-- **Craft Agent UI**：`App.vue`「Craft Demo」→ `AgentCraftDemo`，数据层 `agentChatSession` 单例；`buildAgentTools` 支持 `confirmAll`（Ask 模式逐工具确认）。`useAgentLog` 同时支持组件内订阅自动清理与会话单例场景，避免组件外调用触发生命周期警告。
+- **Craft Agent UI**：`App.vue`「Craft Demo」→ `AgentCraftDemo`，数据层 `agentChatSession` 单例；`useCraftAgentChat` 将 `activities[]` 派生为 Craft-like turn phase（pending / tool_active / awaiting / streaming / complete）。`buildAgentTools` 支持 `confirmAll`（Ask 模式逐工具确认）与 AbortSignal 检查；Stop 会中断 AI SDK 流、阻止晚到工具事件回灌 UI。`useAgentLog` 同时支持组件内订阅自动清理与会话单例场景，避免组件外调用触发生命周期警告。
 
 ## 设计意图 (Intent)
 
@@ -23,7 +23,7 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 ## 接口契约 (Interface)
 
 - `buildAgentTools(confirm?, onActivity?, confirmAll?)` → `ToolSet`（`ToolSchema` 类型来自 `@docpilot/shared-types`）
-- `runAgentChat({ messages, tools, settings, onTextDelta, onToolCall })` → 最终文本（内部 `selectToolsForUserText` + `buildAttachmentContextHint`）
+- `runAgentChat({ messages, tools, settings, onTextDelta, onToolCall, abortSignal? })` → 最终文本（内部 `selectToolsForUserText` + `buildAttachmentContextHint`）
 - `selectToolsForUserText` / `buildAttachmentContextHint` — 意图工具筛选与路径 hint
 - `createChatModel(settings)` → LanguageModel
 - `formatUserMessageForModel(text, attachments)` / `resolveToolArgs(schema, args)` — 附件与路径补全
@@ -32,6 +32,7 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 
 ## 变更日志 (Changelog)
 
+- 2026-06-07: Craft UI adapter 增加 turn phase / thinking gap 映射；`agentChatSession.stop()` 通过 AbortController 中断当前轮，工具执行路径增加 abort 检查并忽略 stop 后晚到活动。
 - 2026-06-06: Craft UI 接入 Agent；`buildAgentTools` 增加 `confirmAll`；`useCraftAgentChat` 映射 activities → turn card；`App.vue` 侧边栏简化为 Craft Demo 单入口。
 - 2026-06-06: 修复 `useAgentLog` 在 `agentChatSession` 单例中组件外调用时触发 Vue `onUnmounted` 警告，并补充回归测试。
 - 2026-06-05: 新增 `format_docx_batch` / `format_docx_text` Word 排版工具与意图筛选。
@@ -56,3 +57,4 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 - API Key 在 .env 或 store 中，非 Keychain；生产环境注意勿提交 `.env`。
 - 需用户自行配置可用模型与网络/本地 Ollama。
 - 文件夹仅扫描一层；`output_path` 仍由模型生成，未自动弹出保存对话框。
+- Stop 可中断模型流和阻止结果继续回灌；已进入 Rust/Tauri 的单个 `run_tool` IPC 仍可能在后台自然完成。

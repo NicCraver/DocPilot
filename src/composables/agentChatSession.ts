@@ -17,6 +17,7 @@ export interface ChatMessage {
   attachments?: AgentAttachment[];
   activities?: AgentActivity[];
   draftContent?: string;
+  interrupted?: boolean;
 }
 
 function upsertActivity(msg: ChatMessage, activity: AgentActivity) {
@@ -34,6 +35,9 @@ const messages = ref<ChatMessage[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const { entries: logs, clear: clearLogs } = useAgentLog();
+let currentAbortController: AbortController | null = null;
+let currentAssistantIndex: number | null = null;
+let currentStopActivityId: string | null = null;
 
 export function useAgentChatSession() {
   return { messages, loading, error, logs };
@@ -112,7 +116,12 @@ export function useAgentChatActions(
     });
     const assistantIndex = messages.value.length;
     const prepareId = createActivityId();
-    messages.value.push({
+    const stopActivityId = createActivityId();
+    const abortController = new AbortController();
+    currentAbortController = abortController;
+    currentAssistantIndex = assistantIndex;
+    currentStopActivityId = stopActivityId;
+    const assistantMessage: ChatMessage = {
       role: "assistant",
       content: "",
       draftContent: "",
@@ -124,13 +133,15 @@ export function useAgentChatActions(
           title: "正在连接模型并加载工具…",
         },
       ],
-    });
+    };
+    messages.value.push(assistantMessage);
     loading.value = true;
     error.value = null;
 
-    const assistantMsg = () => messages.value[assistantIndex];
+    const assistantMsg = () => messages.value[assistantIndex] ?? assistantMessage;
 
     const onActivity = (activity: AgentActivity) => {
+      if (abortController.signal.aborted) return;
       upsertActivity(assistantMsg(), activity);
     };
 
@@ -154,6 +165,12 @@ export function useAgentChatActions(
         detail: `共 ${toolCount} 个工具可用`,
       });
 
+      if (abortController.signal.aborted) {
+        markStoppedMessage(assistantMsg(), stopActivityId);
+        pushAgentLog({ level: "warn", title: "用户已停止当前智能体任务" });
+        return;
+      }
+
       if (pathCount > 0) {
         const paths = flattenAttachmentPaths(attachments);
         onActivity({
@@ -169,10 +186,18 @@ export function useAgentChatActions(
         messages: toModelMessages().slice(0, -1),
         tools,
         settings,
+        abortSignal: abortController.signal,
         onTextDelta: (t) => {
+          if (abortController.signal.aborted) return;
           assistantMsg().draftContent = t;
         },
       });
+
+      if (abortController.signal.aborted) {
+        markStoppedMessage(assistantMsg(), stopActivityId);
+        pushAgentLog({ level: "warn", title: "用户已停止当前智能体任务" });
+        return;
+      }
 
       const final =
         reply.trim() ||
@@ -182,28 +207,66 @@ export function useAgentChatActions(
       assistantMsg().draftContent = "";
       pushAgentLog({ level: "success", title: "本轮智能体任务结束" });
     } catch (e) {
-      error.value = String(e);
-      assistantMsg().content =
-        assistantMsg().draftContent?.trim() || assistantMsg().content || `出错了：${String(e)}`;
-      assistantMsg().draftContent = "";
-      upsertActivity(assistantMsg(), {
-        id: prepareId,
-        kind: "prepare",
-        status: "error",
-        title: "智能体运行失败",
-        error: String(e),
-      });
-      pushAgentLog({ level: "error", title: "智能体运行出错", detail: String(e) });
+      if (abortController.signal.aborted) {
+        error.value = null;
+        markStoppedMessage(assistantMsg(), stopActivityId);
+        pushAgentLog({ level: "warn", title: "用户已停止当前智能体任务", detail: String(e) });
+      } else {
+        error.value = String(e);
+        assistantMsg().content =
+          assistantMsg().draftContent?.trim() || assistantMsg().content || `出错了：${String(e)}`;
+        assistantMsg().draftContent = "";
+        upsertActivity(assistantMsg(), {
+          id: prepareId,
+          kind: "prepare",
+          status: "error",
+          title: "智能体运行失败",
+          error: String(e),
+        });
+        pushAgentLog({ level: "error", title: "智能体运行出错", detail: String(e) });
+      }
     } finally {
-      loading.value = false;
+      if (currentAbortController === abortController) {
+        loading.value = false;
+        currentAbortController = null;
+        currentAssistantIndex = null;
+        currentStopActivityId = null;
+      }
     }
   }
 
   function clear() {
+    stop();
     messages.value = [];
     error.value = null;
     clearLogs();
   }
 
-  return { send, clear };
+  function stop() {
+    if (!loading.value || !currentAbortController) return;
+    currentAbortController.abort();
+    loading.value = false;
+    error.value = null;
+    if (currentAssistantIndex != null) {
+      const msg = messages.value[currentAssistantIndex];
+      if (msg?.role === "assistant") {
+        markStoppedMessage(msg, currentStopActivityId ?? createActivityId());
+      }
+    }
+  }
+
+  return { send, clear, stop };
+}
+
+function markStoppedMessage(msg: ChatMessage, activityId: string) {
+  msg.interrupted = true;
+  msg.content = msg.draftContent?.trim() || msg.content || "已停止生成。";
+  msg.draftContent = "";
+  upsertActivity(msg, {
+    id: activityId,
+    kind: "prepare",
+    status: "error",
+    title: "已停止当前任务",
+    error: "用户已停止当前任务",
+  });
 }

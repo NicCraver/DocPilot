@@ -2,7 +2,7 @@
 
 ## 现状 (Status)
 
-- **`AgentCraftDemo.vue`**（`layouts/`）：主 Agent 界面，Craft 三栏布局 + 真实工具编排。
+- **`AgentCraftDemo.vue`**（`layouts/`）：主 Agent 界面，Craft 三栏布局 + 真实工具编排；中心区以 Craft-like TurnCard / ResponseCard 展示当前轮编排状态。
 - `AgentChat.vue`：遗留三套对比布局容器，侧边栏入口已移除。
 - 会话 `agentChatSession.ts` 单例，Craft 与遗留布局共用。
 - `AgentMarkdown.vue`：助理 Markdown 流式渲染。
@@ -21,6 +21,7 @@
 
 ## 变更日志 (Changelog)
 
+- 2026-06-07: Craft Demo 对齐 Craft Agents turn-card 交互：Explore/Ask/Execute 权限模式、thinking/preparing gap、turn copy、真实 Stop 中断与 ResponseCard 状态。
 - 2026-06-05: Craft Demo 作为主 Agent UI，接入 `runAgentChat` 与 PDF 工具链；侧边栏简化为「AI 助理」单入口。
 - 2026-06-05: 三套 Agent UI（经典 / Claude 流式 / 编排检视器）+ 三个侧边栏菜单；共享会话状态。
 - 2026-06-04: 修复全屏/大窗口时聊天区底部留白：`AgentChat` 改用 `h-full` 随主区域 flex 撑满，不再使用 `calc(100vh - 10rem)`。
@@ -31,3 +32,4 @@
 ## 待办 / 风险 (TODO / Risks)
 
 - 长对话未做虚拟滚动；消息很多时可接 `MarkstreamVirtualTimeline` 或现有 scroller 适配器。
+- 多会话 inbox 仍为当前 session 的视觉对齐；尚未引入完整持久化 session manager / branch 后端。
