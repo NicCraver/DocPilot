@@ -1,4 +1,4 @@
-import { computed, ref } from "vue";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 import {
   deriveCraftTurnPhase,
   shouldShowCraftThinkingIndicator,
@@ -13,16 +13,51 @@ export type CraftOssPermissionMode = "safe" | "ask" | "allow-all";
 
 /** OSS PERMISSION_MODE_CONFIG displayName / shortName */
 export const CRAFT_OSS_PERMISSION_LABEL: Record<CraftOssPermissionMode, string> = {
-  safe: "Explore",
-  ask: "Ask to Edit",
-  "allow-all": "Auto",
+  safe: "探索",
+  ask: "询问后编辑",
+  "allow-all": "执行",
 };
 
 export const CRAFT_OSS_PERMISSION_SHORT: Record<CraftOssPermissionMode, string> = {
-  safe: "Explore",
-  ask: "Ask",
-  "allow-all": "Auto",
+  safe: "探索",
+  ask: "询问",
+  "allow-all": "执行",
 };
+
+export const CRAFT_OSS_PERMISSION_ICON: Record<CraftOssPermissionMode, string> = {
+  safe: "i-lucide-compass",
+  ask: "i-lucide-message-circle-question",
+  "allow-all": "i-lucide-refresh-cw",
+};
+
+/** 处理中轮播文案（对齐 OSS 原版） */
+export const CRAFT_OSS_PROCESSING_MESSAGES = [
+  "处理中…",
+  "思考中…",
+  "嗖嗖运转…",
+  "烹饪中…",
+  "慢炖中…",
+  "加速中…",
+  "考虑中…",
+] as const;
+
+export function formatOssElapsed(seconds: number) {
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+export function ossProcessingLabel(seconds: number, hasActivities: boolean) {
+  const idx = Math.floor(seconds / 8) % CRAFT_OSS_PROCESSING_MESSAGES.length;
+  const base =
+    !hasActivities && seconds < 4
+      ? "处理中…"
+      : !hasActivities
+        ? "思考中…"
+        : CRAFT_OSS_PROCESSING_MESSAGES[idx];
+  return `${base} ${formatOssElapsed(seconds)}`;
+}
 
 export const CRAFT_OSS_PERMISSION_ORDER: CraftOssPermissionMode[] = ["safe", "ask", "allow-all"];
 
@@ -35,29 +70,29 @@ export const CRAFT_OSS_TODO_STATES: Array<{
 }> = [
   {
     id: "backlog",
-    label: "Backlog",
+    label: "待排",
     colorClass: "is-muted",
     icon: "i-lucide-inbox",
     category: "open",
   },
-  { id: "todo", label: "Todo", colorClass: "is-muted", icon: "i-lucide-circle", category: "open" },
+  { id: "todo", label: "待办", colorClass: "is-muted", icon: "i-lucide-circle", category: "open" },
   {
     id: "needs-review",
-    label: "Needs Review",
+    label: "待审阅",
     colorClass: "is-info",
     icon: "i-lucide-eye",
     category: "open",
   },
   {
     id: "done",
-    label: "Done",
+    label: "已完成",
     colorClass: "is-accent",
     icon: "i-lucide-check",
     category: "closed",
   },
   {
     id: "cancelled",
-    label: "Cancelled",
+    label: "已取消",
     colorClass: "is-muted",
     icon: "i-lucide-ban",
     category: "closed",
@@ -106,6 +141,8 @@ export interface CraftOssSession {
   notes?: string;
   files?: string[];
   model?: string;
+  workspaceId?: string;
+  queuedMessage?: string;
 }
 
 /** 左侧导航 / 空状态快速跳转用 */
@@ -116,6 +153,12 @@ export const CRAFT_OSS_DEMO_CATALOG: Array<{
   hint: string;
 }> = [
   { sessionId: "new-session", state: "empty", label: "空会话", hint: "无消息，可发送触发模拟" },
+  {
+    sessionId: "demo-pdf-compress",
+    state: "plan",
+    label: "PDF 压缩",
+    hint: "多附件 + 工具链 + 计划审阅（录屏对照）",
+  },
   {
     sessionId: "demo-thinking",
     state: "thinking",
@@ -290,33 +333,106 @@ const SIMULATION_STEPS: Array<{
   toolName: string;
   title: string;
   description: string;
+  input?: string;
   runMs: number;
   fileName?: string;
 }> = [
   {
     id: "sim-think",
     toolName: "think",
-    title: "Analyze request",
-    description: "Understanding context and intent",
+    title: "分析请求",
+    description: "理解上下文与意图",
     runMs: 900,
   },
   {
     id: "sim-read",
     toolName: "read_file",
-    title: "Read workspace files",
-    description: "Scan project structure",
+    title: "读取工作区文件",
+    description: "扫描项目结构",
+    input: "ls -la ./workspace",
     runMs: 1100,
     fileName: "README.md",
   },
   {
     id: "sim-act",
     toolName: "edit_file",
-    title: "Apply changes",
-    description: "Update target output",
+    title: "应用更改",
+    description: "更新目标输出",
+    input: "write output.md",
     runMs: 1300,
     fileName: "output.md",
   },
 ];
+
+const PDF_DEMO_FILES = [
+  "invoice-7940576.pdf",
+  "Invoice-2026-1.pdf",
+  "Invoice-2026-2.pdf",
+  "Invoice-2026-3.pdf",
+  "Invoice-2026-4.pdf",
+];
+
+const PDF_PLAN_RESPONSE = `## PDF 压缩计划
+
+### 文件概览
+
+| 文件名 | 原始大小 | 页数 |
+| --- | --- | --- |
+| invoice-7940576.pdf | 34 KB | 1 |
+| Invoice-2026-1.pdf | 416 KB | 1 |
+| Invoice-2026-2.pdf | 416 KB | 1 |
+| Invoice-2026-3.pdf | 416 KB | 1 |
+| Invoice-2026-4.pdf | 421 KB | 1 |
+| **合计** | **~1.7 MB** | **5** |
+
+### 压缩方案
+
+使用 **Ghostscript (gs)**，质量预设 \`/screen\`：
+
+- 图片降采样至 72 DPI
+- 压缩图像流
+- 移除冗余元数据
+
+### 输出
+
+压缩后文件写入 \`/Users/nic/Documents/Nic/美腾科技/cursor报销/pdf\`。`;
+
+function buildPdfInspectActivities(): CraftActivity[] {
+  const ws = "./Users/nic/.craft-agent/workspaces/49be33c6-01d8-e0fe-6501-fc…";
+  return [
+    activity("pdf-a1", "bash", "success", "检查 PDF 文件", {
+      description: "查看附件 PDF 文件大小和信息",
+      input: `ls -lh ${ws}`,
+      elapsed: "0.4s",
+    }),
+    activity("pdf-a2", "bash", "success", "检查输出目录", {
+      description: "确认输出目录是否存在",
+      input: 'ls -la "/Users/nic/Documents/Nic/美腾科技/cursor报销/pdf" 2>&1 || echo "目录…"',
+      elapsed: "0.3s",
+    }),
+    activity("pdf-a3", "bash", "success", "检查 Ghostscript", {
+      description: "确认系统是否有 Ghostscript 用于 PDF 压缩",
+      input: 'which gs 2>&1 || echo "gs 未安装"',
+      elapsed: "0.2s",
+    }),
+    activity("pdf-a4", "bash", "error", "查看 PDF 信息", {
+      description: "查看各 PDF 的页面数和详情",
+      input: `for f in ${ws}/*.pdf; do pdfinfo "$f"; done`,
+      output: "pdfinfo: command not found",
+      elapsed: "0.5s",
+    }),
+    activity("pdf-a5", "get_pdf_info", "success", "查看 PDF 信息", {
+      description: "查看各 PDF 的页面数和详情",
+      input: `pdf-tool info ${ws}/invoice-7940576.pdf`,
+      elapsed: "0.6s",
+    }),
+    activity("pdf-a6", "get_pdf_info", "success", "查看 Invoice-1 信息", {
+      description: "查看 Invoice-2026-1 PDF 信息",
+      input: `pdf-tool info ${ws}/Invoice-2026-1.pdf`,
+      elapsed: "0.5s",
+    }),
+  ];
+}
 
 function buildLongActivities(count: number): CraftActivity[] {
   const names = [
@@ -348,13 +464,44 @@ const MOCK_SESSIONS: CraftOssSession[] = [
     name: "New Chat",
     preview: "Start a conversation",
     todoState: "todo",
-    permissionMode: "ask",
+    permissionMode: "safe",
     demoState: "empty",
     demoLabel: "空会话",
     lastMessageAt: Date.now(),
     dateGroup: "Today",
-    model: "claude-sonnet-4-20250514",
+    model: "glm-5.1",
+    workspaceId: "49be33c6-01d8-e0fe-",
     turns: [],
+  },
+  {
+    id: "demo-pdf-compress",
+    name: "PDF文件压缩",
+    preview: "计划：Ghostscript /screen",
+    todoState: "needs-review",
+    permissionMode: "safe",
+    demoState: "plan",
+    demoLabel: "PDF 压缩计划",
+    lastMessageRole: "plan",
+    lastMessageAt: Date.now() - 4 * 60_000,
+    dateGroup: "Today",
+    model: "glm-5.1",
+    workspaceId: "49be33c6-01d8-e0fe-",
+    files: PDF_DEMO_FILES,
+    turns: [
+      userTurn(
+        "pdf-u1",
+        "请帮我压缩这些 PDF，输出到 /Users/nic/Documents/Nic/美腾科技/cursor报销/pdf",
+        "10:12",
+        PDF_DEMO_FILES,
+      ),
+      assistantTurn({
+        id: "pdf-a1",
+        title: "查看附件 PDF 文件大小和信息",
+        time: "10:13",
+        activities: buildPdfInspectActivities(),
+        response: PDF_PLAN_RESPONSE,
+      }),
+    ],
   },
   {
     id: "demo-thinking",
@@ -813,11 +960,42 @@ export function useCraftAgentsOssMock() {
   const selectedActivityId = ref<string | null>(null);
   const expandedTurns = ref<Record<string, boolean>>({});
   const input = ref("");
+  const elapsedSeconds = ref(0);
   let simulationToken = 0;
+  let elapsedTimer: number | null = null;
   const sleepTimers = new Set<ReturnType<typeof setTimeout>>();
+
+  function startElapsedTimer() {
+    elapsedSeconds.value = 0;
+    if (elapsedTimer) window.clearInterval(elapsedTimer);
+    elapsedTimer = window.setInterval(() => {
+      elapsedSeconds.value += 1;
+    }, 1000);
+  }
+
+  function stopElapsedTimer() {
+    if (elapsedTimer) {
+      window.clearInterval(elapsedTimer);
+      elapsedTimer = null;
+    }
+    elapsedSeconds.value = 0;
+  }
+
+  onBeforeUnmount(() => {
+    stopElapsedTimer();
+  });
 
   const activeSession = computed(
     () => sessions.value.find((s) => s.id === activeSessionId.value) ?? sessions.value[0],
+  );
+
+  watch(
+    () => activeSession.value.isProcessing,
+    (processing) => {
+      if (processing) startElapsedTimer();
+      else stopElapsedTimer();
+    },
+    { immediate: true },
   );
 
   const filteredSessions = computed(() => {
@@ -892,6 +1070,100 @@ export function useCraftAgentsOssMock() {
     const order = CRAFT_OSS_PERMISSION_ORDER;
     const idx = order.indexOf(permissionMode.value);
     permissionMode.value = order[(idx + 1) % order.length];
+    patchSession(activeSessionId.value, { permissionMode: permissionMode.value });
+  }
+
+  function cycleTodoState() {
+    const session = activeSession.value;
+    const open = CRAFT_OSS_TODO_STATES.filter((s) => s.category === "open");
+    const idx = open.findIndex((s) => s.id === session.todoState);
+    const next = open[(idx + 1) % open.length]?.id ?? "todo";
+    patchSession(session.id, { todoState: next });
+  }
+
+  function acceptPlan() {
+    const session = activeSession.value;
+    if (session.lastMessageRole !== "plan") return;
+
+    permissionMode.value = "allow-all";
+    patchSession(session.id, {
+      lastMessageRole: "assistant",
+      permissionMode: "allow-all",
+      queuedMessage: "计划已批准，请执行。",
+      todoState: "todo",
+      isProcessing: true,
+      demoState: "streaming",
+      demoLabel: "执行压缩（模拟）",
+    });
+    startElapsedTimer();
+
+    const token = ++simulationToken;
+    void (async () => {
+      try {
+        await sleep(1200, token);
+        patchSession(session.id, { queuedMessage: undefined });
+        const assistantId = `a-exec-${Date.now()}`;
+        const now = formatNow();
+        const execTurn = assistantTurn({
+          id: assistantId,
+          title: "用 Ghostscript 压缩 PDF",
+          time: now,
+          activities: [],
+          response: "",
+          complete: false,
+        });
+        const sessionNow = sessions.value.find((s) => s.id === session.id);
+        if (!sessionNow) return;
+        patchSession(session.id, {
+          turns: [
+            ...sessionNow.turns,
+            userTurn(`u-compact-${Date.now()}`, "/ Compact", now),
+            execTurn,
+          ],
+        });
+        expandedTurns.value = { ...expandedTurns.value, [assistantId]: true };
+
+        const compressSteps = PDF_DEMO_FILES.map((file, i) => ({
+          id: `pdf-c-${i}`,
+          toolName: "bash",
+          title: `压缩 ${file}`,
+          description: file,
+          input: `gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -o out/${file} in/${file}`,
+          runMs: 700 + i * 120,
+        }));
+
+        for (const step of compressSteps) {
+          await runActivityStep(session.id, assistantId, step, token);
+          await sleep(100, token);
+        }
+
+        const result = `## 全部完成！以下是压缩结果：
+
+| 文件名 | 原始大小 | 压缩后大小 | 压缩率 |
+| --- | --- | --- | --- |
+| invoice-7940576.pdf | 34 KB | 21 KB | 38% ↓ |
+| Invoice-2026-1.pdf | 416 KB | 83 KB | 80% ↓ |
+| Invoice-2026-2.pdf | 416 KB | 84 KB | 80% ↓ |
+| Invoice-2026-3.pdf | 416 KB | 85 KB | 80% ↓ |
+| Invoice-2026-4.pdf | 421 KB | 86 KB | 80% ↓ |
+
+文件已写入输出目录。`;
+
+        await streamResponse(session.id, assistantId, result, token);
+        patchSession(session.id, {
+          isProcessing: false,
+          preview: "5 个 PDF 已压缩",
+          todoState: "done",
+          demoState: "completed",
+          demoLabel: "压缩完成（模拟）",
+        });
+        stopElapsedTimer();
+      } catch (error) {
+        if (error instanceof SimulationAborted) return;
+        patchSession(session.id, { isProcessing: false });
+        stopElapsedTimer();
+      }
+    })();
   }
 
   function isTurnExpanded(turnId: string, turn: CraftAssistantTurn) {
@@ -985,7 +1257,9 @@ export function useCraftAgentsOssMock() {
       preview: "Stopped",
       demoState: "stopped",
       demoLabel: "已中断（模拟）",
+      queuedMessage: undefined,
     });
+    stopElapsedTimer();
   }
 
   async function runActivityStep(
@@ -1005,6 +1279,7 @@ export function useCraftAgentsOssMock() {
       activity(step.id, step.toolName, "pending", step.title, {
         description: step.description,
         fileName: step.fileName,
+        input: step.input,
       }),
     );
     patchAssistantTurn(sessionId, turnId, {
@@ -1028,6 +1303,7 @@ export function useCraftAgentsOssMock() {
             ...a,
             status: "success" as const,
             elapsed: `${(step.runMs / 1000).toFixed(1)}s`,
+            input: step.input ?? a.input,
           }
         : a,
     );
@@ -1107,17 +1383,24 @@ export function useCraftAgentsOssMock() {
     });
     input.value = "";
     expandedTurns.value = { ...expandedTurns.value, [assistantId]: true };
+    startElapsedTimer();
+
+    const isGreeting = userContent.length <= 12 && !/pdf|压缩|merge|文件/i.test(userContent);
 
     try {
-      await sleep(700, token);
+      await sleep(isGreeting ? 2200 : 700, token);
 
-      for (const step of SIMULATION_STEPS) {
-        await runActivityStep(sessionId, assistantId, step, token);
-        await sleep(180, token);
+      if (!isGreeting) {
+        for (const step of SIMULATION_STEPS) {
+          await runActivityStep(sessionId, assistantId, step, token);
+          await sleep(180, token);
+        }
+        await sleep(300, token);
       }
 
-      await sleep(300, token);
-      const response = buildMockResponse(userContent);
+      const response = isGreeting
+        ? `你好！我是 Craft Agent，可以帮你处理 PDF、文档转换和本地文件操作。有什么我可以帮你的吗？`
+        : buildMockResponse(userContent);
       await streamResponse(sessionId, assistantId, response, token);
 
       patchSession(sessionId, {
@@ -1135,9 +1418,11 @@ export function useCraftAgentsOssMock() {
         todoState: session.todoState === "backlog" ? "todo" : session.todoState,
       });
       selectedActivityId.value = SIMULATION_STEPS[SIMULATION_STEPS.length - 1]?.id ?? null;
+      stopElapsedTimer();
     } catch (error) {
       if (error instanceof SimulationAborted) return;
       patchSession(sessionId, { isProcessing: false });
+      stopElapsedTimer();
     }
   }
 
@@ -1169,6 +1454,9 @@ export function useCraftAgentsOssMock() {
     sendMessage,
     stopSimulation,
     disposeSimulation,
+    acceptPlan,
+    cycleTodoState,
+    elapsedSeconds,
     demoCatalog: CRAFT_OSS_DEMO_CATALOG,
   };
 }

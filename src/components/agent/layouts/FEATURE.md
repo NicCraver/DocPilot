@@ -3,7 +3,7 @@
 ## 现状 (Status)
 
 - **`AgentCraftDemo.vue`**：主 Agent UI（`App.vue` → Craft Demo）。三栏 Craft 布局：左侧会话轨、中间 Craft-like TurnCard + ResponseCard + 流式 Markdown、右侧 Activity 检视器。
-- **`AgentCraftAgentsOss.vue`**：`App.vue` → craft-agents-oss。四栏 OSS 布局 + `useCraftAgentsOssMock` **14 组**状态 demo（空会话、Thinking、Preparing、Streaming、权限确认、Stopped、Plan、已完成、工具报错、多轮、Flagged、长工具链、Backlog、Cancelled）；左栏 State demos 与空状态卡片可一键跳转。
+- **`AgentCraftAgentsOss.vue`**：`App.vue` → craft-agents-oss。四栏 OSS 布局 + `useCraftAgentsOssMock` **15 组**状态 demo（含录屏对照 **PDF 压缩**）；处理中保留 composer + Stop、聊天区计时状态（处理中/思考中/烹饪中等）、工具行命令片段与 Error 徽章、计划 Response 复制/接受、排队提示。
 - 已接入真实 Agent：`useCraftAgentChat` → `agentChatSession` / `runAgentChat` / 26 个 PDF/图片/文件/Word 工具；Ask 模式内联工具确认，Explore/Ask/Execute 控制执行策略。
 - `useCraftAgentChat` 派生 turn phase 与 thinking/preparing gap；Stop 通过 AbortController 中断当前轮，Copy 可复制当前 turn 摘要/回复。
 - 遗留三套对比布局（`AgentMessageClassic` / `Stream` / `Inspector`）仍保留在代码库，侧边栏已移除。
@@ -19,6 +19,13 @@
 
 ## 变更日志 (Changelog)
 
+- 2026-06-08: OSS composer 焦点环改为容器 `:focus-within` 整框高亮，修复 textarea 单独 focus 在底栏分界处出现紫色横线；底栏右侧模型名与发送钮间距加大。
+- 2026-06-08: OSS 会话列表标题/预览单行省略（`min-width:0` 链路 + 徽章与预览分行收缩），悬停 `title` 显示全文。
+- 2026-06-08: craft-agents-oss 思考态去重：尚无工具步骤时仅保留一行内联计时（不渲染 Turn 卡片/thinking 行/footer）；有步骤后才显示 Turn 卡片 + 步骤间 thinking 行 + 底部轮播计时。
+- 2026-06-08: craft-agents-oss 对齐录屏交互：composer 上方探索/待办/信息工具条；处理中内联计时 + composer 内 Stop；附件网格卡片；工具步骤命令预览与 Error 徽章；计划接受后排队→执行模拟；新增 PDF 压缩 demo 会话。
+- 2026-06-08: 导航/会话选中态统一为中性内凹面板，去除左侧主色高亮条（AppNavItem、Craft 会话轨、OSS 导航与会话列表）。
+- 2026-06-08: 全量 UI 品味升级（审计落地）：`--dp-*` 令牌扩展并映射 OSS 主题；去彩虹工具色/重阴影/药丸 Badge；状态文案中文化；补 segmented/textarea/permission/inspector 空态与 focus/disabled；用户气泡主色浅底区分助理卡片。
+- 2026-06-08: AgentCraftDemo 视觉对齐新 design tokens：紧凑三栏间距、会话轨左指示选中态、发送钮主色、建议卡片交互态、用户气泡细边框。
 - 2026-06-07: craft-agents-oss 扩展 14 种会话状态 demo 目录（`CRAFT_OSS_DEMO_CATALOG`），Inspector 展示 demo 说明，空会话页提供状态卡片入口。
 - 2026-06-07: craft-agents-oss 发送消息后模拟 LLM 循环：Thinking → 工具步骤 pending/running/success → Response 流式输出；支持 Stop 中断。
 - 2026-06-07: craft-agents-oss UI 对齐 OSS 原版设计 token（`craft-agents-oss-theme.css`）、四栏 AppShell 布局；tab 全屏沉浸（隐藏 DocPilot 顶栏、零内边距）。
