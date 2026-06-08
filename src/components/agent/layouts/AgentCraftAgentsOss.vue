@@ -386,9 +386,7 @@ async function copyResponse(turn: CraftAssistantTurn) {
                         class="i-lucide-flag oss-flag-icon"
                         aria-label="Flagged"
                       />
-                      <span
-                        v-if="session.lastMessageRole === 'plan'"
-                        class="oss-pill oss-pill-plan"
+                      <span v-if="session.lastMessageRole === 'plan'" class="oss-pill oss-pill-plan"
                         >Plan</span
                       >
                       <span :class="['oss-pill', modeBadgeClass(session.permissionMode)]">
@@ -661,12 +659,7 @@ async function copyResponse(turn: CraftAssistantTurn) {
                 <span class="i-lucide-chevron-down" aria-hidden="true" />
               </button>
             </div>
-            <button
-              class="oss-info-btn"
-              type="button"
-              title="详情面板"
-              @click="toggleRightSidebar"
-            >
+            <button class="oss-info-btn" type="button" title="详情面板" @click="toggleRightSidebar">
               <span class="i-lucide-info" aria-hidden="true" />
               信息
             </button>
@@ -682,7 +675,12 @@ async function copyResponse(turn: CraftAssistantTurn) {
             />
             <div class="oss-composer-bar">
               <div class="oss-composer-left">
-                <button class="oss-icon-btn" type="button" title="Attach file" :disabled="isProcessing">
+                <button
+                  class="oss-icon-btn"
+                  type="button"
+                  title="Attach file"
+                  :disabled="isProcessing"
+                >
                   <span class="i-lucide-paperclip" aria-hidden="true" />
                 </button>
                 <button class="oss-icon-btn" type="button" title="Sources" :disabled="isProcessing">
