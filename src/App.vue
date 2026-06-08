@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import ToolsHome from "./components/tools/ToolsHome.vue";
 import AgentCraftDemo from "./components/agent/layouts/AgentCraftDemo.vue";
+import AgentCraftAgentsOss from "./components/agent/layouts/AgentCraftAgentsOss.vue";
 import ProviderSettings from "./components/settings/ProviderSettings.vue";
 import WordTypeset from "./components/word-typeset/WordTypeset.vue";
 import WordTemplateFill from "./components/word-template-fill/WordTemplateFill.vue";
@@ -9,16 +10,26 @@ import WordSmartDoc from "./components/word-smart-doc/WordSmartDoc.vue";
 import AppNavItem from "./components/ui/AppNavItem.vue";
 import AppBadge from "./components/ui/AppBadge.vue";
 
-type Tab = "agent" | "tools" | "word-typeset" | "word-template" | "word-smart-doc" | "settings";
+type Tab =
+  | "agent"
+  | "craft-agents-oss"
+  | "tools"
+  | "word-typeset"
+  | "word-template"
+  | "word-smart-doc"
+  | "settings";
 const tab = ref<Tab>("agent");
 
 const isFullWidthTab = computed(
   () =>
     tab.value === "agent" ||
+    tab.value === "craft-agents-oss" ||
     tab.value === "word-typeset" ||
     tab.value === "word-template" ||
     tab.value === "word-smart-doc",
 );
+
+const isOssTab = computed(() => tab.value === "craft-agents-oss");
 
 const tabMeta = computed(() => {
   switch (tab.value) {
@@ -26,6 +37,11 @@ const tabMeta = computed(() => {
       return {
         title: "Craft Demo",
         desc: "会话面板 + 工具编排 + 权限确认（Craft 布局，接入 DocPilot 工具链）",
+      };
+    case "craft-agents-oss":
+      return {
+        title: "craft-agents-oss",
+        desc: "复刻 Craft Agents OSS 前端布局，含 7 组模拟会话（完成/流式/计划/权限/错误等）",
       };
     case "tools":
       return { title: "PDF 工具箱", desc: "本地批量处理与格式转换" };
@@ -75,6 +91,16 @@ const tabMeta = computed(() => {
         <AppNavItem :active="tab === 'agent'" label="Craft Demo" @click="tab = 'agent'">
           <template #icon>
             <span class="i-lucide-list-tree w-5 h-5" />
+          </template>
+        </AppNavItem>
+
+        <AppNavItem
+          :active="tab === 'craft-agents-oss'"
+          label="craft-agents-oss"
+          @click="tab = 'craft-agents-oss'"
+        >
+          <template #icon>
+            <span class="i-lucide-box w-5 h-5" />
           </template>
         </AppNavItem>
 
@@ -145,6 +171,7 @@ const tabMeta = computed(() => {
 
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <header
+        v-if="!isOssTab"
         class="h-16 shrink-0 px-8 flex items-center justify-between border-b border-[var(--dp-border)] bg-[var(--dp-surface)]/80 backdrop-blur-sm"
       >
         <div>
@@ -160,8 +187,14 @@ const tabMeta = computed(() => {
 
       <div class="flex-1 overflow-hidden flex flex-col min-h-0">
         <div
-          class="flex-1 min-h-0 px-8 py-6 flex flex-col"
-          :class="isFullWidthTab ? 'overflow-hidden' : 'overflow-y-auto'"
+          class="flex-1 min-h-0 flex flex-col"
+          :class="[
+            isOssTab
+              ? 'p-0 overflow-hidden'
+              : isFullWidthTab
+                ? 'px-8 py-6 overflow-hidden'
+                : 'px-8 py-6 overflow-y-auto',
+          ]"
         >
           <p v-if="!isFullWidthTab" class="text-sm text-[var(--dp-text-secondary)] mb-5 max-w-3xl">
             {{ tabMeta.desc }}
@@ -177,6 +210,7 @@ const tabMeta = computed(() => {
               "
             >
               <AgentCraftDemo v-if="tab === 'agent'" />
+              <AgentCraftAgentsOss v-else-if="tab === 'craft-agents-oss'" />
               <ToolsHome v-else-if="tab === 'tools'" />
               <WordTypeset v-else-if="tab === 'word-typeset'" />
               <WordTemplateFill v-else-if="tab === 'word-template'" />
