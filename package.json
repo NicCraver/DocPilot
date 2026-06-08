@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vp dev",
+    "dev": "tauri dev",
+    "dev:web": "vp dev",
     "build": "vp build",
     "test": "vp test",
     "check": "vp check src packages/shared-types/src/index.ts packages/shared-types/src/tool-ids.ts",
@@ -33,6 +34,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^3.0.67",
     "@docpilot/shared-types": "workspace:*",
+    "@fontsource-variable/geist": "^5.2.9",
     "@tauri-apps/api": "^2.11.0",
     "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-store": "^2.4.3",

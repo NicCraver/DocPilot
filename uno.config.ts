@@ -53,7 +53,7 @@ export default defineConfig({
   ],
   theme: {
     fontFamily: {
-      sans: "Inter, ui-sans-serif, system-ui, -apple-system, sans-serif",
+      sans: 'var(--dp-font-sans)',
     },
   },
   shortcuts: {

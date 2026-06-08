@@ -2,57 +2,79 @@
 
 /* ============================================================================
  * DocPilot 设计令牌系统 (Design Tokens)
- * 风格：Flat Design · Inter · 蓝主色 (#2563EB) · 浅灰文档背景 (#F8FAFC)
- * 对齐 ui-ux-pro-max：WCAG AA 对比度、可见焦点环、prefers-reduced-motion 降级
+ * 风格：桌面文档工具 · Geist · 冷灰单强调色 · 克制信息密度
  * ==========================================================================*/
 
 :root {
-  /* ---- 中性面板与背景 ---- */
-  --dp-bg: #f1f5f9; /* 应用最外层底色（slate-100，比 surface 略深以衬托卡片） */
-  --dp-surface: #ffffff; /* 卡片 / 侧栏 / 主面板 */
-  --dp-surface-muted: #f8fafc; /* 次级容器底（slate-50） */
+  /* ---- 中性面板与背景（冷灰统一色相） ---- */
+  --dp-bg: #f2f2f5;
+  --dp-surface: #ffffff;
+  --dp-surface-muted: #f7f7f9;
+  --dp-surface-elevated: #fafafa;
+  --dp-surface-inset: #eeeff2;
 
   /* ---- 边框 ---- */
-  --dp-border: #e2e8f0; /* 默认描边（slate-200） */
-  --dp-border-strong: #cbd5e1; /* 强调描边 / 虚线拖拽框（slate-300） */
+  --dp-border: rgb(26 26 31 / 0.09);
+  --dp-border-strong: rgb(26 26 31 / 0.15);
 
-  /* ---- 主色（scan blue） ---- */
-  --dp-primary: #2563eb; /* blue-600，对白底文字对比 > 4.5:1 */
-  --dp-primary-hover: #1d4ed8; /* blue-700 */
-  --dp-primary-soft: #eff6ff; /* blue-50，软背景 */
+  /* ---- 主色（单一强调色，略降饱和） ---- */
+  --dp-primary: #5252c8;
+  --dp-primary-hover: #4444b5;
+  --dp-primary-soft: #ececf8;
 
-  /* ---- 强调色（CTA orange，谨慎使用） ---- */
-  --dp-accent: #f97316; /* orange-500 */
-  --dp-accent-soft: #fff7ed; /* orange-50 */
+  /* ---- 语义色 ---- */
+  --dp-accent: #b86e08;
+  --dp-accent-soft: #faf4e8;
+  --dp-success: #0d8a5c;
+  --dp-success-soft: #ecf8f2;
+  --dp-danger: #c92828;
+  --dp-danger-soft: #fdf0f0;
 
-  /* ---- 语义状态色 ---- */
-  --dp-success: #059669; /* emerald-600 */
-  --dp-success-soft: #ecfdf5; /* emerald-50 */
-  --dp-danger: #dc2626; /* red-600 */
-  --dp-danger-soft: #fef2f2; /* red-50 */
+  /* ---- 文字层级 ---- */
+  --dp-text: #1a1a1f;
+  --dp-text-secondary: #55555f;
+  --dp-text-muted: #888892;
 
-  /* ---- 文字层级（均满足 AA 对比度） ---- */
-  --dp-text: #0f172a; /* slate-900 主文字 */
-  --dp-text-secondary: #475569; /* slate-600 次要文字 */
-  --dp-text-muted: #64748b; /* slate-500 辅助/占位文字 */
+  /* ---- 工具/附件图标（灰底 + 主色，无彩虹） ---- */
+  --dp-tool-bg: var(--dp-surface-muted);
+  --dp-tool-fg: var(--dp-text-secondary);
+  --dp-tool-active-bg: var(--dp-primary-soft);
+  --dp-tool-active-fg: var(--dp-primary);
 
   /* ---- 圆角 ---- */
-  --dp-radius-sm: 0.5rem; /* 8px */
-  --dp-radius-md: 0.625rem; /* 10px */
-  --dp-radius-lg: 0.75rem; /* 12px */
-  --dp-radius-xl: 1rem; /* 16px */
+  --dp-radius-sm: 0.375rem;
+  --dp-radius-md: 0.5rem;
+  --dp-radius-lg: 0.625rem;
+  --dp-radius-xl: 0.75rem;
 
-  /* ---- 阴影（Flat 风格：克制、单层、低扩散） ---- */
-  --dp-shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
-  --dp-shadow: 0 4px 12px -2px rgb(15 23 42 / 0.08), 0 2px 6px -2px rgb(15 23 42 / 0.05);
-  --dp-shadow-lg: 0 12px 32px -8px rgb(15 23 42 / 0.14);
+  /* ---- 阴影（着色、轻量） ---- */
+  --dp-shadow-sm: 0 1px 2px rgb(26 26 46 / 0.04);
+  --dp-shadow-md: 0 2px 6px -1px rgb(26 26 46 / 0.07);
+  --dp-shadow: 0 4px 14px -3px rgb(26 26 46 / 0.09);
+  --dp-shadow-lg: 0 10px 28px -6px rgb(26 26 46 / 0.12);
 
   /* ---- 焦点环 ---- */
-  --dp-ring: 0 0 0 3px rgb(37 99 235 / 0.35);
+  --dp-ring: 0 0 0 3px rgb(82 82 200 / 0.28);
 
-  /* ---- 动效时长（micro-interaction 150-200ms） ---- */
-  --dp-dur-fast: 150ms;
+  /* ---- 动效 ---- */
+  --dp-dur-fast: 140ms;
   --dp-dur: 200ms;
+  --dp-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ---- 排版阶梯（4 级 + 标签） ---- */
+  --dp-font-sans:
+    "Geist Variable", "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  --dp-font-mono: "Geist Mono", "SF Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --dp-text-2xs: 0.6875rem;
+  --dp-text-xs: 0.75rem;
+  --dp-text-sm: 0.8125rem;
+  --dp-text-base: 0.9375rem;
+  --dp-text-lg: 1.0625rem;
+  --dp-leading-tight: 1.35;
+  --dp-leading-normal: 1.55;
+  --dp-leading-relaxed: 1.65;
+  --dp-label-tracking: 0.01em;
 }
 
 /* ----------------------------------------------------------------------------
@@ -64,7 +86,6 @@
   box-sizing: border-box;
 }
 
-/* ---- 元素归零（presetUno 不含 preflight，需手动 reset） ---- */
 html,
 body,
 div,
@@ -120,6 +141,10 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
 img,
 svg {
   display: block;
@@ -128,8 +153,7 @@ svg {
 
 code,
 pre {
-  font-family:
-    "SF Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: var(--dp-font-mono);
 }
 
 html,
@@ -139,17 +163,9 @@ body,
 }
 
 body {
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    "PingFang SC",
-    "Microsoft YaHei",
-    sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
+  font-family: var(--dp-font-sans);
+  font-size: var(--dp-text-base);
+  line-height: var(--dp-leading-normal);
   color: var(--dp-text);
   background: var(--dp-bg);
   -webkit-font-smoothing: antialiased;
@@ -158,13 +174,28 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* 数据列/价格使用等宽数字，避免跳动 */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
+/* 标签/分组标题 */
+.dp-label {
+  font-size: var(--dp-text-xs);
+  font-weight: 600;
+  letter-spacing: var(--dp-label-tracking);
+  color: var(--dp-text-muted);
+}
+
+/* Agent 面板：轻边框、无重阴影 */
+.dp-agent-panel {
+  border: 1px solid var(--dp-border);
+  border-radius: var(--dp-radius-xl);
+  background: var(--dp-surface);
+  overflow: hidden;
+}
+
 /* ----------------------------------------------------------------------------
- * 可访问性：统一可见焦点环（键盘导航）
+ * 可访问性：统一可见焦点环
  * --------------------------------------------------------------------------*/
 :focus-visible {
   outline: none;
@@ -172,20 +203,35 @@ body {
   border-radius: var(--dp-radius-sm);
 }
 
+textarea:focus-visible,
+input:focus-visible {
+  box-shadow: var(--dp-ring);
+}
+
 button {
   font-family: inherit;
+  transition:
+    background-color var(--dp-dur-fast) var(--dp-ease),
+    color var(--dp-dur-fast) var(--dp-ease),
+    border-color var(--dp-dur-fast) var(--dp-ease),
+    box-shadow var(--dp-dur-fast) var(--dp-ease),
+    opacity var(--dp-dur-fast) var(--dp-ease);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 /* ----------------------------------------------------------------------------
- * 精致滚动条（细、低调，hover 加深）
+ * 精致滚动条
  * --------------------------------------------------------------------------*/
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--dp-border-strong) transparent;
 }
 *::-webkit-scrollbar {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
 }
 *::-webkit-scrollbar-track {
   background: transparent;
@@ -202,7 +248,7 @@ button {
 }
 
 /* ----------------------------------------------------------------------------
- * 减弱动效（尊重系统偏好）
+ * 减弱动效
  * --------------------------------------------------------------------------*/
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -213,12 +259,16 @@ button {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
+  button:active:not(:disabled) {
+    transform: none;
+  }
 }
 
 /* ----------------------------------------------------------------------------
  * markstream-vue 聊天区微调
  * --------------------------------------------------------------------------*/
 .markstream-vue.agent-markdown {
-  font-size: 0.875rem;
-  line-height: 1.625;
+  font-size: var(--dp-text-sm);
+  line-height: var(--dp-leading-relaxed);
 }

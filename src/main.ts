@@ -1,4 +1,5 @@
 import { createApp } from "vue";
+import "@fontsource-variable/geist";
 import "virtual:uno.css";
 import "./styles/app.css";
 import App from "./App.vue";

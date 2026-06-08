@@ -288,29 +288,29 @@ function previewText(turn: CraftAssistantTurn) {
   if (running) return running.description || running.title;
   const pending = turn.activities.find((activity) => activity.status === "pending");
   if (pending) return `等待：${pending.title}`;
-  if (turn.phase === "pending") return "Thinking...";
-  if (turn.phase === "awaiting") return "Preparing response...";
-  if (turn.phase === "streaming") return "Writing response...";
-  if (turn.interrupted) return "Stopped";
+  if (turn.phase === "pending") return "思考中…";
+  if (turn.phase === "awaiting") return "准备回复…";
+  if (turn.phase === "streaming") return "正在输出…";
+  if (turn.interrupted) return "已停止";
   return turn.title || "步骤已完成";
 }
 
 function thinkingText(turn: CraftAssistantTurn) {
-  if (turn.phase === "streaming") return "Preparing response...";
-  if (turn.activities.length) return "Preparing response...";
-  return "Thinking...";
+  if (turn.phase === "streaming") return "准备回复…";
+  if (turn.activities.length) return "准备回复…";
+  return "思考中…";
 }
 
 function activityStatusLabel(status: CraftActivity["status"]) {
   switch (status) {
     case "pending":
-      return "Pending";
+      return "等待";
     case "running":
-      return "Running";
+      return "执行中";
     case "success":
-      return "Completed";
+      return "完成";
     case "error":
-      return "Error";
+      return "错误";
     default:
       return status;
   }
@@ -589,7 +589,10 @@ function getFileTypeAndIcon(fileName: string) {
                   <button
                     v-for="activity in visibleActivities(turn)"
                     :key="activity.id"
-                    class="craft-activity-row"
+                    :class="[
+                      'craft-activity-row',
+                      selectedActivity?.id === activity.id && 'is-selected',
+                    ]"
                     type="button"
                     @click="selectedActivity = activity"
                   >
@@ -648,11 +651,11 @@ function getFileTypeAndIcon(fileName: string) {
                       class="i-lucide-message-square-text craft-action-icon"
                       aria-hidden="true"
                     />
-                    Response
+                    回复
                   </span>
-                  <span v-if="turn.streaming" class="craft-response-state">Streaming</span>
+                  <span v-if="turn.streaming" class="craft-response-state">输出中</span>
                   <span v-else-if="turn.interrupted" class="craft-response-state is-stopped">
-                    Stopped
+                    已停止
                   </span>
                 </header>
                 <AgentMarkdown :content="turn.response" :streaming="turn.streaming" />
@@ -750,8 +753,8 @@ function getFileTypeAndIcon(fileName: string) {
 
         <div class="craft-running-bar">
           <div class="craft-running-status">
-            <span class="i-lucide-grip-vertical w-4 h-4 text-slate-400" />
-            <span class="craft-running-text">Working...</span>
+            <span class="i-lucide-grip-vertical craft-running-grip" aria-hidden="true" />
+            <span class="craft-running-text">处理中…</span>
             <span class="craft-running-timer">{{ elapsedSeconds }}s</span>
           </div>
           <button
@@ -852,12 +855,16 @@ function getFileTypeAndIcon(fileName: string) {
 
     <aside class="craft-inspector" aria-label="Craft activity detail">
       <div class="craft-inspector-head">
-        <strong>Activity</strong>
+        <strong>活动详情</strong>
         <span :class="['craft-pill', activeWorkCount ? 'is-info' : 'is-success']">
           {{ activeWorkCount ? "进行中" : "空闲" }}
         </span>
       </div>
-      <div v-if="selectedActivity" class="craft-inspector-body">
+      <div v-if="!selectedActivity" class="craft-inspector-empty">
+        <span class="i-lucide-mouse-pointer-click craft-inspector-empty-icon" aria-hidden="true" />
+        <p>点击工具步骤查看输入与输出</p>
+      </div>
+      <div v-else class="craft-inspector-body">
         <div class="craft-activity-hero">
           <span
             :class="['craft-tool-shell', activityKind(selectedActivity.toolName)]"
@@ -873,15 +880,15 @@ function getFileTypeAndIcon(fileName: string) {
           </div>
         </div>
         <section>
-          <label>Description</label>
-          <pre>{{ selectedActivity.description || "No description" }}</pre>
+          <label class="craft-inspector-label">说明</label>
+          <pre>{{ selectedActivity.description || "无说明" }}</pre>
         </section>
         <section v-if="selectedActivity.input">
-          <label>Input</label>
+          <label class="craft-inspector-label">输入</label>
           <pre>{{ selectedActivity.input }}</pre>
         </section>
         <section v-if="selectedActivity.output">
-          <label>Output</label>
+          <label class="craft-inspector-label">输出</label>
           <pre>{{ selectedActivity.output }}</pre>
         </section>
       </div>
@@ -892,8 +899,8 @@ function getFileTypeAndIcon(fileName: string) {
 <style scoped>
 .craft-demo {
   display: grid;
-  grid-template-columns: 14.5rem minmax(0, 1fr) 19rem;
-  gap: 1rem;
+  grid-template-columns: 13.5rem minmax(0, 1fr) 18rem;
+  gap: 0.375rem;
   height: 100%;
   min-height: 0;
 }
@@ -905,7 +912,6 @@ function getFileTypeAndIcon(fileName: string) {
   border: 1px solid var(--dp-border);
   border-radius: var(--dp-radius-xl);
   background: var(--dp-surface);
-  box-shadow: var(--dp-shadow-sm);
   overflow: hidden;
 }
 
@@ -923,9 +929,9 @@ function getFileTypeAndIcon(fileName: string) {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.875rem;
+  padding: 0.625rem 0.75rem;
   border-bottom: 1px solid var(--dp-border);
-  background: var(--dp-surface-muted);
+  background: color-mix(in srgb, var(--dp-surface-muted) 80%, var(--dp-surface));
 }
 
 .craft-rail-header {
@@ -938,15 +944,17 @@ function getFileTypeAndIcon(fileName: string) {
 
 .craft-rail-header p,
 .craft-chat-header p {
-  font-size: 0.875rem;
-  font-weight: 700;
+  font-size: var(--dp-text-sm);
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--dp-text);
 }
 
 .craft-rail-header span,
 .craft-chat-header span {
-  font-size: 0.75rem;
+  font-size: var(--dp-text-xs);
   color: var(--dp-text-muted);
+  line-height: var(--dp-leading-tight);
 }
 
 .craft-logo {
@@ -989,13 +997,20 @@ function getFileTypeAndIcon(fileName: string) {
   text-align: left;
 }
 
-.craft-session-row:hover,
-.craft-session-row.is-active {
+.craft-session-row {
+  transition:
+    background-color var(--dp-dur-fast) var(--dp-ease),
+    box-shadow var(--dp-dur-fast) var(--dp-ease);
+}
+
+.craft-session-row:hover {
   background: var(--dp-surface-muted);
 }
 
 .craft-session-row.is-active {
-  box-shadow: inset 0 0 0 1px var(--dp-border);
+  background: var(--dp-bg);
+  box-shadow: inset 0 0 0 1px var(--dp-border-strong);
+  color: var(--dp-text);
 }
 
 .craft-session-text {
@@ -1033,7 +1048,7 @@ function getFileTypeAndIcon(fileName: string) {
 }
 
 .craft-state-dot.queued {
-  background: var(--dp-accent);
+  background: color-mix(in srgb, var(--dp-primary) 55%, var(--dp-text-muted));
 }
 
 .craft-state-dot.done {
@@ -1049,11 +1064,11 @@ function getFileTypeAndIcon(fileName: string) {
   justify-content: center;
   min-height: 1.45rem;
   padding: 0 0.45rem;
-  border-radius: 999px;
+  border-radius: var(--dp-radius-sm);
   background: var(--dp-surface-muted);
   color: var(--dp-text-secondary);
-  font-size: 0.6875rem;
-  font-weight: 650;
+  font-size: var(--dp-text-2xs);
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -1069,8 +1084,8 @@ function getFileTypeAndIcon(fileName: string) {
 }
 
 .craft-option.mode-ask {
-  color: var(--dp-accent);
-  background: var(--dp-accent-soft);
+  color: var(--dp-primary-hover);
+  background: color-mix(in srgb, var(--dp-primary-soft) 70%, var(--dp-surface));
 }
 
 .craft-option.mode-safe {
@@ -1082,8 +1097,8 @@ function getFileTypeAndIcon(fileName: string) {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 1.25rem;
-  background: color-mix(in srgb, var(--dp-surface-muted) 65%, white);
+  padding: 1rem 1.125rem;
+  background: var(--dp-surface-muted);
 }
 
 .craft-empty {
@@ -1095,15 +1110,17 @@ function getFileTypeAndIcon(fileName: string) {
 }
 
 .craft-empty h3 {
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: var(--dp-text-lg);
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--dp-text);
+  text-wrap: balance;
 }
 
 .craft-empty p {
-  font-size: 0.875rem;
+  font-size: var(--dp-text-sm);
   color: var(--dp-text-secondary);
-  line-height: 1.6;
+  line-height: var(--dp-leading-relaxed);
 }
 
 .craft-suggestions {
@@ -1114,18 +1131,28 @@ function getFileTypeAndIcon(fileName: string) {
 }
 
 .craft-suggestions button {
-  padding: 0.75rem 0.875rem;
+  padding: 0.7rem 0.8rem;
   border: 1px solid var(--dp-border);
   border-radius: var(--dp-radius-lg);
   background: var(--dp-surface);
-  color: var(--dp-text);
-  font-size: 0.8125rem;
+  color: var(--dp-text-secondary);
+  font-size: var(--dp-text-sm);
   text-align: left;
+  transition:
+    border-color var(--dp-dur-fast) var(--dp-ease),
+    background-color var(--dp-dur-fast) var(--dp-ease),
+    color var(--dp-dur-fast) var(--dp-ease),
+    transform var(--dp-dur-fast) var(--dp-ease);
 }
 
 .craft-suggestions button:hover {
-  border-color: var(--dp-primary);
+  border-color: color-mix(in srgb, var(--dp-primary) 25%, var(--dp-border));
   background: var(--dp-primary-soft);
+  color: var(--dp-text);
+}
+
+.craft-suggestions button:active {
+  transform: scale(0.99);
 }
 
 .craft-message-stack {
@@ -1153,12 +1180,13 @@ function getFileTypeAndIcon(fileName: string) {
 
 .craft-user-bubble {
   max-width: min(88%, 34rem);
-  padding: 0.7rem 0.875rem;
-  border-radius: 0.9rem;
-  background: color-mix(in srgb, var(--dp-text) 6%, white);
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--dp-radius-lg);
+  background: var(--dp-primary-soft);
+  border: 1px solid color-mix(in srgb, var(--dp-primary) 18%, var(--dp-border));
   color: var(--dp-text);
-  font-size: 0.875rem;
-  line-height: 1.6;
+  font-size: var(--dp-text-sm);
+  line-height: var(--dp-leading-relaxed);
 }
 
 .craft-user-turn time {
@@ -1198,16 +1226,15 @@ function getFileTypeAndIcon(fileName: string) {
   border: 1px solid var(--dp-border);
   border-radius: var(--dp-radius-lg);
   background: var(--dp-surface);
-  box-shadow: var(--dp-shadow-sm);
   position: relative;
   transition:
-    border-color var(--dp-dur-fast) ease,
-    box-shadow var(--dp-dur-fast) ease;
+    border-color var(--dp-dur-fast) var(--dp-ease),
+    background-color var(--dp-dur-fast) var(--dp-ease);
 }
 
 .craft-attachment-card:hover {
-  border-color: var(--dp-primary);
-  box-shadow: var(--dp-shadow-md);
+  border-color: var(--dp-border-strong);
+  background: var(--dp-surface-muted);
 }
 
 .craft-attachment-icon-wrapper {
@@ -1218,47 +1245,18 @@ function getFileTypeAndIcon(fileName: string) {
   height: 2.25rem;
   border-radius: var(--dp-radius-md);
   flex-shrink: 0;
+  background: var(--dp-tool-bg);
+  color: var(--dp-tool-fg);
 }
 
-.craft-attachment-icon-wrapper.file-pdf {
-  background: #fef2f2;
-  color: #ef4444;
-}
-.dark .craft-attachment-icon-wrapper.file-pdf {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-}
-
-.craft-attachment-icon-wrapper.file-md {
-  background: #f0fdf4;
-  color: #10b981;
-}
-.dark .craft-attachment-icon-wrapper.file-md {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-}
-
-.craft-attachment-icon-wrapper.file-word {
-  background: #eff6ff;
-  color: #3b82f6;
-}
-.dark .craft-attachment-icon-wrapper.file-word {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-}
-
-.craft-attachment-icon-wrapper.file-img {
-  background: #fffbeb;
-  color: #d97706;
-}
-.dark .craft-attachment-icon-wrapper.file-img {
-  background: rgba(217, 119, 6, 0.15);
-  color: #fbbf24;
-}
-
+.craft-attachment-icon-wrapper.file-pdf,
+.craft-attachment-icon-wrapper.file-md,
+.craft-attachment-icon-wrapper.file-word,
+.craft-attachment-icon-wrapper.file-img,
+.craft-attachment-icon-wrapper.file-html,
 .craft-attachment-icon-wrapper.file-default {
-  background: var(--dp-surface-muted);
-  color: var(--dp-text-secondary);
+  background: var(--dp-tool-bg);
+  color: var(--dp-tool-fg);
 }
 
 .craft-attachment-icon {
@@ -1284,9 +1282,8 @@ function getFileTypeAndIcon(fileName: string) {
 }
 
 .craft-attachment-type {
-  font-size: 0.6875rem;
+  font-size: var(--dp-text-2xs);
   color: var(--dp-text-muted);
-  text-transform: uppercase;
   font-weight: 500;
   margin-top: 0.125rem;
 }
@@ -1309,12 +1306,12 @@ function getFileTypeAndIcon(fileName: string) {
 
 .craft-attachment-close:hover {
   opacity: 1;
-  background: #fee2e2;
-  color: #ef4444;
+  background: var(--dp-danger-soft);
+  color: var(--dp-danger);
 }
-.dark .craft-attachment-close:hover {
-  background: rgba(239, 68, 68, 0.2);
-  color: #f87171;
+
+.craft-attachment-close:focus-visible {
+  box-shadow: var(--dp-ring);
 }
 
 .craft-composer-bar-left,
@@ -1450,12 +1447,24 @@ function getFileTypeAndIcon(fileName: string) {
   place-items: center;
   border-radius: var(--dp-radius-sm);
   color: var(--dp-text-muted);
+  transition:
+    background-color var(--dp-dur-fast) var(--dp-ease),
+    color var(--dp-dur-fast) var(--dp-ease);
 }
 
-.craft-icon-button:hover,
+.craft-icon-button:hover:not(:disabled),
 .craft-icon-button.is-framed {
   background: var(--dp-surface-muted);
   color: var(--dp-text);
+}
+
+.craft-icon-button:focus-visible {
+  box-shadow: var(--dp-ring);
+}
+
+.craft-icon-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .craft-activity-list {
@@ -1570,45 +1579,21 @@ function getFileTypeAndIcon(fileName: string) {
   flex: 0 0 auto;
   place-items: center;
   border: none;
-  border-radius: 0.42rem;
-  background: var(--dp-primary-soft);
-  color: var(--dp-primary);
+  border-radius: var(--dp-radius-sm);
+  background: var(--dp-tool-bg);
+  color: var(--dp-tool-fg);
 }
 
 .craft-tool-shell.think,
-.craft-tool-shell.agent {
-  background: color-mix(in srgb, var(--dp-primary) 14%, white);
-  color: var(--dp-primary);
-}
-
-.craft-tool-shell.search {
-  background: #fff7ed;
-  color: #c2410c;
-}
-
-.craft-tool-shell.read {
-  background: #ecfdf5;
-  color: #047857;
-}
-
-.craft-tool-shell.terminal {
-  background: #f5f3ff;
-  color: #6d28d9;
-}
-
-.craft-tool-shell.edit {
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-
-.craft-tool-shell.plan {
-  background: #fefce8;
-  color: #a16207;
-}
-
+.craft-tool-shell.agent,
+.craft-tool-shell.search,
+.craft-tool-shell.read,
+.craft-tool-shell.terminal,
+.craft-tool-shell.edit,
+.craft-tool-shell.plan,
 .craft-tool-shell.preview {
-  background: #f0f9ff;
-  color: #0369a1;
+  background: var(--dp-tool-bg);
+  color: var(--dp-tool-fg);
 }
 
 .craft-tool-icon {
@@ -1620,7 +1605,14 @@ function getFileTypeAndIcon(fileName: string) {
 .craft-activity-title {
   flex: 0 0 auto;
   color: var(--dp-text-secondary);
-  font-weight: 650;
+  font-weight: 600;
+}
+
+.craft-activity-row.is-selected,
+.craft-activity-row:focus-visible {
+  background: var(--dp-primary-soft);
+  color: var(--dp-text);
+  box-shadow: var(--dp-ring);
 }
 
 .craft-separator,
@@ -1663,7 +1655,6 @@ function getFileTypeAndIcon(fileName: string) {
   border: 1px solid var(--dp-border);
   border-radius: var(--dp-radius-lg);
   background: var(--dp-surface);
-  box-shadow: var(--dp-shadow-sm);
 }
 
 .craft-response.is-interrupted {
@@ -1677,8 +1668,8 @@ function getFileTypeAndIcon(fileName: string) {
   gap: 0.75rem;
   min-width: 0;
   color: var(--dp-text-muted);
-  font-size: 0.75rem;
-  font-weight: 750;
+  font-size: var(--dp-text-xs);
+  font-weight: 600;
 }
 
 .craft-response-head > span:first-child {
@@ -1692,10 +1683,11 @@ function getFileTypeAndIcon(fileName: string) {
   align-items: center;
   min-height: 1.35rem;
   padding: 0 0.4rem;
-  border-radius: 999px;
+  border-radius: var(--dp-radius-sm);
   background: var(--dp-primary-soft);
   color: var(--dp-primary);
-  font-size: 0.6875rem;
+  font-size: var(--dp-text-2xs);
+  font-weight: 600;
 }
 
 .craft-response-state.is-stopped {
@@ -1734,10 +1726,18 @@ function getFileTypeAndIcon(fileName: string) {
   min-height: 2.35rem;
   padding: 0 0.75rem;
   border-radius: var(--dp-radius-md);
-  background: var(--dp-text);
+  background: var(--dp-primary);
   color: white;
-  font-size: 0.8125rem;
-  font-weight: 700;
+  font-size: var(--dp-text-sm);
+  font-weight: 600;
+  transition:
+    background-color var(--dp-dur-fast) var(--dp-ease),
+    transform var(--dp-dur-fast) var(--dp-ease);
+}
+
+.craft-accept:hover,
+.craft-send:hover:not(:disabled) {
+  background: var(--dp-primary-hover);
 }
 
 .craft-markdown {
@@ -1958,11 +1958,26 @@ function getFileTypeAndIcon(fileName: string) {
 .craft-permission-actions button {
   background: var(--dp-surface-muted);
   color: var(--dp-text-secondary);
+  border: 1px solid var(--dp-border);
+}
+
+.craft-permission-actions button:hover:not(:disabled) {
+  background: var(--dp-surface-inset);
+  color: var(--dp-text);
+}
+
+.craft-permission-actions button:focus-visible {
+  box-shadow: var(--dp-ring);
 }
 
 .craft-permission-actions button.primary {
-  background: var(--dp-text);
+  background: var(--dp-primary);
+  border-color: transparent;
   color: white;
+}
+
+.craft-permission-actions button.primary:hover:not(:disabled) {
+  background: var(--dp-primary-hover);
 }
 
 .craft-option-row {
@@ -1977,7 +1992,6 @@ function getFileTypeAndIcon(fileName: string) {
   border: 1px solid var(--dp-border);
   border-radius: var(--dp-radius-lg);
   background: var(--dp-surface);
-  box-shadow: var(--dp-shadow-sm);
 }
 
 .craft-composer textarea {
@@ -1987,8 +2001,14 @@ function getFileTypeAndIcon(fileName: string) {
   resize: vertical;
   padding: 0.45rem;
   outline: 0;
+  border-radius: var(--dp-radius-sm);
   color: var(--dp-text);
-  line-height: 1.5;
+  line-height: var(--dp-leading-normal);
+  transition: box-shadow var(--dp-dur-fast) var(--dp-ease);
+}
+
+.craft-composer textarea:focus-visible {
+  box-shadow: var(--dp-ring);
 }
 
 .craft-composer textarea::placeholder {
@@ -2018,22 +2038,31 @@ function getFileTypeAndIcon(fileName: string) {
   padding: 0 0.55rem;
   border-radius: var(--dp-radius-sm);
   color: var(--dp-text-secondary);
-  font-size: 0.75rem;
-  font-weight: 650;
+  font-size: var(--dp-text-xs);
+  font-weight: 600;
   transition:
-    background var(--dp-dur-fast) ease,
-    color var(--dp-dur-fast) ease,
-    box-shadow var(--dp-dur-fast) ease;
+    background var(--dp-dur-fast) var(--dp-ease),
+    color var(--dp-dur-fast) var(--dp-ease),
+    box-shadow var(--dp-dur-fast) var(--dp-ease);
+}
+
+.craft-segmented .mode-btn:hover:not(.is-selected) {
+  background: color-mix(in srgb, var(--dp-border) 40%, transparent);
+  color: var(--dp-text);
+}
+
+.craft-segmented .mode-btn:focus-visible {
+  box-shadow: var(--dp-ring);
 }
 
 .craft-segmented .mode-btn.is-selected {
   background: var(--dp-surface);
   color: var(--dp-text);
-  box-shadow: var(--dp-shadow-sm);
+  box-shadow: inset 0 0 0 1px var(--dp-border);
 }
 
 .craft-segmented .mode-btn.mode-ask.is-selected {
-  color: var(--dp-accent);
+  color: var(--dp-primary-hover);
 }
 
 .craft-segmented .mode-btn.mode-auto.is-selected {
@@ -2050,8 +2079,20 @@ function getFileTypeAndIcon(fileName: string) {
 }
 
 .craft-send:disabled {
-  opacity: 0.4;
+  opacity: 0.38;
   cursor: not-allowed;
+  background: var(--dp-surface-inset);
+  color: var(--dp-text-muted);
+}
+
+.craft-send:focus-visible {
+  box-shadow: var(--dp-ring);
+}
+
+.craft-running-grip {
+  width: 1rem;
+  height: 1rem;
+  color: var(--dp-text-muted);
 }
 
 .craft-send.is-stop {
@@ -2084,8 +2125,34 @@ function getFileTypeAndIcon(fileName: string) {
 }
 
 .craft-activity-hero h3 {
-  font-size: 0.95rem;
-  font-weight: 800;
+  font-size: var(--dp-text-base);
+  font-weight: 600;
+}
+
+.craft-inspector-empty {
+  display: grid;
+  place-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--dp-text-muted);
+  font-size: var(--dp-text-xs);
+  line-height: var(--dp-leading-relaxed);
+}
+
+.craft-inspector-empty-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  opacity: 0.55;
+}
+
+.craft-inspector-label,
+.craft-inspector label {
+  color: var(--dp-text-muted);
+  font-size: var(--dp-text-xs);
+  font-weight: 600;
+  letter-spacing: var(--dp-label-tracking);
 }
 
 .craft-status-text {
@@ -2110,12 +2177,6 @@ function getFileTypeAndIcon(fileName: string) {
 .craft-inspector section {
   display: grid;
   gap: 0.35rem;
-}
-
-.craft-inspector label {
-  color: var(--dp-text-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
 }
 
 .craft-inspector pre {

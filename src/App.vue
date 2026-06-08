@@ -63,30 +63,28 @@ const tabMeta = computed(() => {
 <template>
   <div class="h-full flex bg-[var(--dp-bg)] text-[var(--dp-text)] antialiased">
     <aside
-      class="w-[17.5rem] shrink-0 flex flex-col border-r border-[var(--dp-border)] bg-[var(--dp-surface)]"
+      class="w-[16.5rem] shrink-0 flex flex-col border-r border-[var(--dp-border)] bg-[var(--dp-surface)]"
       aria-label="主导航"
     >
-      <div class="p-5 border-b border-[var(--dp-border)]">
-        <div class="flex items-center gap-3">
+      <div class="px-4 py-4 border-b border-[var(--dp-border)]">
+        <div class="flex items-center gap-2.5">
           <div
-            class="w-11 h-11 rounded-xl bg-[var(--dp-primary)] flex items-center justify-center text-white shadow-[var(--dp-shadow)]"
+            class="w-9 h-9 rounded-[var(--dp-radius-lg)] bg-[var(--dp-primary-soft)] text-[var(--dp-primary)] flex items-center justify-center"
             aria-hidden="true"
           >
-            <span class="i-lucide-file-text w-6 h-6" />
+            <span class="i-lucide-file-text w-[1.125rem] h-[1.125rem]" />
           </div>
-          <div>
-            <h1 class="text-lg font-bold tracking-tight text-[var(--dp-text)]">DocPilot</h1>
-            <p class="text-xs text-[var(--dp-text-muted)] font-medium">智能 PDF 助手</p>
+          <div class="min-w-0">
+            <h1 class="text-[0.9375rem] font-semibold tracking-[-0.02em] text-[var(--dp-text)]">
+              DocPilot
+            </h1>
+            <p class="text-[0.6875rem] text-[var(--dp-text-muted)] font-medium">智能 PDF 助手</p>
           </div>
         </div>
       </div>
 
-      <nav class="flex-1 p-4 space-y-1 overflow-y-auto" aria-label="功能模块">
-        <p
-          class="px-3 pt-1 pb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--dp-text-muted)]"
-        >
-          核心功能
-        </p>
+      <nav class="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto" aria-label="功能模块">
+        <p class="dp-label px-3 pt-1 pb-1.5">核心功能</p>
 
         <AppNavItem :active="tab === 'agent'" label="Craft Demo" @click="tab = 'agent'">
           <template #icon>
@@ -104,11 +102,7 @@ const tabMeta = computed(() => {
           </template>
         </AppNavItem>
 
-        <p
-          class="px-3 pt-4 pb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--dp-text-muted)]"
-        >
-          工具
-        </p>
+        <p class="dp-label px-3 pt-3 pb-1.5">工具</p>
 
         <AppNavItem :active="tab === 'tools'" label="PDF 工具箱" @click="tab = 'tools'">
           <template #icon>
@@ -153,17 +147,21 @@ const tabMeta = computed(() => {
         </AppNavItem>
       </nav>
 
-      <div class="p-5 border-t border-[var(--dp-border)]">
-        <div class="flex items-center gap-3 px-1">
+      <div class="px-4 py-3.5 border-t border-[var(--dp-border)]">
+        <div class="flex items-center gap-2.5 px-1">
           <div
-            class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-xs font-bold"
+            class="w-8 h-8 rounded-[var(--dp-radius-md)] bg-[var(--dp-surface-muted)] flex items-center justify-center text-[var(--dp-text-secondary)] text-[0.625rem] font-semibold"
             aria-hidden="true"
           >
             DP
           </div>
           <div class="min-w-0">
-            <p class="text-xs font-semibold text-[var(--dp-text)] truncate">DocPilot Desktop</p>
-            <p class="text-xs text-[var(--dp-text-muted)]">v0.1.0 · 本地运行</p>
+            <p class="text-[0.75rem] font-medium text-[var(--dp-text)] truncate">
+              DocPilot Desktop
+            </p>
+            <p class="text-[0.6875rem] text-[var(--dp-text-muted)] tabular-nums">
+              v0.1.0 · 本地运行
+            </p>
           </div>
         </div>
       </div>
@@ -172,17 +170,17 @@ const tabMeta = computed(() => {
     <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <header
         v-if="!isOssTab"
-        class="h-16 shrink-0 px-8 flex items-center justify-between border-b border-[var(--dp-border)] bg-[var(--dp-surface)]/80 backdrop-blur-sm"
+        class="h-14 shrink-0 px-6 flex items-center justify-between border-b border-[var(--dp-border)] bg-[var(--dp-surface)]"
       >
         <div>
-          <p class="text-xs font-medium text-[var(--dp-text-muted)] uppercase tracking-wide">
-            当前模块
-          </p>
-          <h2 class="text-base font-semibold text-[var(--dp-text)] leading-tight">
+          <p class="dp-label">当前模块</p>
+          <h2
+            class="text-[0.9375rem] font-semibold text-[var(--dp-text)] leading-tight tracking-[-0.01em] text-balance"
+          >
             {{ tabMeta.title }}
           </h2>
         </div>
-        <AppBadge variant="success" pulse>本地服务正常</AppBadge>
+        <AppBadge variant="success">本地服务正常</AppBadge>
       </header>
 
       <div class="flex-1 overflow-hidden flex flex-col min-h-0">
@@ -192,8 +190,8 @@ const tabMeta = computed(() => {
             isOssTab
               ? 'p-0 overflow-hidden'
               : isFullWidthTab
-                ? 'px-8 py-6 overflow-hidden'
-                : 'px-8 py-6 overflow-y-auto',
+                ? 'px-4 py-3 overflow-hidden'
+                : 'px-6 py-5 overflow-y-auto',
           ]"
         >
           <p v-if="!isFullWidthTab" class="text-sm text-[var(--dp-text-secondary)] mb-5 max-w-3xl">
