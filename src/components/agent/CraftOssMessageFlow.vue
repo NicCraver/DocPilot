@@ -30,8 +30,7 @@ const props = withDefaults(
     selectedActivityId: null,
     queuedMessage: null,
     showAcceptPlan: false,
-    emptyDescription:
-      "通过自然语言调用本地 PDF / 图片工具。可添加文件附件后描述需求。",
+    emptyDescription: "通过自然语言调用本地 PDF / 图片工具。可添加文件附件后描述需求。",
     suggestions: () => [],
     resetKey: "default",
   },
@@ -67,10 +66,7 @@ const activeAssistantTurn = computed(() => {
 });
 
 const processingLabel = computed(() =>
-  ossProcessingLabel(
-    props.elapsedSeconds,
-    Boolean(activeAssistantTurn.value?.activities.length),
-  ),
+  ossProcessingLabel(props.elapsedSeconds, Boolean(activeAssistantTurn.value?.activities.length)),
 );
 
 function isEarlyThinking(turn: CraftAssistantTurn) {
@@ -313,7 +309,9 @@ const lastTurnId = computed(() => props.turns[props.turns.length - 1]?.id);
               </span>
               <span class="oss-act-title">{{ activity.title }}</span>
               <span v-if="activity.description" class="oss-act-muted">·</span>
-              <span v-if="activity.description" class="oss-act-muted">{{ activity.description }}</span>
+              <span v-if="activity.description" class="oss-act-muted">{{
+                activity.description
+              }}</span>
               <span v-if="activity.input" class="oss-act-cmd">{{ activity.input }}</span>
               <span v-if="activity.status === 'error'" class="oss-act-error">Error</span>
               <span v-if="activity.elapsed" class="oss-act-elapsed">{{ activity.elapsed }}</span>

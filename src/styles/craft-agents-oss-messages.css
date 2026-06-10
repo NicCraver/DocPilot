@@ -429,7 +429,10 @@
   font-family: inherit;
 }
 
-.craft-oss-app .oss-response-body .markstream-vue.agent-markdown :is(p, li, td, th, blockquote, span) {
+.craft-oss-app
+  .oss-response-body
+  .markstream-vue.agent-markdown
+  :is(p, li, td, th, blockquote, span) {
   color: var(--dp-text);
   font-size: var(--dp-text-sm);
   line-height: var(--dp-leading-relaxed);
@@ -441,11 +444,18 @@
   letter-spacing: -0.01em;
 }
 
-.craft-oss-app .oss-response-body .markstream-vue.agent-markdown :is(h1, h2, h3, h4, h5, h6, p, ul, ol) {
+.craft-oss-app
+  .oss-response-body
+  .markstream-vue.agent-markdown
+  :is(h1, h2, h3, h4, h5, h6, p, ul, ol) {
   margin: 0;
 }
 
-.craft-oss-app .oss-response-body .markstream-vue.agent-markdown :is(p, ul, ol, pre, blockquote) + :is(p, ul, ol, pre, blockquote) {
+.craft-oss-app
+  .oss-response-body
+  .markstream-vue.agent-markdown
+  :is(p, ul, ol, pre, blockquote)
+  + :is(p, ul, ol, pre, blockquote) {
   margin-top: 0.5rem;
 }
 
