@@ -11,6 +11,7 @@ const props = defineProps<{
 <template>
   <div class="markstream-vue agent-markdown min-w-0">
     <MarkdownRender
+      mode="chat"
       :content="content"
       :final="!streaming"
       :max-live-nodes="0"

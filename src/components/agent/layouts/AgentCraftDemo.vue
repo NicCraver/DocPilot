@@ -8,15 +8,14 @@ import {
   CRAFT_PERMISSION_MODE_ORDER,
   useCraftAgentChat,
   type CraftActivity,
-  type CraftAssistantTurn,
   type CraftPermissionMode,
 } from "../../../composables/useCraftAgentChat";
-import AgentMarkdown from "../AgentMarkdown.vue";
+import CraftOssMessageFlow from "../CraftOssMessageFlow.vue";
+import "../../../styles/craft-agents-oss-theme.css";
+import "../../../styles/craft-agents-oss-messages.css";
 
 const modeLabel = CRAFT_PERMISSION_MODE_LABEL;
 const modeOrder = CRAFT_PERMISSION_MODE_ORDER;
-const ACTIVITY_LIST_LIMIT = 5;
-
 const suggestions = [
   "请帮我压缩这个 PDF 文件",
   "我想把这两个 PDF 文件合并",
@@ -51,15 +50,36 @@ const {
 
 const input = ref("");
 const activeSessionId = ref("current");
-const expandedTurns = ref<Record<string, boolean>>({});
-const expandedActivityLists = ref<Record<string, boolean>>({});
 const permissionDetailsExpanded = ref(false);
 const selectedActivity = shallowRef<CraftActivity | null>(null);
 const chatScroll = ref<HTMLElement | null>(null);
-const copiedTurnId = ref<string | null>(null);
+const messageResetKey = ref(0);
+
+const SCROLL_PIN_THRESHOLD_PX = 64;
+const stickToBottom = ref(true);
+let scrollPinRaf: number | null = null;
 
 const elapsedSeconds = ref(0);
 let timerId: number | null = null;
+
+function syncStickToBottom() {
+  const el = chatScroll.value;
+  if (!el) return;
+  stickToBottom.value = el.scrollHeight - el.scrollTop - el.clientHeight <= SCROLL_PIN_THRESHOLD_PX;
+}
+
+function scrollPinnedToBottom() {
+  if (!stickToBottom.value) return;
+  if (scrollPinRaf !== null) {
+    cancelAnimationFrame(scrollPinRaf);
+  }
+  scrollPinRaf = requestAnimationFrame(() => {
+    scrollPinRaf = null;
+    const el = chatScroll.value;
+    if (!el || !stickToBottom.value) return;
+    el.scrollTop = el.scrollHeight;
+  });
+}
 
 const lastUserTurn = computed(() => {
   for (let i = messages.value.length - 1; i >= 0; i--) {
@@ -98,6 +118,9 @@ watch(loading, (isLoading) => {
 onBeforeUnmount(() => {
   if (timerId !== null) {
     window.clearInterval(timerId);
+  }
+  if (scrollPinRaf !== null) {
+    cancelAnimationFrame(scrollPinRaf);
   }
 });
 
@@ -140,9 +163,7 @@ const activeWorkCount = computed(
 watch(
   () => [turns.value, pendingPermission.value, loading.value],
   () => {
-    nextTick(() => {
-      chatScroll.value?.scrollTo({ top: chatScroll.value.scrollHeight, behavior: "smooth" });
-    });
+    nextTick(scrollPinnedToBottom);
   },
 );
 
@@ -161,48 +182,6 @@ watch(
 onMounted(() => {
   loadSettings();
 });
-
-function blocks(text: string) {
-  return text
-    .split("\n")
-    .filter((line) => line.trim().length > 0)
-    .map((line) => {
-      const match = line.match(/^(\d+)\.\s+(.*)$/);
-      return match ? { raw: line, number: match[1], text: match[2] } : { raw: line, text: line };
-    });
-}
-
-function isTurnActive(turn: CraftAssistantTurn) {
-  return turn.phase !== "complete";
-}
-
-function isTurnExpanded(turn: CraftAssistantTurn) {
-  if (turn.id in expandedTurns.value) return expandedTurns.value[turn.id];
-  if (isTurnActive(turn)) return true;
-  return turn.activities.length <= ACTIVITY_LIST_LIMIT;
-}
-
-function isActivityListExpanded(turnId: string) {
-  return expandedActivityLists.value[turnId] ?? false;
-}
-
-function visibleActivities(turn: CraftAssistantTurn) {
-  if (isActivityListExpanded(turn.id) || turn.activities.length <= ACTIVITY_LIST_LIMIT) {
-    return turn.activities;
-  }
-  return turn.activities.slice(0, ACTIVITY_LIST_LIMIT);
-}
-
-function hiddenActivityCount(turn: CraftAssistantTurn) {
-  return Math.max(0, turn.activities.length - ACTIVITY_LIST_LIMIT);
-}
-
-function toggleActivityList(turnId: string) {
-  expandedActivityLists.value = {
-    ...expandedActivityLists.value,
-    [turnId]: !isActivityListExpanded(turnId),
-  };
-}
 
 function pathBasename(path: unknown) {
   if (typeof path !== "string" || !path) return "";
@@ -238,15 +217,16 @@ async function submitMessage() {
   const text = input.value;
   const attachments = takePending();
   input.value = "";
+  stickToBottom.value = true;
   await send(text, attachments);
+  nextTick(scrollPinnedToBottom);
 }
 
 function onNewChat() {
   clear();
   clearAttachments();
   input.value = "";
-  expandedTurns.value = {};
-  expandedActivityLists.value = {};
+  messageResetKey.value++;
   permissionDetailsExpanded.value = false;
   selectedActivity.value = null;
 }
@@ -272,33 +252,8 @@ function onTextareaKeydown(event: KeyboardEvent) {
   }
 }
 
-function toggleTurn(turnId: string) {
-  expandedTurns.value = {
-    ...expandedTurns.value,
-    [turnId]: !expandedTurns.value[turnId],
-  };
-}
-
 function applySuggestion(text: string) {
   input.value = text;
-}
-
-function previewText(turn: CraftAssistantTurn) {
-  const running = turn.activities.find((activity) => activity.status === "running");
-  if (running) return running.description || running.title;
-  const pending = turn.activities.find((activity) => activity.status === "pending");
-  if (pending) return `等待：${pending.title}`;
-  if (turn.phase === "pending") return "思考中…";
-  if (turn.phase === "awaiting") return "准备回复…";
-  if (turn.phase === "streaming") return "正在输出…";
-  if (turn.interrupted) return "已停止";
-  return turn.title || "步骤已完成";
-}
-
-function thinkingText(turn: CraftAssistantTurn) {
-  if (turn.phase === "streaming") return "准备回复…";
-  if (turn.activities.length) return "准备回复…";
-  return "思考中…";
 }
 
 function activityStatusLabel(status: CraftActivity["status"]) {
@@ -314,53 +269,6 @@ function activityStatusLabel(status: CraftActivity["status"]) {
     default:
       return status;
   }
-}
-
-function turnMarkdown(turn: CraftAssistantTurn) {
-  const lines = [`# ${turn.title || "Assistant turn"}`];
-  if (turn.activities.length) {
-    lines.push("", "## Activities");
-    for (const activity of turn.activities) {
-      lines.push(`- ${activityStatusLabel(activity.status)}: ${activity.title}`);
-      if (activity.description && activity.description !== activity.title) {
-        lines.push(`  ${activity.description}`);
-      }
-      if (activity.fileName) {
-        lines.push(`  File: ${activity.fileName}`);
-      }
-    }
-  }
-  if (turn.response.trim()) {
-    lines.push("", "## Response", turn.response.trim());
-  }
-  return lines.join("\n");
-}
-
-async function writeClipboard(text: string) {
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-      return;
-    }
-  } catch {
-    // Fall back to the selection API in WebViews that gate clipboard writes.
-  }
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.style.position = "fixed";
-  textarea.style.opacity = "0";
-  document.body.appendChild(textarea);
-  textarea.select();
-  document.execCommand("copy");
-  textarea.remove();
-}
-
-async function copyTurn(turn: CraftAssistantTurn) {
-  await writeClipboard(turnMarkdown(turn));
-  copiedTurnId.value = turn.id;
-  window.setTimeout(() => {
-    if (copiedTurnId.value === turn.id) copiedTurnId.value = null;
-  }, 1600);
 }
 
 function activityKind(toolName: string) {
@@ -412,48 +320,24 @@ function getFileTypeAndIcon(fileName: string) {
   const ext = fileName.split(".").pop()?.toLowerCase() || "";
   switch (ext) {
     case "pdf":
-      return {
-        type: "PDF",
-        icon: "i-lucide-file-text",
-        class: "file-pdf",
-      };
+      return { type: "PDF", icon: "i-lucide-file-text", class: "file-pdf" };
     case "md":
     case "markdown":
-      return {
-        type: "Markdown",
-        icon: "i-lucide-file-code",
-        class: "file-md",
-      };
+      return { type: "Markdown", icon: "i-lucide-file-code", class: "file-md" };
     case "html":
     case "htm":
-      return {
-        type: "HTML",
-        icon: "i-lucide-file-code",
-        class: "file-html",
-      };
+      return { type: "HTML", icon: "i-lucide-file-code", class: "file-html" };
     case "doc":
     case "docx":
-      return {
-        type: "Word",
-        icon: "i-lucide-file-text",
-        class: "file-word",
-      };
+      return { type: "Word", icon: "i-lucide-file-text", class: "file-word" };
     case "jpg":
     case "jpeg":
     case "png":
     case "gif":
     case "webp":
-      return {
-        type: "Image",
-        icon: "i-lucide-image",
-        class: "file-img",
-      };
+      return { type: "Image", icon: "i-lucide-image", class: "file-img" };
     default:
-      return {
-        type: ext.toUpperCase() || "FILE",
-        icon: "i-lucide-file",
-        class: "file-default",
-      };
+      return { type: ext.toUpperCase() || "FILE", icon: "i-lucide-file", class: "file-default" };
   }
 }
 </script>
@@ -509,160 +393,24 @@ function getFileTypeAndIcon(fileName: string) {
         </span>
       </header>
 
-      <div ref="chatScroll" class="craft-message-scroll" role="log" aria-live="polite">
-        <div v-if="!messages.length" class="craft-empty">
-          <h3>您好，我是 DocPilot 智能助理</h3>
-          <p>通过自然语言调用本地 PDF / 图片工具。可添加文件附件后描述需求。</p>
-          <div class="craft-suggestions">
-            <button v-for="s in suggestions" :key="s" type="button" @click="applySuggestion(s)">
-              {{ s }}
-            </button>
-          </div>
-        </div>
-
-        <div v-else class="craft-message-stack">
-          <template v-for="turn in turns" :key="turn.id">
-            <div v-if="turn.type === 'user'" class="craft-user-turn">
-              <div v-if="turn.attachments?.length" class="craft-attachment-scroll w-full">
-                <div
-                  v-for="attachment in turn.attachments"
-                  :key="attachment"
-                  class="craft-attachment-card"
-                >
-                  <div
-                    :class="['craft-attachment-icon-wrapper', getFileTypeAndIcon(attachment).class]"
-                  >
-                    <span :class="['craft-attachment-icon', getFileTypeAndIcon(attachment).icon]" />
-                  </div>
-                  <div class="craft-attachment-info">
-                    <span class="craft-attachment-name" :title="attachment">
-                      {{ attachment }}
-                    </span>
-                    <span class="craft-attachment-type">
-                      {{ getFileTypeAndIcon(attachment).type }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div class="craft-user-bubble">
-                <p v-for="block in blocks(turn.content)" :key="block.raw">{{ block.text }}</p>
-              </div>
-              <time>{{ turn.time }}</time>
-            </div>
-
-            <section v-else class="craft-assistant-turn">
-              <div
-                v-if="turn.activities.length || turn.showThinkingIndicator"
-                class="craft-turn-card"
-              >
-                <div class="craft-turn-header">
-                  <button class="craft-turn-toggle" type="button" @click="toggleTurn(turn.id)">
-                    <span
-                      :class="[
-                        'i-lucide-chevron-right',
-                        'craft-chevron',
-                        isTurnExpanded(turn) && 'is-open',
-                      ]"
-                      aria-hidden="true"
-                    />
-                    <span class="craft-step-count">{{ turn.activities.length }}</span>
-                    <span class="craft-preview">{{ previewText(turn) }}</span>
-                  </button>
-                  <button
-                    class="craft-icon-button"
-                    type="button"
-                    :aria-label="copiedTurnId === turn.id ? 'Copied turn' : 'Copy turn'"
-                    :title="copiedTurnId === turn.id ? 'Copied' : 'Copy turn'"
-                    @click="copyTurn(turn)"
-                  >
-                    <span
-                      :class="[
-                        copiedTurnId === turn.id ? 'i-lucide-check' : 'i-lucide-copy',
-                        'craft-action-icon',
-                      ]"
-                      aria-hidden="true"
-                    />
-                  </button>
-                </div>
-
-                <div v-if="isTurnExpanded(turn)" class="craft-activity-list">
-                  <button
-                    v-for="activity in visibleActivities(turn)"
-                    :key="activity.id"
-                    :class="[
-                      'craft-activity-row',
-                      selectedActivity?.id === activity.id && 'is-selected',
-                    ]"
-                    type="button"
-                    @click="selectedActivity = activity"
-                  >
-                    <span :class="['craft-status', activity.status]" aria-hidden="true" />
-                    <span
-                      :class="['craft-tool-shell', activityKind(activity.toolName)]"
-                      aria-hidden="true"
-                    >
-                      <span :class="['craft-tool-icon', activityIconClass(activity.toolName)]" />
-                    </span>
-                    <span class="craft-activity-title">{{ activity.title }}</span>
-                    <span v-if="activity.description" class="craft-separator">·</span>
-                    <span v-if="activity.description" class="craft-activity-description">
-                      {{ activity.description }}
-                    </span>
-                    <span v-if="activity.fileName" class="craft-file">{{ activity.fileName }}</span>
-                    <span v-if="activity.elapsed" class="craft-elapsed">{{
-                      activity.elapsed
-                    }}</span>
-                  </button>
-                  <button
-                    v-if="hiddenActivityCount(turn) > 0 || isActivityListExpanded(turn.id)"
-                    class="craft-activity-more"
-                    type="button"
-                    @click="toggleActivityList(turn.id)"
-                  >
-                    <span
-                      :class="[
-                        'i-lucide-chevron-down',
-                        'craft-chevron',
-                        isActivityListExpanded(turn.id) && 'is-open',
-                      ]"
-                      aria-hidden="true"
-                    />
-                    {{
-                      isActivityListExpanded(turn.id)
-                        ? "收起工具步骤"
-                        : `展开其余 ${hiddenActivityCount(turn)} 项`
-                    }}
-                  </button>
-                  <div v-if="turn.showThinkingIndicator" class="craft-thinking-row">
-                    <span class="craft-status running" aria-hidden="true" />
-                    <span class="craft-thinking-dot" aria-hidden="true" />
-                    <span>{{ thinkingText(turn) }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <article
-                v-if="turn.response"
-                :class="['craft-response', turn.interrupted && 'is-interrupted']"
-              >
-                <header class="craft-response-head">
-                  <span>
-                    <span
-                      class="i-lucide-message-square-text craft-action-icon"
-                      aria-hidden="true"
-                    />
-                    回复
-                  </span>
-                  <span v-if="turn.streaming" class="craft-response-state">输出中</span>
-                  <span v-else-if="turn.interrupted" class="craft-response-state is-stopped">
-                    已停止
-                  </span>
-                </header>
-                <AgentMarkdown :content="turn.response" :streaming="turn.streaming" />
-              </article>
-            </section>
-          </template>
-        </div>
+      <div
+        ref="chatScroll"
+        class="craft-oss-app oss-chat-scroll craft-message-scroll"
+        role="log"
+        aria-live="polite"
+        @scroll="syncStickToBottom"
+      >
+        <CraftOssMessageFlow
+          :turns="turns"
+          :loading="loading"
+          :elapsed-seconds="elapsedSeconds"
+          :selected-activity-id="selectedActivity?.id ?? null"
+          :suggestions="suggestions"
+          :reset-key="messageResetKey"
+          empty-description="通过自然语言调用本地 PDF / 图片工具。可添加文件附件后描述需求。"
+          @select-activity="selectedActivity = $event"
+          @apply-suggestion="applySuggestion"
+        />
       </div>
 
       <div v-if="error" role="alert" class="craft-error">{{ error }}</div>
@@ -1096,70 +844,9 @@ function getFileTypeAndIcon(fileName: string) {
 .craft-message-scroll {
   flex: 1;
   min-height: 0;
+  min-width: 0;
   overflow: auto;
-  padding: 1rem 1.125rem;
   background: var(--dp-surface-muted);
-}
-
-.craft-empty {
-  display: grid;
-  gap: 0.75rem;
-  width: min(36rem, 100%);
-  margin: 2rem auto 0;
-  text-align: center;
-}
-
-.craft-empty h3 {
-  font-size: var(--dp-text-lg);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--dp-text);
-  text-wrap: balance;
-}
-
-.craft-empty p {
-  font-size: var(--dp-text-sm);
-  color: var(--dp-text-secondary);
-  line-height: var(--dp-leading-relaxed);
-}
-
-.craft-suggestions {
-  display: grid;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  text-align: left;
-}
-
-.craft-suggestions button {
-  padding: 0.7rem 0.8rem;
-  border: 1px solid var(--dp-border);
-  border-radius: var(--dp-radius-lg);
-  background: var(--dp-surface);
-  color: var(--dp-text-secondary);
-  font-size: var(--dp-text-sm);
-  text-align: left;
-  transition:
-    border-color var(--dp-dur-fast) var(--dp-ease),
-    background-color var(--dp-dur-fast) var(--dp-ease),
-    color var(--dp-dur-fast) var(--dp-ease),
-    transform var(--dp-dur-fast) var(--dp-ease);
-}
-
-.craft-suggestions button:hover {
-  border-color: color-mix(in srgb, var(--dp-primary) 25%, var(--dp-border));
-  background: var(--dp-primary-soft);
-  color: var(--dp-text);
-}
-
-.craft-suggestions button:active {
-  transform: scale(0.99);
-}
-
-.craft-message-stack {
-  display: grid;
-  gap: 1rem;
-  width: min(44rem, 100%);
-  margin: 0 auto;
 }
 
 .craft-error {
@@ -1170,28 +857,6 @@ function getFileTypeAndIcon(fileName: string) {
   background: var(--dp-danger-soft);
   color: var(--dp-danger);
   font-size: 0.8125rem;
-}
-
-.craft-user-turn {
-  display: grid;
-  justify-items: end;
-  gap: 0.3rem;
-}
-
-.craft-user-bubble {
-  max-width: min(88%, 34rem);
-  padding: 0.65rem 0.8rem;
-  border-radius: var(--dp-radius-lg);
-  background: var(--dp-primary-soft);
-  border: 1px solid color-mix(in srgb, var(--dp-primary) 18%, var(--dp-border));
-  color: var(--dp-text);
-  font-size: var(--dp-text-sm);
-  line-height: var(--dp-leading-relaxed);
-}
-
-.craft-user-turn time {
-  color: var(--dp-text-muted);
-  font-size: 0.6875rem;
 }
 
 .craft-attachment-scroll {
@@ -1371,41 +1036,6 @@ function getFileTypeAndIcon(fileName: string) {
   }
 }
 
-.craft-assistant-turn {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.craft-turn-card {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.craft-turn-header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.25rem;
-  min-height: 2.35rem;
-  padding: 0.25rem;
-  border-radius: var(--dp-radius-lg);
-  color: var(--dp-text-secondary);
-}
-
-.craft-turn-header:hover {
-  background: color-mix(in srgb, var(--dp-border) 35%, transparent);
-}
-
-.craft-turn-toggle {
-  display: grid;
-  grid-template-columns: 1rem auto minmax(0, 1fr);
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
-  min-height: 1.8rem;
-  text-align: left;
-}
-
 .craft-chevron {
   width: 1rem;
   height: 1rem;
@@ -1414,30 +1044,6 @@ function getFileTypeAndIcon(fileName: string) {
 
 .craft-chevron.is-open {
   transform: rotate(90deg);
-}
-
-.craft-step-count {
-  min-width: 1.5rem;
-  padding: 0.1rem 0.35rem;
-  border: 1px solid var(--dp-border);
-  border-radius: 0.4rem;
-  background: var(--dp-surface);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  text-align: center;
-}
-
-.craft-preview,
-.craft-activity-description {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.craft-preview,
-.craft-activity-row {
-  font-size: 0.8125rem;
 }
 
 .craft-icon-button {
@@ -1465,111 +1071,6 @@ function getFileTypeAndIcon(fileName: string) {
 .craft-icon-button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-}
-
-.craft-activity-list {
-  display: grid;
-  gap: 0.125rem;
-  margin-left: 1rem;
-  padding-left: 0.875rem;
-  border-left: 2px solid var(--dp-border);
-}
-
-.craft-activity-more {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-height: 1.85rem;
-  margin-top: 0.2rem;
-  padding: 0.125rem 0.35rem;
-  color: var(--dp-text-muted);
-  font-size: 0.75rem;
-  font-weight: 650;
-}
-
-.craft-activity-more:hover {
-  color: var(--dp-primary);
-  background: var(--dp-primary-soft);
-  border-radius: var(--dp-radius-sm);
-}
-
-.craft-activity-more .craft-chevron.is-open {
-  transform: rotate(180deg);
-}
-
-.craft-activity-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 1.85rem;
-  min-width: 0;
-  padding: 0.125rem 0.25rem;
-  border-radius: var(--dp-radius-sm);
-  color: var(--dp-text-muted);
-  text-align: left;
-}
-
-.craft-activity-row:hover {
-  background: var(--dp-surface-muted);
-}
-
-.craft-status {
-  position: relative;
-  width: 0.8rem;
-  height: 0.8rem;
-  flex: 0 0 auto;
-  border-radius: 999px;
-  border: 1.5px solid currentColor;
-  color: var(--dp-text-muted);
-}
-
-.craft-status.running {
-  border-color: color-mix(in srgb, var(--dp-primary) 25%, transparent);
-  border-top-color: var(--dp-primary);
-  animation: craft-spin 760ms linear infinite;
-}
-
-.craft-status.pending {
-  color: var(--dp-accent);
-}
-
-.craft-status.success {
-  color: var(--dp-success);
-}
-
-.craft-status.success::after {
-  position: absolute;
-  left: 0.19rem;
-  top: 0.1rem;
-  width: 0.22rem;
-  height: 0.4rem;
-  border: solid currentColor;
-  border-width: 0 1.5px 1.5px 0;
-  content: "";
-  transform: rotate(45deg);
-}
-
-.craft-status.error {
-  color: var(--dp-danger);
-}
-
-.craft-thinking-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  min-height: 1.9rem;
-  padding: 0.125rem 0.25rem;
-  color: var(--dp-text-muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-
-.craft-thinking-dot {
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 999px;
-  background: var(--dp-primary);
-  animation: craft-pulse 1.1s ease-in-out infinite;
 }
 
 .craft-tool-shell {
@@ -1602,121 +1103,6 @@ function getFileTypeAndIcon(fileName: string) {
   height: 0.875rem;
 }
 
-.craft-activity-title {
-  flex: 0 0 auto;
-  color: var(--dp-text-secondary);
-  font-weight: 600;
-}
-
-.craft-activity-row.is-selected,
-.craft-activity-row:focus-visible {
-  background: var(--dp-primary-soft);
-  color: var(--dp-text);
-  box-shadow: var(--dp-ring);
-}
-
-.craft-separator,
-.craft-elapsed {
-  color: var(--dp-text-muted);
-}
-
-.craft-elapsed {
-  margin-left: auto;
-  font-size: 0.6875rem;
-}
-
-.craft-diff {
-  border-radius: 0.35rem;
-}
-
-.craft-diff.add {
-  color: var(--dp-success);
-  background: var(--dp-success-soft);
-}
-
-.craft-diff.del {
-  color: var(--dp-danger);
-  background: var(--dp-danger-soft);
-}
-
-.craft-file {
-  max-width: 10rem;
-  overflow: hidden;
-  border-radius: 0.35rem;
-  text-overflow: ellipsis;
-}
-
-.craft-response {
-  position: relative;
-  display: grid;
-  gap: 0.6rem;
-  width: min(100%, 42rem);
-  padding: 0.85rem;
-  border: 1px solid var(--dp-border);
-  border-radius: var(--dp-radius-lg);
-  background: var(--dp-surface);
-}
-
-.craft-response.is-interrupted {
-  border-color: color-mix(in srgb, var(--dp-danger) 24%, var(--dp-border));
-}
-
-.craft-response-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  min-width: 0;
-  color: var(--dp-text-muted);
-  font-size: var(--dp-text-xs);
-  font-weight: 600;
-}
-
-.craft-response-head > span:first-child {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.craft-response-state {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.35rem;
-  padding: 0 0.4rem;
-  border-radius: var(--dp-radius-sm);
-  background: var(--dp-primary-soft);
-  color: var(--dp-primary);
-  font-size: var(--dp-text-2xs);
-  font-weight: 600;
-}
-
-.craft-response-state.is-stopped {
-  background: var(--dp-danger-soft);
-  color: var(--dp-danger);
-}
-
-.craft-response.is-plan {
-  border-color: color-mix(in srgb, var(--dp-accent) 28%, var(--dp-border));
-  background: color-mix(in srgb, var(--dp-accent-soft) 38%, var(--dp-surface));
-}
-
-.craft-plan-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.7rem;
-}
-
-.craft-plan-header > span:first-child {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  color: var(--dp-accent);
-  font-weight: 700;
-}
-
-.craft-accept,
 .craft-permission-actions button,
 .craft-send {
   display: inline-flex;
@@ -1735,42 +1121,8 @@ function getFileTypeAndIcon(fileName: string) {
     transform var(--dp-dur-fast) var(--dp-ease);
 }
 
-.craft-accept:hover,
 .craft-send:hover:not(:disabled) {
   background: var(--dp-primary-hover);
-}
-
-.craft-markdown {
-  color: var(--dp-text);
-  font-size: 0.875rem;
-  line-height: 1.65;
-}
-
-.craft-markdown p + p,
-.craft-user-bubble p + p {
-  margin-top: 0.45rem;
-}
-
-.craft-markdown .numbered {
-  display: grid;
-  grid-template-columns: 1.4rem minmax(0, 1fr);
-  gap: 0.25rem;
-}
-
-.craft-markdown .numbered span {
-  color: var(--dp-text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.craft-caret {
-  display: inline-block;
-  width: 0.45rem;
-  height: 1rem;
-  margin-left: 0.2rem;
-  vertical-align: -0.15rem;
-  border-radius: 1px;
-  background: var(--dp-primary);
-  animation: craft-blink 1s steps(2, start) infinite;
 }
 
 .craft-permission,

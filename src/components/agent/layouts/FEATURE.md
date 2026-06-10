@@ -2,7 +2,7 @@
 
 ## 现状 (Status)
 
-- **`AgentCraftDemo.vue`**：主 Agent UI（`App.vue` → Craft Demo）。三栏 Craft 布局：左侧会话轨、中间 Craft-like TurnCard + ResponseCard + 流式 Markdown、右侧 Activity 检视器。
+- **`AgentCraftDemo.vue`**：主 Agent UI（`App.vue` → Craft Demo）。三栏布局：左侧会话轨、中间 **OSS 消息流**（`CraftOssMessageFlow`）+ 原有 Composer/权限条、右侧 Activity 检视器。
 - **`AgentCraftAgentsOss.vue`**：`App.vue` → craft-agents-oss。四栏 OSS 布局 + `useCraftAgentsOssMock` **15 组**状态 demo（含录屏对照 **PDF 压缩**）；处理中保留 composer + Stop、聊天区计时状态（处理中/思考中/烹饪中等）、工具行命令片段与 Error 徽章、计划 Response 复制/接受、排队提示。
 - 已接入真实 Agent：`useCraftAgentChat` → `agentChatSession` / `runAgentChat` / 26 个 PDF/图片/文件/Word 工具；Ask 模式内联工具确认，Explore/Ask/Execute 控制执行策略。
 - `useCraftAgentChat` 派生 turn phase 与 thinking/preparing gap；Stop 通过 AbortController 中断当前轮，Copy 可复制当前 turn 摘要/回复。
@@ -19,6 +19,10 @@
 
 ## 变更日志 (Changelog)
 
+- 2026-06-10: 修复贴底流式输出抖动：贴底检测 + rAF 合并 + 瞬时 `scrollTop`（取代高频 `smooth` 滚动）；`overflow-anchor` 锚定末条消息。
+- 2026-06-10: 修复 Craft Demo 消息区无法滚动：`.craft-oss-app.oss-chat-scroll` 组合选择器 + `craft-message-scroll` 补 `overflow: auto`。
+- 2026-06-10: `oss-response-body` 正文字号与 `oss-user-bubble` 对齐（`--dp-text-sm` / `--dp-leading-relaxed`）。
+- 2026-06-10: 抽取 `CraftOssMessageFlow.vue` + `craft-agents-oss-messages.css`；Craft Demo 与 craft-agents-oss 共用 OSS 消息流（早期思考态、Turn 底栏计时、命令预览、Response 复制底栏）。
 - 2026-06-08: OSS composer 焦点环改为容器 `:focus-within` 整框高亮，修复 textarea 单独 focus 在底栏分界处出现紫色横线；底栏右侧模型名与发送钮间距加大。
 - 2026-06-08: OSS 会话列表标题/预览单行省略（`min-width:0` 链路 + 徽章与预览分行收缩），悬停 `title` 显示全文。
 - 2026-06-08: craft-agents-oss 思考态去重：尚无工具步骤时仅保留一行内联计时（不渲染 Turn 卡片/thinking 行/footer）；有步骤后才显示 Turn 卡片 + 步骤间 thinking 行 + 底部轮播计时。

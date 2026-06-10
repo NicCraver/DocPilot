@@ -2,7 +2,7 @@
 
 ## 现状 (Status)
 
-已实现：`list_tools` 动态注册全部 **26** 个 AI SDK tools、streamText 多步编排（`consumeStream` + `stepCountIs(8)`）、**`provider.chat`** 兼容智谱/Ollama、按用户意图筛选工具子集、路径上下文注入 system（对齐 VercelAISDK demo）、Provider 可配置（store 持久化）、对话 UI + 工具调用卡片、`requires_confirmation` 确认（dialog ask）；`jsonSchemaToZod` 支持 array 类型。
+已实现：`list_tools` 动态注册全部 **26** 个 AI SDK tools、streamText 多步编排（`textStream` + `stepCountIs(8)`）、**`provider.chat`** 兼容智谱/Ollama、按用户意图筛选工具子集、路径上下文注入 system（对齐 VercelAISDK demo）、Provider 可配置（store 持久化）、对话 UI + 工具调用卡片、`requires_confirmation` 确认（dialog ask）；`jsonSchemaToZod` 支持 array 类型。
 **文件附件**：发送前可添加本地文件/文件夹（文件夹一层展开为 pdf/图片路径列表），路径块注入模型消息；工具执行前对缺失/无效的 `input_path` / `input_paths` / `path` / `src` 弹出系统文件选择器。
 对话界面与工具调用卡片已全面美化，包含：
 
@@ -32,6 +32,7 @@ Agent 跑在前端 TS，工具执行与 UI 共用 `run_tool`；模型通过 Open
 
 ## 变更日志 (Changelog)
 
+- 2026-06-10: 修复多步工具后会话卡死：`runAgentChat` 移除 `textStream` 与 `consumeStream()` 并行消费（工具已完成但 `loading` 不归零）；工具成功且无模型总结时返回兜底文案。
 - 2026-06-07: Craft UI adapter 增加 turn phase / thinking gap 映射；`agentChatSession.stop()` 通过 AbortController 中断当前轮，工具执行路径增加 abort 检查并忽略 stop 后晚到活动。
 - 2026-06-06: Craft UI 接入 Agent；`buildAgentTools` 增加 `confirmAll`；`useCraftAgentChat` 映射 activities → turn card；`App.vue` 侧边栏简化为 Craft Demo 单入口。
 - 2026-06-06: 修复 `useAgentLog` 在 `agentChatSession` 单例中组件外调用时触发 Vue `onUnmounted` 警告，并补充回归测试。

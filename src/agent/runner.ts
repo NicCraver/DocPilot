@@ -83,8 +83,9 @@ export async function runAgentChat(options: RunAgentOptions): Promise<string> {
     },
   });
 
+  // 仅通过 textStream 消费；勿与 consumeStream() 并行，否则多步工具后易死锁（工具已完成但 loading 不归零）。
   let fullText = "";
-  const streamTask = (async () => {
+  try {
     for await (const chunk of result.textStream) {
       if (!streamLogged) {
         streamLogged = true;
@@ -93,25 +94,18 @@ export async function runAgentChat(options: RunAgentOptions): Promise<string> {
       fullText += chunk;
       onTextDelta?.(fullText);
     }
-  })();
-
-  try {
-    await result.consumeStream();
   } catch (e) {
     pushAgentLog({ level: "error", title: "模型流消费失败", detail: String(e) });
     throw e;
   }
 
-  await streamTask;
-
+  const finishReason = await result.finishReason;
+  const steps = await result.steps;
   const finalText = await result.text;
   if (finalText && finalText.length > fullText.length) {
     fullText = finalText;
     onTextDelta?.(fullText);
   }
-
-  const finishReason = await result.finishReason;
-  const steps = await result.steps;
   pushAgentLog({
     level: "success",
     title: "模型回复完成",
@@ -124,8 +118,14 @@ export async function runAgentChat(options: RunAgentOptions): Promise<string> {
       .join(" · "),
   });
 
-  if (!fullText.trim() && steps.every((s) => !s.toolCalls?.length)) {
+  const hadToolCalls = steps.some((s) => (s.toolCalls?.length ?? 0) > 0);
+
+  if (!fullText.trim() && !hadToolCalls) {
     return "模型未返回内容，也未调用工具。请确认 API 使用 Chat Completions（智谱/Ollama 等需 provider.chat），并已添加 PDF 附件或提供完整路径。";
+  }
+
+  if (!fullText.trim() && hadToolCalls) {
+    return "相关工具已执行完成。请在上方步骤列表与右侧活动详情中查看结果。";
   }
 
   return fullText;

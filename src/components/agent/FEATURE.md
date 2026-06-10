@@ -2,7 +2,8 @@
 
 ## 现状 (Status)
 
-- **`AgentCraftDemo.vue`**（`layouts/`）：主 Agent 界面（Craft Demo），Craft 三栏布局 + 真实工具编排；中心区以 Craft-like TurnCard / ResponseCard 展示当前轮编排状态。
+- **`AgentCraftDemo.vue`**（`layouts/`）：主 Agent 界面（Craft Demo），Craft 三栏布局 + 真实工具编排；消息流复用 **`CraftOssMessageFlow.vue`**（与 craft-agents-oss 同构的 OSS Turn/Response 交互与样式）。
+- **`CraftOssMessageFlow.vue`**：OSS 消息流共享组件（空态、用户气泡、TurnCard、ResponseCard、思考态去重、工具命令预览）；样式见 `craft-agents-oss-messages.css`。
 - **`AgentCraftAgentsOss.vue`**（`layouts/`）：craft-agents-oss 对照页，Vue 复刻 OSS 四栏 UI + mock 会话数据。
 - `AgentChat.vue`：遗留三套对比布局容器，侧边栏入口已移除。
 - 会话 `agentChatSession.ts` 单例，Craft 与遗留布局共用。
@@ -22,6 +23,8 @@
 
 ## 变更日志 (Changelog)
 
+- 2026-06-10: Response 正文与 `oss-user-bubble` 同用 `--dp-text-sm`；markstream `mode="chat"`。
+- 2026-06-10: Craft Demo 消息区接入 `CraftOssMessageFlow`（直接复用 craft-agents-oss 消息模板与主题）；空态 OSS 版式 + DocPilot 三条建议；Composer/侧栏未改动。
 - 2026-06-07: craft-agents-oss tab 复刻 OSS 前端（Inbox 状态流、TurnCard/ResponseCard、权限模式、Inspector），内置 7 组模拟会话。
 - 2026-06-07: 侧边栏核心功能区新增 craft-agents-oss tab，用于对照原版 Craft Agents UI。
 - 2026-06-07: Craft Demo 对齐 Craft Agents turn-card 交互：Explore/Ask/Execute 权限模式、thinking/preparing gap、turn copy、真实 Stop 中断与 ResponseCard 状态。
