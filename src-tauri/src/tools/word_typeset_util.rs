@@ -86,6 +86,16 @@ fn script_path() -> Result<PathBuf, String> {
 pub struct TypesetFileResult {
     pub input: String,
     pub output: String,
+    #[serde(default = "default_true")]
+    pub ok: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub backup: Option<String>,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]

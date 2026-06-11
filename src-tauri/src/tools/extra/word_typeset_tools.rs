@@ -30,7 +30,15 @@ impl Tool for FormatDocxBatch {
                     "in_place": {
                         "type": "boolean",
                         "description": "是否原地覆盖（默认 true，会先备份 .docx.bak）"
-                    }
+                    },
+                    "output_mode": {
+                        "type": "string",
+                        "enum": ["in_place", "output_dir", "suffix"],
+                        "description": "输出模式：覆盖原文件 / 输出到文件夹 / 同目录副本"
+                    },
+                    "output_dir": { "type": "string", "description": "output_mode=output_dir 时的目标文件夹" },
+                    "output_suffix": { "type": "string", "description": "output_mode=suffix 时的文件名后缀，默认 _排版" },
+                    "continue_on_error": { "type": "boolean", "description": "单文件失败时是否继续（默认 true）" }
                 },
                 "required": ["input_paths"]
             }),
@@ -44,6 +52,10 @@ impl Tool for FormatDocxBatch {
             input_paths: Vec<String>,
             config: Option<serde_json::Value>,
             in_place: Option<bool>,
+            output_mode: Option<String>,
+            output_dir: Option<String>,
+            output_suffix: Option<String>,
+            continue_on_error: Option<bool>,
         }
         let args: Args = serde_json::from_value(input.args)
             .map_err(|e| ToolError::InvalidInput(e.to_string()))?;
@@ -57,6 +69,10 @@ impl Tool for FormatDocxBatch {
             "input_paths": args.input_paths,
             "config": args.config,
             "in_place": args.in_place.unwrap_or(true),
+            "output_mode": args.output_mode,
+            "output_dir": args.output_dir,
+            "output_suffix": args.output_suffix,
+            "continue_on_error": args.continue_on_error.unwrap_or(true),
         });
 
         let result = run_word_typeset(payload).map_err(ToolError::Execution)?;

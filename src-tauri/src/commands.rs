@@ -127,6 +127,13 @@ fn collect_docx(dir: &std::path::Path, recursive: bool, out: &mut Vec<String>) -
     for entry in entries.flatten() {
         let path = entry.path();
         if path.is_file() {
+            let name = path
+                .file_name()
+                .and_then(|s| s.to_str())
+                .unwrap_or("");
+            if name.starts_with("~$") {
+                continue;
+            }
             if path
                 .extension()
                 .and_then(|s| s.to_str())
@@ -146,7 +153,11 @@ fn collect_docx(dir: &std::path::Path, recursive: bool, out: &mut Vec<String>) -
 pub async fn format_docx_batch(
     input_paths: Vec<String>,
     config: serde_json::Value,
-    in_place: bool,
+    in_place: Option<bool>,
+    output_mode: Option<String>,
+    output_dir: Option<String>,
+    output_suffix: Option<String>,
+    continue_on_error: Option<bool>,
 ) -> Result<crate::tools::word_typeset_util::TypesetBatchResult, String> {
     if input_paths.is_empty() {
         return Err("文件列表为空".into());
@@ -155,9 +166,29 @@ pub async fn format_docx_batch(
         "mode": "batch",
         "input_paths": input_paths,
         "config": config,
-        "in_place": in_place,
+        "in_place": in_place.unwrap_or(true),
+        "output_mode": output_mode,
+        "output_dir": output_dir,
+        "output_suffix": output_suffix,
+        "continue_on_error": continue_on_error.unwrap_or(true),
     });
     crate::tools::word_typeset_util::run_word_typeset(payload)
+}
+
+#[tauri::command]
+pub async fn reveal_path_in_folder(path: String, app: tauri::AppHandle) -> Result<(), String> {
+    use tauri_plugin_opener::OpenerExt;
+    app.opener()
+        .reveal_item_in_dir(&path)
+        .map_err(|e| format!("无法在文件夹中显示: {e}"))
+}
+
+#[tauri::command]
+pub async fn open_path_with_default_app(path: String, app: tauri::AppHandle) -> Result<(), String> {
+    use tauri_plugin_opener::OpenerExt;
+    app.opener()
+        .open_path(&path, None::<&str>)
+        .map_err(|e| format!("无法打开文件: {e}"))
 }
 
 #[tauri::command]

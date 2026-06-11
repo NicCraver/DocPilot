@@ -67,6 +67,7 @@ def builtin_default_config() -> dict[str, Any]:
             "body_line_spacing": 28,
             "indent_left": 0,
             "indent_right": 0,
+            "first_line_indent": 0,
         },
         "table": {
             "enabled": True,
@@ -126,8 +127,9 @@ def thesis_default_config() -> dict[str, Any]:
             "body_font": "宋体",
             "body_size": "小四",
             "body_line_spacing": 22,
-            "indent_left": 0.74,
+            "indent_left": 0,
             "indent_right": 0,
+            "first_line_indent": 0.74,
         },
         "table": {
             "enabled": True,
@@ -203,8 +205,9 @@ def journal_default_config() -> dict[str, Any]:
             "body_font": "宋体",
             "body_size": "五号",
             "body_line_spacing": 16,
-            "indent_left": 0.64,
+            "indent_left": 0,
             "indent_right": 0,
+            "first_line_indent": 0.64,
         },
         "table": {
             "enabled": True,
@@ -394,6 +397,7 @@ def format_paragraph(paragraph, config: dict[str, Any], kind: str) -> None:
     spec: tuple[str, Any, float | None, bool | None] | None = None
     indent_left = headings.get("indent_left", 0)
     indent_right = headings.get("indent_right", 0)
+    first_line_indent = headings.get("first_line_indent", 0)
 
     if kind == "title":
         spec = (
@@ -531,7 +535,12 @@ def format_paragraph(paragraph, config: dict[str, Any], kind: str) -> None:
     elif kind == "english_block":
         apply_line_spacing(paragraph, line_spacing)
     pf = paragraph.paragraph_format
-    if kind in ("body", "heading1", "heading2", "heading3", "attachment", "abstract"):
+    if kind in ("body", "heading1", "heading2", "heading3", "attachment"):
+        pf.left_indent = Cm(float(indent_left))
+        pf.right_indent = Cm(float(indent_right))
+        if float(first_line_indent) > 0:
+            pf.first_line_indent = Cm(float(first_line_indent))
+    elif kind == "abstract" and float(other.get("abstract_hang_indent_cm") or 0) <= 0:
         pf.left_indent = Cm(float(indent_left))
         pf.right_indent = Cm(float(indent_right))
 
@@ -1129,26 +1138,57 @@ def merge_config(user: dict[str, Any] | None) -> dict[str, Any]:
     return result
 
 
-def process_file(input_path: str, output_path: str, config: dict[str, Any], in_place: bool) -> str:
+def resolve_batch_output_path(
+    src: Path,
+    output_mode: str,
+    output_dir: str | None,
+    output_suffix: str,
+) -> Path:
+    if output_mode == "output_dir":
+        if not output_dir:
+            raise ValueError("输出到文件夹模式需要指定 output_dir")
+        out_dir = Path(output_dir)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        return out_dir / src.name
+    if output_mode == "suffix":
+        suffix = output_suffix or "_排版"
+        stem = src.stem
+        if stem.endswith(suffix):
+            return src.with_name(f"{stem}.docx")
+        return src.with_name(f"{stem}{suffix}.docx")
+    return src
+
+
+def process_file(
+    input_path: str,
+    config: dict[str, Any],
+    output_mode: str = "in_place",
+    output_dir: str | None = None,
+    output_suffix: str = "_排版",
+) -> dict[str, Any]:
     src = Path(input_path)
     if not src.is_file():
         raise FileNotFoundError(f"文件不存在: {input_path}")
+    if src.name.startswith("~$"):
+        raise ValueError(f"跳过 Word 临时文件: {input_path}")
     if src.suffix.lower() != ".docx":
         raise ValueError(f"仅支持 .docx: {input_path}")
 
     doc = Document(str(src))
     format_document(doc, config)
 
-    if in_place:
+    out_path = resolve_batch_output_path(src, output_mode, output_dir, output_suffix)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    result: dict[str, Any] = {"input": str(src), "output": str(out_path), "ok": True}
+    if output_mode == "in_place":
         backup = src.with_suffix(src.suffix + ".bak")
         shutil.copy2(src, backup)
-        doc.save(str(src))
-        return str(src)
-
-    out = Path(output_path)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    doc.save(str(out))
-    return str(out)
+        doc.save(str(out_path))
+        result["backup"] = str(backup)
+    else:
+        doc.save(str(out_path))
+    return result
 
 
 def process_text(text: str, output_path: str, config: dict[str, Any]) -> str:
@@ -1189,13 +1229,55 @@ def main() -> int:
             paths = payload.get("input_paths") or []
             if not paths:
                 raise ValueError("input_paths 为空")
-            in_place = bool(payload.get("in_place", True))
+            output_mode = payload.get("output_mode")
+            legacy_output = payload.get("output_path")
+            if not output_mode:
+                if bool(payload.get("in_place", True)):
+                    output_mode = "in_place"
+                elif legacy_output:
+                    output_mode = "explicit"
+                else:
+                    output_mode = "suffix"
+            output_dir = payload.get("output_dir")
+            output_suffix = str(payload.get("output_suffix") or "_排版")
+            continue_on_error = bool(payload.get("continue_on_error", True))
+            had_error = False
             for raw in paths:
                 inp = str(raw)
-                out = payload.get("output_path") or inp
-                saved = process_file(inp, out, config, in_place)
-                logs.append(f"排版完成: {saved}")
-                results.append({"input": inp, "output": saved})
+                try:
+                    if output_mode == "explicit" and legacy_output:
+                        src = Path(inp)
+                        if not src.is_file():
+                            raise FileNotFoundError(f"文件不存在: {inp}")
+                        doc = Document(str(src))
+                        format_document(doc, config)
+                        out_path = Path(str(legacy_output))
+                        out_path.parent.mkdir(parents=True, exist_ok=True)
+                        doc.save(str(out_path))
+                        item = {"input": inp, "output": str(out_path), "ok": True}
+                    else:
+                        item = process_file(
+                            inp,
+                            config,
+                            output_mode=str(output_mode),
+                            output_dir=str(output_dir) if output_dir else None,
+                            output_suffix=output_suffix,
+                        )
+                    backup_note = ""
+                    if item.get("backup"):
+                        backup_note = f"（备份: {item['backup']}）"
+                    logs.append(f"排版完成: {item['output']}{backup_note}")
+                    results.append(item)
+                except Exception as exc:
+                    had_error = True
+                    err_item = {"input": inp, "output": "", "ok": False, "error": str(exc)}
+                    results.append(err_item)
+                    logs.append(f"排版失败: {inp} — {exc}")
+                    if not continue_on_error:
+                        raise
+            if had_error and continue_on_error:
+                ok_count = sum(1 for r in results if r.get("ok"))
+                logs.append(f"批量结束: 成功 {ok_count}/{len(results)}")
 
         print(
             json.dumps(

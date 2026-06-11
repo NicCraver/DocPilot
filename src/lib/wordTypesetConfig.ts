@@ -2,6 +2,10 @@ export type PageNumberAlign = "odd_even" | "center" | "left" | "right";
 
 export type ColumnsStartMode = "never" | "first_numeric_heading" | "after_front_matter";
 
+export type TypesetOutputMode = "in_place" | "output_dir" | "suffix";
+
+export type FileQueueStatus = "pending" | "running" | "success" | "failed" | "skipped";
+
 export interface JournalHeaderConfig {
   enabled?: boolean;
   font?: string;
@@ -54,6 +58,8 @@ export interface WordTypesetHeadingsConfig {
   body_line_spacing: number;
   indent_left: number;
   indent_right: number;
+  /** 正文首行缩进 (cm)，与整段左缩进独立 */
+  first_line_indent: number;
 }
 
 export interface WordTypesetTableConfig {
@@ -121,20 +127,83 @@ export const FONT_OPTIONS = [
 
 export const SIZE_OPTIONS = ["二号", "三号", "四号", "小四", "五号", "小五"] as const;
 
+export const FONT_SELECT_OPTIONS = FONT_OPTIONS.map((value) => ({ value, label: value }));
+
+export const SIZE_SELECT_OPTIONS = SIZE_OPTIONS.map((value) => ({ value, label: value }));
+
+export const COLUMN_COUNT_OPTIONS = [
+  { value: 1, label: "单栏" },
+  { value: 2, label: "双栏" },
+] as const;
+
 export const PAGE_NUMBER_ALIGN_OPTIONS: { value: PageNumberAlign; label: string }[] = [
-  { value: "odd_even", label: "奇偶分页" },
+  { value: "odd_even", label: "奇偶分页（需 Word 分节，当前为统一页脚）" },
   { value: "center", label: "居中" },
   { value: "left", label: "左对齐" },
   { value: "right", label: "右对齐" },
 ];
 
-export type WordTypesetPresetId = "government" | "thesis" | "journal";
+export const TYPESET_OUTPUT_MODE_OPTIONS: { value: TypesetOutputMode; label: string }[] = [
+  { value: "in_place", label: "覆盖原文件（自动生成 .bak）" },
+  { value: "output_dir", label: "输出到文件夹" },
+  { value: "suffix", label: "同目录副本" },
+];
+
+export const COLUMNS_START_OPTIONS: { value: ColumnsStartMode; label: string }[] = [
+  { value: "never", label: "不分栏" },
+  { value: "first_numeric_heading", label: "首个数字标题后" },
+  { value: "after_front_matter", label: "摘要/关键词后" },
+];
+
+export const GOVERNMENT_REQUIRED_FONTS = ["方正小标宋简体", "楷体_GB2312", "仿宋_GB2312"] as const;
+
+export const SAMPLE_GOVERNMENT_TEXT = `关于报送2024年度工作总结的通知
+
+各县（市、区）人民政府，市政府各部门：
+
+为全面总结本年度工作，请各单位于12月20日前报送工作总结材料。
+
+一、报送要求
+（一）材料格式规范，内容真实准确。
+（二）附相关数据表格与附件说明。
+
+附件：1. 工作总结模板
+2. 数据统计表
+`;
+
+export const BUILTIN_PRESET_IDS = ["government", "thesis", "journal"] as const;
+
+export type BuiltinPresetId = (typeof BUILTIN_PRESET_IDS)[number];
+
+/** 任意方案 id（内置或 custom-xxxx） */
+export type WordTypesetPresetId = string;
 
 export interface WordTypesetPreset {
-  id: WordTypesetPresetId;
+  id: BuiltinPresetId;
   label: string;
   description: string;
 }
+
+export interface WordTypesetPresetProfile {
+  id: string;
+  label: string;
+  description: string;
+  kind: "builtin" | "custom";
+  /** Lucide UnoCSS 图标类，如 i-lucide-bookmark */
+  icon?: string;
+}
+
+export const PRESET_ICON_OPTIONS = [
+  { value: "i-lucide-landmark", label: "机关" },
+  { value: "i-lucide-graduation-cap", label: "论文" },
+  { value: "i-lucide-newspaper", label: "期刊" },
+  { value: "i-lucide-bookmark", label: "书签" },
+  { value: "i-lucide-briefcase", label: "公文" },
+  { value: "i-lucide-building-2", label: "单位" },
+  { value: "i-lucide-file-text", label: "文档" },
+  { value: "i-lucide-scroll-text", label: "卷轴" },
+  { value: "i-lucide-sparkles", label: "自定义" },
+] as const;
 
 export const WORD_TYPESET_PRESETS: WordTypesetPreset[] = [
   {
@@ -200,6 +269,7 @@ export function governmentWordTypesetConfig(): WordTypesetConfig {
       body_line_spacing: 28,
       indent_left: 0,
       indent_right: 0,
+      first_line_indent: 0,
     },
     table: {
       enabled: true,
@@ -264,8 +334,9 @@ export function thesisWordTypesetConfig(): WordTypesetConfig {
       body_font: "宋体",
       body_size: "小四",
       body_line_spacing: 22,
-      indent_left: 0.74,
+      indent_left: 0,
       indent_right: 0,
+      first_line_indent: 0.74,
     },
     table: {
       enabled: true,
@@ -340,8 +411,9 @@ export function journalWordTypesetConfig(): WordTypesetConfig {
       body_font: "宋体",
       body_size: "五号",
       body_line_spacing: 16,
-      indent_left: 0.64,
+      indent_left: 0,
       indent_right: 0,
+      first_line_indent: 0.64,
     },
     table: {
       enabled: true,
@@ -381,8 +453,64 @@ export function journalWordTypesetConfig(): WordTypesetConfig {
   };
 }
 
-export function wordTypesetConfigForPreset(id: WordTypesetPresetId): WordTypesetConfig {
+export function isBuiltinPresetId(id: string): id is BuiltinPresetId {
+  return (BUILTIN_PRESET_IDS as readonly string[]).includes(id);
+}
+
+export function builtinPresetProfiles(): WordTypesetPresetProfile[] {
+  return WORD_TYPESET_PRESETS.map((preset) => ({
+    ...preset,
+    kind: "builtin" as const,
+    icon: presetIconClass(preset.id),
+  }));
+}
+
+export function presetIconClass(id: string, icon?: string): string {
+  if (icon) return icon;
+  if (id === "government") return "i-lucide-landmark";
+  if (id === "journal") return "i-lucide-newspaper";
+  if (id === "thesis") return "i-lucide-graduation-cap";
+  return "i-lucide-bookmark";
+}
+
+export function createCustomPresetId(): string {
+  return `custom-${crypto.randomUUID().slice(0, 8)}`;
+}
+
+export function wordTypesetConfigForPreset(id: BuiltinPresetId): WordTypesetConfig {
   if (id === "thesis") return thesisWordTypesetConfig();
   if (id === "journal") return journalWordTypesetConfig();
   return governmentWordTypesetConfig();
+}
+
+export function defaultConfigForPresetId(id: string): WordTypesetConfig {
+  if (isBuiltinPresetId(id)) return wordTypesetConfigForPreset(id);
+  return governmentWordTypesetConfig();
+}
+
+export function isJournalLikeConfig(config: WordTypesetConfig): boolean {
+  return (config.page.columns ?? 1) > 1 || config.page.journal_header?.enabled === true;
+}
+
+export function presetShowsJournalSection(presetId: string, config: WordTypesetConfig): boolean {
+  return presetId === "journal" || isJournalLikeConfig(config);
+}
+
+/** 确保期刊页眉对象存在，便于表单双向绑定 */
+export function ensureJournalHeader(config: WordTypesetConfig): JournalHeaderConfig {
+  if (!config.page.journal_header) {
+    config.page.journal_header = {
+      enabled: false,
+      font: "宋体",
+      size: "五号",
+      first_left: "",
+      first_center: "",
+      first_right: "",
+      running_left: "",
+      running_center: "",
+      running_right: "",
+      center_char_spacing: true,
+    };
+  }
+  return config.page.journal_header;
 }

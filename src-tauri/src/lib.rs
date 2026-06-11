@@ -22,6 +22,8 @@ pub fn run() {
             commands::typeset_write_text_file,
             commands::format_docx_batch,
             commands::format_docx_text,
+            commands::reveal_path_in_folder,
+            commands::open_path_with_default_app,
             commands::generate_word_from_template,
             commands::smart_doc_learn_template,
             commands::smart_doc_list_templates,

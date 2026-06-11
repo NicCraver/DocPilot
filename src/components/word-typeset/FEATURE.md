@@ -2,21 +2,19 @@
 
 ## 现状 (Status)
 
-已实现独立 UI 模块（`WordTypeset.vue`），对齐 DocPilot 设计令牌与 `AppButton` 组件：左侧分段切换（文件批量 / 输入文本）、文件列表（文件名+路径、空状态、计数徽章）、`AppButton` 主操作、可折叠运行日志；右侧配置区带**政府格式 / 论文格式**预设切换（Tauri Store 自动缓存）、分区卡片与 Lucide 图标标题、统一表单控件焦点环，底部导入/导出 JSON 与「存为政府默认」操作栏。
+正式页采用 **方案 A · 双栏工作台**（`WordTypesetProduction.vue`）：左侧文件队列与执行，右侧排版方案与配置。
 
-配置缓存：`src/lib/wordTypesetStore.ts`（`word-typeset-config.json`），修改表单 debounce 自动写入当前预设；切换预设时加载对应缓存。保存/切换预设前会对 Vue 响应式配置解包后克隆，避免 WebView `DataCloneError`。
+**方案管理**：内置（政府/论文/期刊）+ 自定义方案；「+」弹窗添加；齿轮菜单含导入 JSON、导出当前/全部方案、复制方案、恢复默认、重命名/删除自定义方案。缓存 v2：`profiles` + `presets` + `ui` 偏好。
 
-预设：`governmentWordTypesetConfig()` 机关公文；`thesisWordTypesetConfig()` 学位论文（黑体标题、宋体小四正文、首行缩进 0.74cm）。
+**输出模式**：覆盖原文件（自动 `.docx.bak`）、输出到文件夹、同目录副本（可配置后缀）；支持单文件失败继续；文件列表显示逐文件成功/失败状态。
 
-后端：`scripts/word-typeset.py`（python-docx）经 `word_typeset_util.rs` 调用；Tauri 命令 `format_docx_batch` / `format_docx_text`；Agent 工具 `format_docx_batch` / `format_docx_text`。
+**配置 UI**：`WordTypesetConfigPanel` 统一承载页面/标题/正文/表格/其他配置（原生 `select` / `input` / `checkbox`）；期刊双栏专区独立组件 `WordTypesetJournalSection`。选期刊方案或启用双栏时自动展示期刊专区。
 
-内置默认对齐机关公文参考工具：方正小标宋题目、楷体\_GB2312 副标题/二级标题、仿宋\_GB2312 正文与表格、黑体图表题与附件、Times New Roman 数字字母、表格行距 22 磅、附件默认启用。
+**交互**：拖放 docx、样例 docx/文本、首次引导、运行后打开输出、日志复制、⌘/Ctrl+Enter 排版、⌘/Ctrl+O 添加文件。Agent 工具 `format_docx_*` 读取排版页当前激活方案缓存。
 
-依赖安装：`node scripts/ensure-word-typeset.mjs`（复用项目 `.venv`）。
+后端：`scripts/word-typeset.py`；Tauri `format_docx_batch` / `format_docx_text` / `reveal_path_in_folder` / `open_path_with_default_app`。
 
-预设：`governmentWordTypesetConfig()` 机关公文；`thesisWordTypesetConfig()` 学位论文；`journalWordTypesetConfig()` 学术期刊（对齐《煤炭工程》类 PDF：页眉、doi、摘要悬挂缩进、前置单栏+正文双栏、数字标题、三线表、双语表题、引文上标 `[1]`）。
-
-自动化测试：`pnpm run word-typeset:test` — **10 场景 / 90 项**；`pnpm run word-typeset:thesis-test`；`pnpm run word-typeset:journal-test` — 期刊样例（选煤固废论文结构，10 项校验）；`pnpm run word-typeset:coal-paper-full` — 从用户 PDF《选煤固废资源化利用研究进展》生成复杂 docx（约 1.6 万字、6 表、11 图）并排版校验。
+测试：`pnpm run word-typeset:test` 等。
 
 ## 设计意图 (Intent)
 
@@ -24,27 +22,22 @@
 
 ## 接口契约 (Interface)
 
-- 前端：`useWordTypeset()` — 文件列表、配置 state、invoke 排版与配置读写
-- Tauri：`format_docx_batch`、`format_docx_text`、`list_docx_in_dir`、`typeset_read_text_file`、`typeset_write_text_file`
+- 前端：`useWordTypeset()` — 文件列表、配置 state、输出模式、invoke 排版与配置读写
+- 配置：`src/lib/wordTypesetStore.ts` — `loadActiveTypesetConfig()` 供 Agent 工具共用
+- Tauri：`format_docx_batch`（含 `output_mode` / `output_dir` / `output_suffix` / `continue_on_error`）、`format_docx_text`、路径打开/定位
 - Python CLI：`word-typeset.py '<json>'`，`mode` 为 `batch` 或 `text`
 
 ## 变更日志 (Changelog)
 
-- 2026-06-05: 新增 `word-typeset:coal-paper-full`：从《煤炭工程》PDF 双栏提取正文，按字号识别章节并注入数字标题，生成复杂测试 docx 并校验双栏/页眉/上标/图表。
-- 2026-06-06: 修复预设保存/切换时直接 `structuredClone` Vue 响应式配置导致的 `DataCloneError`，新增 composable 回归测试。
-- 2026-06-05: 期刊论文补全：页眉（题名页/正文页）、doi、after_front_matter 双栏、引文上标、英文表题、引言双栏节。
-- 2026-06-05: 新增「期刊论文」预设（双栏、摘要悬挂缩进、数字编号标题、三线表）；样例对齐用户提供的《煤炭工程》PDF 结构。
-- 2026-06-05: 修复政府/论文预设切换不生效：消除 initFromCache 竞态、切换时先更新内存状态再写缓存。
-- 2026-06-05: 表单样式二次优化：统一四列网格、字段分组（字体/字号/行距子标签）、复选框卡片栅格、行间距与列对齐。
-- 2026-06-05: UI 优化：设计令牌统一、分段 Tab、文件列表空状态、可折叠日志、配置分区卡片与 AppButton 操作栏。
-- 2026-06-05: 对齐机关公文默认：方正小标宋/楷体\_GB2312/仿宋\_GB2312；表格行距(磅)、自动列宽、TXT空行合并、符号格式化、MD标题识别；二级标题默认不加粗。
-- 2026-06-05: 测试 docx 改为中文名；新增公文长文、中文路径（某市发改委/报送材料/《…》）场景。
-- 2026-06-05: 扩展测试至多场景（复杂混排、双表、附件、启发式、批量、表格禁用等）；题注/表题缩进与中文序号题注识别优化。
-- 2026-06-05: 修复 Subtitle 样式误识别为 Title（子串 `title`）；ascii 字体分设中西文；新增自动化格式校验与测试样例。
-- 2026-06-05: 初始实现 Word 批量排版 UI、Python 排版引擎与 Tauri/Agent 工具注册。
+- 2026-06-10: 配置区抽离 `WordTypesetConfigPanel`；期刊/输出/方案弹窗等子组件拆分；表单保持原生 HTML 控件。
+- 2026-06-10: 修复样例 docx（Tauri camelCase `outputPath`）；引导卡牌居中；添加/编辑方案支持图标与说明；自定义方案内联编辑/删除；配置修改「已自动保存」提示。
+- 2026-06-10: 全面完善：期刊 UI、首行缩进修复、三种输出模式、逐文件状态、拖放/引导/样例、方案复制与导出当前、Agent 工具读缓存、日志复制与打开输出。
+- 2026-06-10: 修复添加方案无响应（改用 `WordTypesetPresetDialog`）；设置菜单改为导出全部方案包；导入支持方案包。
+- 2026-06-10: 按方案 A 重构正式页：双栏工作台、方案栏 + 设置菜单、自定义方案增删改；缓存升级 v2（profiles + 任意 preset id）。
 
 ## 待办 / 风险 (TODO / Risks)
 
-- 页码奇偶分页对齐需依赖 Word 分节，当前为统一页脚页码字段。
-- 样式识别已支持精确样式名 + 中文序号启发式（一、/（一））；非标准模板仍可能需调整。
+- 页码奇偶分页对齐需依赖 Word 分节，当前为统一页脚页码字段（UI 已标注）。
+- 样式识别已支持精确样式名 + 中文序号启发式；非标准模板仍可能需调整。
 - 发布包需决定是否将 python-docx 打入 sidecar 或文档说明开发环境安装步骤。
+- `.doc` 旧格式暂不支持，仅 `.docx`。

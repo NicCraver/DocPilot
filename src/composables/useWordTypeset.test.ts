@@ -14,6 +14,7 @@ vi.mock("../lib/wordTypesetStore", () => ({
 
 import { useWordTypeset } from "./useWordTypeset";
 import {
+  builtinPresetProfiles,
   governmentWordTypesetConfig,
   journalWordTypesetConfig,
   thesisWordTypesetConfig,
@@ -22,7 +23,9 @@ import {
 describe("useWordTypeset", () => {
   it("切换预设时可以持久化当前响应式配置快照", async () => {
     loadCacheMock.mockResolvedValue({
+      version: 2,
       activePresetId: "government",
+      profiles: builtinPresetProfiles(),
       presets: {
         government: governmentWordTypesetConfig(),
         thesis: thesisWordTypesetConfig(),
